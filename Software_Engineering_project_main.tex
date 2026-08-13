@@ -1,0 +1,259 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% -----------------------------------------------------
+% bvraghav-tiet-ucs503p-article.sty
+% -----------------------------------------------------
+
+% Variable: Lab Instructor
+\makeatletter \newcommand{\BvrSetLabInstructor}[1]{%
+  \gdef\Bvr@LabInstructor{#1}}
+% default
+\newcommand{\Bvr@LabInstructor}{Dr. Raghav %
+  B. Venkataramaiyer}
+% public accessor
+\newcommand{\BvrLabInstructorValue}{\Bvr@LabInstructor}
+\makeatother
+
+% Add subtitle
+\usepackage{titling}
+% -- Set title bold
+\pretitle{\begin{center}\bfseries\fontsize{18bp}{18bp}\selectfont}
+\makeatletter
+\newcommand{\BvrSubtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\large#1\end{center}
+    \vskip 0.5em}%
+}
+\makeatother
+
+% Hints in the section title(s)
+\newcommand{\BvrHint}[1]{%
+  {\normalfont\normalsize\itshape\hfill #1}}
+
+% -----------------------------------------------------
+
+\title{Vyapari: A Unified ERP Platform for Retail and Wholesale Businesses}
+
+\BvrSetLabInstructor{Miss Paramveer Kaur}
+
+\BvrSubtitle{%
+  Project Proposal for UCS503P  \\
+  Submitted to: \BvrLabInstructorValue \\ \bfseries
+  Thapar Institute of Engineering and Technology% 
+}
+
+\author{
+  Vanshika, CSED%
+  \thanks{Roll No: \texttt{1024030163}, %
+    Email: \texttt{vvanshika\_be24@thapar.edu}}
+  \and 
+  Vanshika, CSED%
+  \thanks{Roll No: \texttt{1024030166}, %
+    Email: \texttt{vbansal1\_be24@thapar.edu}}
+  \and 
+  Nandini Garg, CSED%
+  \thanks{Roll No: \texttt{1024030169}, %
+    Email: \texttt{ngarg2\_be24@thapar.edu}}
+}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Higher-order goal%
+  \BvrHint{\ldots secondary framing}}
+This project aims to help small and mid-sized retail and
+wholesale businesses run their day-to-day operations
+online through a single system, instead of juggling
+separate spreadsheets, ledgers, and point tools. While the
+long-term vision is a full-fledged Enterprise Resource
+Planning (ERP) suite, the immediate engineering objective
+is to translate \emph{unified business operations} into a
+measurable, deployable web platform.
+
+\section{Time-to-value %
+\BvrHint{\ldots primary heuristic}}
+\begin{itemize}[leftmargin=0.7cm]
+    \item We will deliver meaningful increments quickly by prototyping the core inventory-to-invoice workflow first and validating it with a mock business within a short iteration window.
+    \item We will prioritize fast feedback over perfection by using weekly iterations (and targeting CI-backed automation early) to reduce release friction.
+    \item Success is defined by what can be delivered and measured in the first iteration (a working sales-and-inventory loop), then improved based on feedback.
+\end{itemize}
+
+\section{Problem Statement}
+Retail and wholesale businesses, especially small and
+mid-sized ones, typically rely on a patchwork of tools:
+paper ledgers, spreadsheets, WhatsApp for orders, and
+separate billing software. Common pain points include:
+\begin{itemize}[leftmargin=0.7cm]
+    \item \textbf{Fragmentation:} inventory, sales, finance, and employee records live in disconnected systems, causing lost context and duplicate data entry.
+    \item \textbf{Low visibility:} owners cannot easily see real-time stock levels, cash flow, or sales trends across locations.
+    \item \textbf{Manual overhead:} invoicing, payroll, and customer follow-ups are handled manually, consuming staff time and inviting errors.
+    \item \textbf{No forecasting:} businesses restock and staff reactively, since there is no systematic demand or cash-flow forecasting.
+\end{itemize}
+
+\textbf{Why this matters now (contextual relevance):} As small and mid-sized retailers move online and face thinner margins, even modest automation of inventory, billing, and reporting can materially reduce lost sales, stockouts, and administrative overhead.
+
+\section{Proposed Solution %
+\BvrHint{\ldots Software Proposition}}
+\subsection{Overview}
+Build a \textbf{web-based} ERP platform, \textbf{Vyapar360}, that unifies the core operational and administrative functions a retail or wholesale business needs to run online:
+\begin{itemize}[leftmargin=0.7cm]
+    \item \textbf{Inventory:} stock tracking, reorder alerts, multi-location and multi-SKU support.
+    \item \textbf{Sales:} order capture, point-of-sale style billing, order status tracking.
+    \item \textbf{Finance:} ledgers, expense tracking, profit/loss summaries.
+    \item \textbf{CRM:} customer records, purchase history, follow-up reminders.
+    \item \textbf{Employees \& Payroll:} staff records, attendance, salary computation and disbursal tracking.
+    \item \textbf{Invoices:} generation, templating, and GST/tax-ready billing.
+    \item \textbf{Analytics:} dashboards for sales, inventory turnover, and financial health.
+    \item \textbf{AI chatbot:} conversational assistant for staff/customers to query stock, orders, or FAQs.
+    \item \textbf{Forecasting:} lightweight demand and cash-flow forecasting to guide restocking and staffing.
+\end{itemize}
+
+\subsection{Core workflow}
+\begin{enumerate}[leftmargin=0.7cm]
+    \item Staff/owner onboards the business: catalog, initial stock, and employee records.
+    \item Sales are recorded through the POS/sales module, automatically decrementing inventory and generating an invoice.
+    \item Finance and payroll modules update ledgers and salary computations from sales, expense, and attendance data.
+    \item Analytics and forecasting modules surface trends and reorder/staffing suggestions; the chatbot lets staff query the system in natural language.
+\end{enumerate}
+
+\subsection{Operational constraints for an educational, course-project setting}
+\begin{itemize}[leftmargin=0.7cm]
+    \item Keep the solution usable on low-to-mid range devices via responsive web design.
+    \item Avoid dependence on advanced research algorithms; focus on workflow, automation, and system correctness, using off-the-shelf forecasting and NLP components rather than novel models.
+    \item Design for deployability using common web hosting and managed databases.
+\end{itemize}
+
+\section{Solution Approach %
+\BvrHint{\ldots Engineering focus}}
+This is an engineering course project, so we focus on scalable module design and integration rather than novel algorithm research.
+
+\subsection{Forecasting and chatbot assistance %
+\BvrHint{\ldots non-research}}
+Forecasting and the chatbot will be built on mature, off-the-shelf approaches:
+\begin{itemize}[leftmargin=0.7cm]
+    \item Demand forecasting via a simple moving-average or lightweight time-series model (e.g., exponential smoothing) rather than state-of-the-art forecasting research.
+    \item AI chatbot via a hosted LLM API constrained to a defined set of intents (stock lookup, order status, FAQs) with retrieval over the business's own data.
+    \item Always show forecasts/chatbot answers as suggestions to staff, never as fully automated, unreviewed actions (e.g., no auto-placed purchase orders without confirmation).
+\end{itemize}
+
+\subsection{Web architecture %
+\BvrHint{\ldots web-based solution}}
+A typical 3-tier, modular web architecture:
+\begin{itemize}[leftmargin=0.7cm]
+    \item \textbf{Frontend:} responsive UI for owners, staff, and customers (dashboards, POS screen, catalog/CRM views).
+    \item \textbf{Backend API:} authentication and role-based access, module-specific services (inventory, sales, finance, payroll, CRM), and an integration layer for analytics/forecasting/chatbot.
+    \item \textbf{Database:} relational store for transactional modules (inventory, sales, finance, payroll) plus a document/vector store for chatbot retrieval.
+\end{itemize}
+
+\subsection{CI/CD and fast delivery enabler}
+CI/CD will be used to:
+\begin{itemize}[leftmargin=0.7cm]
+    \item Automatically build and run tests on every change across modules.
+    \item Produce repeatable deployment artifacts to staging.
+    \item Enable safe and frequent releases of incremental features (module by module).
+\end{itemize}
+
+\section{Evaluation Criterion %
+\BvrHint{\ldots measurable and attributable}}
+We define success using measurable metrics tied to the core sales-to-invoice workflow.
+
+\subsection{Primary evaluation metric}
+\textbf{Time-to-invoice (TTI):} time between a sale being recorded and a corresponding invoice being generated and inventory being updated.
+\begin{itemize}[leftmargin=0.7cm]
+    \item Target: median TTI $\le$ 5 seconds during pilot window.
+    \item Attribution: measured from database timestamps (sale creation vs. invoice/inventory update event).
+\end{itemize}
+
+\subsection{Secondary evaluation metrics}
+\begin{itemize}[leftmargin=0.7cm]
+    \item \textbf{Stock accuracy:} percentage agreement between system-recorded stock and physical stock counts during pilot audits.
+    \item \textbf{Forecast usefulness:} percentage of forecast-driven reorder suggestions accepted by staff.
+    \item \textbf{Chatbot resolution rate:} percentage of chatbot queries answered correctly without escalation to a human.
+    \item \textbf{Reliability:} availability of staging/production for login, billing, and inventory operations during business hours (e.g., $\ge$ 99\% uptime in pilot).
+\end{itemize}
+
+\subsection{Pilot validation plan %
+\BvrHint{\ldots high-level}}
+\begin{itemize}[leftmargin=0.7cm]
+    \item Recruit 2--3 small retail/wholesale businesses (or simulate with mock storefronts) and 3--5 staff roles.
+    \item Compare metrics before/after within the iteration window by logging baseline estimates via short interviews or existing process observations.
+\end{itemize}
+
+\section{Scalability %
+\BvrHint{\ldots with foresight}}
+The proposition should scale in both theoretical and practical senses.
+
+\begin{enumerate}[leftmargin=0.7cm]
+    \item \textbf{Scalable (theoretically):} The system should support growth in number of SKUs, transactions, and concurrent users by:
+    \begin{itemize}[leftmargin=0.7cm]
+        \item decoupling modules (inventory/sales/finance/CRM/payroll as independently deployable services),
+        \item enabling pagination and indexing for common queries (stock lookups, invoice search),
+        \item using stateless API design for horizontal scaling.
+    \end{itemize}
+    
+    \item \textbf{Operationally deployable (practically):} The system should run on common web hosting:
+    \begin{itemize}[leftmargin=0.7cm]
+        \item managed database,
+        \item containerized or platform-hosted deployment per module,
+        \item CI/CD pipeline for staging/production.
+    \end{itemize}
+\end{enumerate}
+
+\section{Engine availability heuristic}
+A mature set of ``engines'' (tooling/services) is available to implement this as a web-based project:
+\begin{itemize}[leftmargin=0.7cm]
+    \item Web framework for REST APIs and reactive frontend pages.
+    \item Managed relational database for transactional modules; optional document/vector store for chatbot retrieval.
+    \item Authentication and role-based access approach (token-based or session-based).
+    \item Object storage for product images and invoice PDFs.
+    \item Hosted LLM API for the chatbot module.
+    \item Charting/BI library for the analytics module.
+    \item Test framework for unit/integration tests.
+    \item CI runner and staging deployment target.
+\end{itemize}
+We will use these mature components to focus on module design, integration correctness, and measurement rather than inventing new infrastructure.
+
+\section{Project scope and deliverables %
+\BvrHint{\ldots iteration-friendly}}
+\subsection{Initial deliverable %
+\BvrHint{\ldots first iteration}}
+\begin{itemize}[leftmargin=0.7cm]
+    \item Inventory module: add/update/view stock with low-stock alerts
+    \item Sales module: record a sale, auto-generate an invoice, decrement stock
+    \item Basic finance ledger: auto-populated from sales and manual expense entry
+    \item Basic logging and timestamps for TTI measurement
+    \item CI: build + backend unit tests + linting
+    \item CD to staging with a single command or pipeline job
+\end{itemize}
+
+\subsection{Subsequent deliverables}
+\begin{itemize}[leftmargin=0.7cm]
+    \item CRM module: customer records, purchase history, follow-up reminders
+    \item Employees \& Payroll module: attendance and salary computation
+    \item Analytics dashboard: sales, inventory turnover, and financial summaries
+    \item Forecasting module: demand/reorder suggestions
+    \item AI chatbot: stock/order/FAQ query assistant
+    \item Improved search/filtering and indexed queries for scale readiness
+\end{itemize}
+
+\section{Risks and mitigations}
+\begin{itemize}[leftmargin=0.7cm]
+    \item \textbf{Data privacy / consent:} minimize collected customer and employee data; encrypt sensitive fields (e.g., payroll, payment details); store only what is needed.
+    \item \textbf{Staff adoption:} provide an easy UI for billing and stock updates; keep workflow steps minimal; include keyboard-friendly shortcuts for POS use.
+    \item \textbf{Forecast/chatbot over-trust:} present forecasts and chatbot answers as suggestions requiring staff confirmation, never as fully automated decisions.
+    \item \textbf{Evaluation measurement ambiguity:} instrument timestamps and define clear module boundaries and events before development begins.
+    \item \textbf{Operational issues in pilot:} use staging early; ensure CI/CD produces repeatable deployments across all modules.
+\end{itemize}
+
+\section{Summary}
+This project proposes Vyapar360, a deployable web-based ERP platform that unifies inventory, sales, finance, CRM, employees/payroll, invoicing, analytics, AI chatbot, and forecasting for retail and wholesale businesses. It meets the course criteria by emphasizing time-to-value through rapid, module-by-module iterations, implementing CI/CD to support frequent safe releases, and using measurable evaluation criteria (especially time-to-invoice). It remains focused on engineering workflow, modular architecture, and scalability readiness rather than research-driven novelty, while demonstrating understanding of large-scale, multi-module system design.
+
+\end{document}
