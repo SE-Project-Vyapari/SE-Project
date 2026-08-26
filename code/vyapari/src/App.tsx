@@ -11,7 +11,16 @@ const AuthRedirect = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+<<<<<<< HEAD
 import { Overview } from './modules/overview/Overview';
+=======
+const DashboardPlaceholder = () => (
+  <div style={{ padding: 40 }}>
+    <h1>Overview Dashboard (Prompt 05)</h1>
+    <p>Authenticated successfully. Select a module from the sidebar.</p>
+  </div>
+);
+>>>>>>> 080a965ddd867508fec967cc40ed9f29a9d2172d
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -29,7 +38,11 @@ function AppRoutes() {
       
       {/* Protected App Shell Routes */}
       <Route element={<AppShell />}>
+<<<<<<< HEAD
         <Route path="/" element={<Overview />} />
+=======
+        <Route path="/" element={<DashboardPlaceholder />} />
+>>>>>>> 080a965ddd867508fec967cc40ed9f29a9d2172d
         <Route path="/pos" element={<FeaturePlaceholder title="Point of Sale" />} />
         <Route path="/orders" element={<FeaturePlaceholder title="Orders" />} />
         <Route path="/inventory" element={<FeaturePlaceholder title="Inventory" />} />

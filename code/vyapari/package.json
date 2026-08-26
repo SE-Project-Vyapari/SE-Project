@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+<<<<<<< HEAD
     "date-fns": "^4.4.0",
+=======
+>>>>>>> 080a965ddd867508fec967cc40ed9f29a9d2172d
     "lucide-react": "^1.34.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
