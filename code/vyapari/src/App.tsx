@@ -13,6 +13,9 @@ const AuthRedirect = ({ children }: { children: React.ReactNode }) => {
 
 import { Overview } from './modules/overview/Overview';
 import { PosPage } from './modules/pos/PosPage';
+import { InventoryList } from './modules/inventory/InventoryList';
+import { TransferList } from './modules/inventory/TransferList';
+import { ProductDetail } from './modules/inventory/ProductDetail';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -33,7 +36,9 @@ function AppRoutes() {
         <Route path="/" element={<Overview />} />
         <Route path="/pos" element={<PosPage />} />
         <Route path="/orders" element={<FeaturePlaceholder title="Orders" />} />
-        <Route path="/inventory" element={<FeaturePlaceholder title="Inventory" />} />
+        <Route path="/inventory" element={<InventoryList />} />
+        <Route path="/inventory/transfers" element={<TransferList />} />
+        <Route path="/inventory/:id" element={<ProductDetail />} />
         <Route path="/invoices" element={<FeaturePlaceholder title="Invoices" />} />
         <Route path="/customers" element={<FeaturePlaceholder title="Customers" />} />
         <Route path="/insights" element={<FeaturePlaceholder title="Customer Insights" />} />
