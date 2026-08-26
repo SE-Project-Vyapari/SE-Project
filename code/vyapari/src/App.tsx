@@ -12,6 +12,7 @@ const AuthRedirect = ({ children }: { children: React.ReactNode }) => {
 };
 
 import { Overview } from './modules/overview/Overview';
+import { PosPage } from './modules/pos/PosPage';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -30,7 +31,7 @@ function AppRoutes() {
       {/* Protected App Shell Routes */}
       <Route element={<AppShell />}>
         <Route path="/" element={<Overview />} />
-        <Route path="/pos" element={<FeaturePlaceholder title="Point of Sale" />} />
+        <Route path="/pos" element={<PosPage />} />
         <Route path="/orders" element={<FeaturePlaceholder title="Orders" />} />
         <Route path="/inventory" element={<FeaturePlaceholder title="Inventory" />} />
         <Route path="/invoices" element={<FeaturePlaceholder title="Invoices" />} />
