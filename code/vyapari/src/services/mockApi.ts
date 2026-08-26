@@ -66,6 +66,7 @@ export const mockApi = {
       cashierId: payload.cashierId,
       status: 'completed',
       totalAmount,
+      history: [{ status: 'completed', timestamp: now }],
       createdAt: now
     };
     store.insert('orders', order);
@@ -406,5 +407,93 @@ export const mockApi = {
     
     store.update('stockTransfers', transfer.id, { status: 'completed', completedAt: now });
     return transfer;
+  },
+
+  /**
+   * createOrder (Manual Entry)
+   */
+  async createOrder(payload: {
+    outletId: string;
+    cashierId: string;
+    customerId?: string;
+    items: { productId: string; quantity: number; unitPrice: number }[];
+    notes?: string;
+  }) {
+    await delay(300);
+    const now = new Date().toISOString();
+    let totalAmount = 0;
+
+    const orderId = generateId();
+
+    payload.items.forEach(item => {
+      const subtotal = item.quantity * item.unitPrice;
+      totalAmount += subtotal;
+      store.insert('orderItems', {
+        id: generateId(),
+        orderId,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        subtotal
+      });
+    });
+
+    const order: Types.Order = {
+      id: orderId,
+      outletId: payload.outletId,
+      customerId: payload.customerId,
+      cashierId: payload.cashierId,
+      status: 'pending',
+      totalAmount,
+      history: [{ status: 'pending', timestamp: now }],
+      createdAt: now
+    };
+    store.insert('orders', order);
+    
+    return order;
+  },
+
+  /**
+   * updateOrderStatus
+   */
+  async updateOrderStatus(orderId: string, newStatus: Types.Order['status']) {
+    await delay(200);
+    const state = store.getState();
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) throw new Error('Order not found');
+
+    const now = new Date().toISOString();
+    const history = [...(order.history || []), { status: newStatus, timestamp: now }];
+
+    // If reversing a completed/processing order that decremented stock, we restock
+    // (For this mock, we assume 'processing', 'ready', 'completed' mean stock is gone,
+    // so if transitioning to 'cancelled' or 'returned' from those, we restock).
+    // The prompt says "Cancelling/returning an order must reverse the relevant InventoryRecord decrement"
+    if ((newStatus === 'cancelled' && ['processing', 'ready', 'completed'].includes(order.status)) || newStatus === 'returned') {
+      const items = state.orderItems.filter(i => i.orderId === orderId);
+      for (const item of items) {
+        const inv = state.inventoryRecords.find(r => r.productId === item.productId && r.outletId === order.outletId);
+        if (inv) {
+          store.update('inventoryRecords', inv.id, { quantity: inv.quantity + item.quantity, lastUpdated: now });
+          store.insert('stockMovements', {
+            id: generateId(),
+            productId: item.productId,
+            outletId: order.outletId,
+            quantityChange: item.quantity,
+            type: newStatus === 'returned' ? 'in' : 'adjustment',
+            referenceId: orderId,
+            createdAt: now
+          });
+        }
+      }
+    }
+
+    store.update('orders', orderId, { status: newStatus, history });
+
+    if (newStatus === 'ready') {
+      eventBus.publish(Events.ORDER_STATUS_CHANGED, { orderId, status: newStatus });
+    }
+
+    return { ...order, status: newStatus, history };
   }
 };

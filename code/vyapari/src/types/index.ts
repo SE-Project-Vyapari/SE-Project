@@ -101,8 +101,9 @@ export interface Order {
   outletId: string;
   customerId?: string;
   cashierId: string;
-  status: 'pending' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'processing' | 'ready' | 'completed' | 'cancelled' | 'returned';
   totalAmount: number;
+  history?: { status: string; timestamp: string }[];
   createdAt: string;
 }
 

@@ -16,6 +16,8 @@ import { PosPage } from './modules/pos/PosPage';
 import { InventoryList } from './modules/inventory/InventoryList';
 import { TransferList } from './modules/inventory/TransferList';
 import { ProductDetail } from './modules/inventory/ProductDetail';
+import { OrderList } from './modules/orders/OrderList';
+import { OrderDetail } from './modules/orders/OrderDetail';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -35,7 +37,8 @@ function AppRoutes() {
       <Route element={<AppShell />}>
         <Route path="/" element={<Overview />} />
         <Route path="/pos" element={<PosPage />} />
-        <Route path="/orders" element={<FeaturePlaceholder title="Orders" />} />
+        <Route path="/orders" element={<OrderList />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/inventory" element={<InventoryList />} />
         <Route path="/inventory/transfers" element={<TransferList />} />
         <Route path="/inventory/:id" element={<ProductDetail />} />
