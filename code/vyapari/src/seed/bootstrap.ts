@@ -1,6 +1,7 @@
 import { store } from '../services/store';
 
 export function seedDatabase() {
+  if (store.getState().businesses.length > 0) return; // Prevent duplicate seeding on hot reload
   const now = new Date().toISOString();
   
   // 1 Business

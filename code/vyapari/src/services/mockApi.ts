@@ -247,5 +247,164 @@ export const mockApi = {
     store.insert('payrollRuns', run);
     eventBus.publish(Events.PAYROLL_PROCESSED, { payrollRunId: runId });
     return run;
+  },
+
+  /**
+   * addProduct
+   */
+  async addProduct(payload: { businessId: string; name: string; sku: string; barcode?: string; category: string; price: number; cost: number; initialStock: number; reorderLevel: number; outletId: string }) {
+    await delay(300);
+    const now = new Date().toISOString();
+    
+    const product: Types.Product = {
+      id: generateId(),
+      businessId: payload.businessId,
+      name: payload.name,
+      sku: payload.sku,
+      barcode: payload.barcode,
+      category: payload.category,
+      price: payload.price,
+      cost: payload.cost,
+      createdAt: now
+    };
+    store.insert('products', product);
+
+    const inventory: Types.InventoryRecord = {
+      id: generateId(),
+      productId: product.id,
+      outletId: payload.outletId,
+      quantity: payload.initialStock,
+      reorderLevel: payload.reorderLevel,
+      lastUpdated: now
+    };
+    store.insert('inventoryRecords', inventory);
+
+    if (payload.initialStock > 0) {
+      store.insert('stockMovements', {
+        id: generateId(),
+        productId: product.id,
+        outletId: payload.outletId,
+        quantityChange: payload.initialStock,
+        type: 'in',
+        createdAt: now
+      });
+    }
+    
+    return { product, inventory };
+  },
+
+  /**
+   * adjustStock
+   */
+  async adjustStock(payload: { productId: string; outletId: string; change: number; reason: 'in' | 'out' | 'adjustment'; referenceId?: string }) {
+    await delay(300);
+    const state = store.getState();
+    const inv = state.inventoryRecords.find(r => r.productId === payload.productId && r.outletId === payload.outletId);
+    if (!inv) throw new Error('Inventory record not found');
+
+    const newQuantity = inv.quantity + payload.change;
+    const now = new Date().toISOString();
+
+    store.update('inventoryRecords', inv.id, { quantity: newQuantity, lastUpdated: now });
+
+    const movement: Types.StockMovement = {
+      id: generateId(),
+      productId: payload.productId,
+      outletId: payload.outletId,
+      quantityChange: payload.change,
+      type: payload.reason,
+      referenceId: payload.referenceId,
+      createdAt: now
+    };
+    store.insert('stockMovements', movement);
+
+    if (newQuantity <= inv.reorderLevel) {
+      eventBus.publish(Events.STOCK_BELOW_THRESHOLD, { productId: payload.productId, outletId: payload.outletId, remaining: newQuantity });
+    }
+    return { inventory: { ...inv, quantity: newQuantity }, movement };
+  },
+
+  /**
+   * initiateTransfer
+   */
+  async initiateTransfer(payload: { productId: string; fromOutletId: string; toOutletId: string; quantity: number }) {
+    await delay(300);
+    const state = store.getState();
+    const sourceInv = state.inventoryRecords.find(r => r.productId === payload.productId && r.outletId === payload.fromOutletId);
+    
+    if (!sourceInv || sourceInv.quantity < payload.quantity) {
+      throw new Error('Insufficient stock for transfer');
+    }
+
+    const now = new Date().toISOString();
+
+    // Decrement source
+    const newQuantity = sourceInv.quantity - payload.quantity;
+    store.update('inventoryRecords', sourceInv.id, { quantity: newQuantity, lastUpdated: now });
+    
+    const movementOut: Types.StockMovement = {
+      id: generateId(),
+      productId: payload.productId,
+      outletId: payload.fromOutletId,
+      quantityChange: -payload.quantity,
+      type: 'transfer',
+      createdAt: now
+    };
+    store.insert('stockMovements', movementOut);
+
+    const transfer: Types.StockTransfer = {
+      id: generateId(),
+      productId: payload.productId,
+      fromOutletId: payload.fromOutletId,
+      toOutletId: payload.toOutletId,
+      quantity: payload.quantity,
+      status: 'pending',
+      createdAt: now
+    };
+    store.insert('stockTransfers', transfer);
+    
+    return transfer;
+  },
+
+  /**
+   * receiveTransfer
+   */
+  async receiveTransfer(transferId: string) {
+    await delay(300);
+    const state = store.getState();
+    const transfer = state.stockTransfers.find(t => t.id === transferId);
+    if (!transfer || transfer.status !== 'pending') throw new Error('Invalid transfer');
+
+    const now = new Date().toISOString();
+
+    // Find or create destination inventory record
+    let destInv = state.inventoryRecords.find(r => r.productId === transfer.productId && r.outletId === transfer.toOutletId);
+    if (destInv) {
+      store.update('inventoryRecords', destInv.id, { quantity: destInv.quantity + transfer.quantity, lastUpdated: now });
+    } else {
+      const newInv: Types.InventoryRecord = {
+        id: generateId(),
+        productId: transfer.productId,
+        outletId: transfer.toOutletId,
+        quantity: transfer.quantity,
+        reorderLevel: 5,
+        lastUpdated: now
+      };
+      store.insert('inventoryRecords', newInv);
+    }
+
+    const movementIn: Types.StockMovement = {
+      id: generateId(),
+      productId: transfer.productId,
+      outletId: transfer.toOutletId,
+      quantityChange: transfer.quantity,
+      type: 'transfer',
+      referenceId: transfer.id,
+      createdAt: now
+    };
+    store.insert('stockMovements', movementIn);
+    
+    store.update('stockTransfers', transfer.id, { status: 'completed', completedAt: now });
+    return transfer;
   }
 };
