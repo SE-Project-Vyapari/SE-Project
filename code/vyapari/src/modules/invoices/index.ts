@@ -1,1 +1,2 @@
-// public exports for invoices
+export { InvoicesList } from './InvoicesList';
+export { InvoiceDetail } from './InvoiceDetail';

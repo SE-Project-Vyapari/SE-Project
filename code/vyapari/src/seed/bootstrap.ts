@@ -53,16 +53,183 @@ export function seedDatabase() {
   });
 
   // 5 Customers
-  const customers = Array.from({ length: 5 }).map((_, i) => ({
-    id: `c-${i+1}`,
-    businessId: 'b-1',
-    name: `Customer ${i+1}`,
-    totalSpent: 0,
-    createdAt: now
-  }));
+  const customers = Array.from({ length: 5 }).map((_, i) => {
+    let outstandingBalance = 0;
+    let totalSpent = 0;
+    if (i === 0) {
+      outstandingBalance = 1500;
+    } else if (i === 1) {
+      totalSpent = 500;
+    } else if (i === 2) {
+      outstandingBalance = 250;
+      totalSpent = 750;
+    }
+    return {
+      id: `c-${i+1}`,
+      businessId: 'b-1',
+      name: `Customer ${i+1}`,
+      totalSpent,
+      outstandingBalance,
+      createdAt: now
+    };
+  });
   customers.forEach(c => store.insert('customers', c));
 
-  // A couple of sales
-  // These will be properly generated when testing mockApi, but we add dummy ones for now
+  // Seeding Orders and Invoice data for realistic list/detail displays
+  const dateDaysAgo = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d.toISOString();
+  };
+
+  // Seed Order 1 (Unpaid/Overdue for Customer 1)
+  const ord1Id = 'ord-1';
+  store.insert('orders', {
+    id: ord1Id,
+    outletId: 'o-1',
+    customerId: 'c-1',
+    cashierId: 'u-3',
+    status: 'processing',
+    totalAmount: 1500,
+    createdAt: dateDaysAgo(45),
+    history: [{ status: 'pending', timestamp: dateDaysAgo(45) }, { status: 'processing', timestamp: dateDaysAgo(44) }]
+  });
+  store.insert('orderItems', { id: 'oi-1', orderId: ord1Id, productId: 'p-1', quantity: 5, unitPrice: 100, subtotal: 500 });
+  store.insert('orderItems', { id: 'oi-2', orderId: ord1Id, productId: 'p-2', quantity: 5, unitPrice: 200, subtotal: 1000 });
+
+  // Seed Invoice 1 (Unpaid/Overdue)
+  const inv1Id = 'inv-1';
+  store.insert('invoices', {
+    id: inv1Id,
+    orderId: ord1Id,
+    invoiceNumber: 'INV-2026-001',
+    customerId: 'c-1',
+    amount: 1500,
+    status: 'unpaid',
+    dueDate: dateDaysAgo(30),
+    createdAt: dateDaysAgo(45),
+    amountPaid: 0
+  });
+  store.insert('ledgerEntries', {
+    id: 'le-1',
+    businessId: 'b-1',
+    amount: 1500,
+    type: 'credit',
+    sourceType: 'sale',
+    referenceId: ord1Id,
+    createdAt: dateDaysAgo(45)
+  });
+
+  // Seed Order 2 (Partially Paid for Customer 3)
+  const ord2Id = 'ord-2';
+  store.insert('orders', {
+    id: ord2Id,
+    outletId: 'o-1',
+    customerId: 'c-3',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 1000,
+    createdAt: dateDaysAgo(10),
+    history: [{ status: 'pending', timestamp: dateDaysAgo(10) }, { status: 'completed', timestamp: dateDaysAgo(10) }]
+  });
+  store.insert('orderItems', { id: 'oi-3', orderId: ord2Id, productId: 'p-3', quantity: 2, unitPrice: 300, subtotal: 600 });
+  store.insert('orderItems', { id: 'oi-4', orderId: ord2Id, productId: 'p-4', quantity: 1, unitPrice: 400, subtotal: 400 });
+
+  // Seed Invoice 2 (Partially Paid)
+  const inv2Id = 'inv-2';
+  store.insert('invoices', {
+    id: inv2Id,
+    orderId: ord2Id,
+    invoiceNumber: 'INV-2026-002',
+    customerId: 'c-3',
+    amount: 1000,
+    status: 'partially_paid',
+    dueDate: dateDaysAgo(-5), // Due 5 days in the future
+    createdAt: dateDaysAgo(10),
+    amountPaid: 750
+  });
+  const pm1Id = 'pm-1';
+  store.insert('payments', {
+    id: pm1Id,
+    invoiceId: inv2Id,
+    amount: 750,
+    method: 'upi',
+    status: 'success',
+    createdAt: dateDaysAgo(10)
+  });
+  store.insert('ledgerEntries', {
+    id: 'le-2',
+    businessId: 'b-1',
+    amount: 1000,
+    type: 'credit',
+    sourceType: 'sale',
+    referenceId: ord2Id,
+    createdAt: dateDaysAgo(10)
+  });
+  store.insert('ledgerEntries', {
+    id: 'le-3',
+    businessId: 'b-1',
+    amount: 750,
+    type: 'credit',
+    sourceType: 'payment',
+    referenceId: pm1Id,
+    createdAt: dateDaysAgo(10)
+  });
+
+  // Seed Order 3 (Fully Paid for Customer 2)
+  const ord3Id = 'ord-3';
+  store.insert('orders', {
+    id: ord3Id,
+    outletId: 'o-1',
+    customerId: 'c-2',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 500,
+    createdAt: dateDaysAgo(5),
+    history: [{ status: 'pending', timestamp: dateDaysAgo(5) }, { status: 'completed', timestamp: dateDaysAgo(5) }]
+  });
+  store.insert('orderItems', { id: 'oi-5', orderId: ord3Id, productId: 'p-5', quantity: 1, unitPrice: 500, subtotal: 500 });
+
+  // Seed Invoice 3 (Fully Paid)
+  const inv3Id = 'inv-3';
+  store.insert('invoices', {
+    id: inv3Id,
+    orderId: ord3Id,
+    invoiceNumber: 'INV-2026-003',
+    customerId: 'c-2',
+    amount: 500,
+    status: 'paid',
+    dueDate: dateDaysAgo(-10), // Due in 10 days
+    createdAt: dateDaysAgo(5),
+    amountPaid: 500
+  });
+  const pm2Id = 'pm-2';
+  store.insert('payments', {
+    id: pm2Id,
+    invoiceId: inv3Id,
+    amount: 500,
+    method: 'cash',
+    status: 'success',
+    createdAt: dateDaysAgo(5)
+  });
+  store.insert('ledgerEntries', {
+    id: 'le-4',
+    businessId: 'b-1',
+    amount: 500,
+    type: 'credit',
+    sourceType: 'sale',
+    referenceId: ord3Id,
+    createdAt: dateDaysAgo(5)
+  });
+  store.insert('ledgerEntries', {
+    id: 'le-5',
+    businessId: 'b-1',
+    amount: 500,
+    type: 'credit',
+    sourceType: 'payment',
+    referenceId: pm2Id,
+    createdAt: dateDaysAgo(5)
+  });
+
   console.log('Database seeded with bootstrap data.');
 }

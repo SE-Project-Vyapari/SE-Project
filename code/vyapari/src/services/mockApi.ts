@@ -8,6 +8,12 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 11);
 }
 
+export const isInvoiceOverdue = (invoice: { status: string; dueDate?: string }) => {
+  if (invoice.status === 'paid' || invoice.status === 'cancelled') return false;
+  if (!invoice.dueDate) return false;
+  return new Date(invoice.dueDate) < new Date();
+};
+
 export const mockApi = {
   // ---------------------------------------------------------
   // Basic CRUD Examples
@@ -118,9 +124,21 @@ export const mockApi = {
       customerId: payload.customerId,
       amount: totalAmount,
       status: 'paid', // Assuming POS cash sale
-      createdAt: now
+      createdAt: now,
+      amountPaid: totalAmount
     };
     store.insert('invoices', invoice);
+
+    // Update customer total spent
+    if (payload.customerId) {
+      const customer = state.customers.find(c => c.id === payload.customerId);
+      if (customer) {
+        store.update('customers', payload.customerId, {
+          totalSpent: (customer.totalSpent || 0) + totalAmount,
+          lastVisit: now
+        });
+      }
+    }
 
     // 4. Create LedgerEntry
     const ledgerEntry: Types.LedgerEntry = {
@@ -449,6 +467,30 @@ export const mockApi = {
       createdAt: now
     };
     store.insert('orders', order);
+
+    // Generate unpaid invoice immediately for manual order
+    const invoice: Types.Invoice = {
+      id: generateId(),
+      orderId,
+      invoiceNumber: `INV-${Date.now()}`,
+      customerId: payload.customerId,
+      amount: totalAmount,
+      status: 'unpaid',
+      dueDate: new Date(Date.now() + 15 * 24 * 3600 * 1000).toISOString(),
+      createdAt: now,
+      amountPaid: 0
+    };
+    store.insert('invoices', invoice);
+
+    // Update customer outstanding balance
+    if (payload.customerId) {
+      const customer = store.getState().customers.find(c => c.id === payload.customerId);
+      if (customer) {
+        store.update('customers', payload.customerId, {
+          outstandingBalance: (customer.outstandingBalance || 0) + totalAmount
+        });
+      }
+    }
     
     return order;
   },
@@ -466,9 +508,6 @@ export const mockApi = {
     const history = [...(order.history || []), { status: newStatus, timestamp: now }];
 
     // If reversing a completed/processing order that decremented stock, we restock
-    // (For this mock, we assume 'processing', 'ready', 'completed' mean stock is gone,
-    // so if transitioning to 'cancelled' or 'returned' from those, we restock).
-    // The prompt says "Cancelling/returning an order must reverse the relevant InventoryRecord decrement"
     if ((newStatus === 'cancelled' && ['processing', 'ready', 'completed'].includes(order.status)) || newStatus === 'returned') {
       const items = state.orderItems.filter(i => i.orderId === orderId);
       for (const item of items) {
@@ -488,6 +527,63 @@ export const mockApi = {
       }
     }
 
+    // Cancel or Void invoice if order is cancelled or returned
+    if (newStatus === 'cancelled' || newStatus === 'returned') {
+      const invoice = state.invoices.find(i => i.orderId === orderId);
+      if (invoice && invoice.status !== 'cancelled') {
+        store.update('invoices', invoice.id, { status: 'cancelled' });
+        // Deduct from customer outstanding balance if it was unpaid
+        if (order.customerId) {
+          const customer = state.customers.find(c => c.id === order.customerId);
+          if (customer) {
+            const unpaidAmount = invoice.amount - (invoice.amountPaid || 0);
+            store.update('customers', order.customerId, {
+              outstandingBalance: Math.max(0, (customer.outstandingBalance || 0) - unpaidAmount)
+            });
+          }
+        }
+      }
+    } else {
+      // Ensure invoice exists when transitioned to confirmed/processing/ready/completed
+      const invoice = state.invoices.find(i => i.orderId === orderId);
+      if (!invoice && ['confirmed', 'processing', 'ready', 'completed'].includes(newStatus)) {
+        const newInvoice: Types.Invoice = {
+          id: generateId(),
+          orderId,
+          invoiceNumber: `INV-${Date.now()}`,
+          customerId: order.customerId,
+          amount: order.totalAmount,
+          status: newStatus === 'completed' ? 'paid' : 'unpaid',
+          dueDate: new Date(Date.now() + 15 * 24 * 3600 * 1000).toISOString(),
+          createdAt: now,
+          amountPaid: newStatus === 'completed' ? order.totalAmount : 0
+        };
+        store.insert('invoices', newInvoice);
+
+        if (order.customerId && newStatus !== 'completed') {
+          const customer = state.customers.find(c => c.id === order.customerId);
+          if (customer) {
+            store.update('customers', order.customerId, {
+              outstandingBalance: (customer.outstandingBalance || 0) + order.totalAmount
+            });
+          }
+        }
+      } else if (invoice && newStatus === 'completed' && invoice.status !== 'paid') {
+        // If order becomes completed, mark invoice as paid
+        const remaining = invoice.amount - (invoice.amountPaid || 0);
+        store.update('invoices', invoice.id, { status: 'paid', amountPaid: invoice.amount });
+        if (order.customerId) {
+          const customer = state.customers.find(c => c.id === order.customerId);
+          if (customer) {
+            store.update('customers', order.customerId, {
+              outstandingBalance: Math.max(0, (customer.outstandingBalance || 0) - remaining),
+              totalSpent: (customer.totalSpent || 0) + remaining
+            });
+          }
+        }
+      }
+    }
+
     store.update('orders', orderId, { status: newStatus, history });
 
     if (newStatus === 'ready') {
@@ -495,5 +591,73 @@ export const mockApi = {
     }
 
     return { ...order, status: newStatus, history };
+  },
+
+  /**
+   * markInvoicePaid (Full/Partial Payment)
+   */
+  async markInvoicePaid(invoiceId: string, paymentAmount: number, method: 'cash' | 'card' | 'upi' | 'bank_transfer') {
+    await delay(300);
+    const state = store.getState();
+    const invoice = state.invoices.find(i => i.id === invoiceId);
+    if (!invoice) throw new Error('Invoice not found');
+
+    const now = new Date().toISOString();
+    const currentPaid = invoice.amountPaid || 0;
+    const newPaid = currentPaid + paymentAmount;
+    
+    let newStatus: Types.Invoice['status'] = 'paid';
+    if (newPaid < invoice.amount) {
+      newStatus = 'partially_paid';
+    } else if (newPaid > invoice.amount) {
+      throw new Error('Payment amount exceeds invoice balance');
+    }
+
+    // Update invoice status & amountPaid
+    store.update('invoices', invoiceId, {
+      status: newStatus,
+      amountPaid: newPaid
+    });
+
+    // Record Payment
+    const paymentId = generateId();
+    const payment: Types.Payment = {
+      id: paymentId,
+      invoiceId,
+      amount: paymentAmount,
+      method,
+      status: 'success',
+      createdAt: now
+    };
+    store.insert('payments', payment);
+
+    // Record LedgerEntry
+    const ledgerEntry: Types.LedgerEntry = {
+      id: generateId(),
+      businessId: 'b-1',
+      amount: paymentAmount,
+      type: 'credit',
+      sourceType: 'payment',
+      referenceId: paymentId,
+      createdAt: now
+    };
+    store.insert('ledgerEntries', ledgerEntry);
+
+    // Update Customer outstanding balance and total spent
+    if (invoice.customerId) {
+      const customer = state.customers.find(c => c.id === invoice.customerId);
+      if (customer) {
+        store.update('customers', invoice.customerId, {
+          outstandingBalance: Math.max(0, (customer.outstandingBalance || 0) - paymentAmount),
+          totalSpent: (customer.totalSpent || 0) + paymentAmount,
+          lastVisit: now
+        });
+      }
+    }
+
+    // Publish event
+    eventBus.publish(Events.SALE_COMPLETED, { invoiceId, amountPaid: paymentAmount });
+    
+    return { invoice: { ...invoice, status: newStatus, amountPaid: newPaid }, payment };
   }
 };

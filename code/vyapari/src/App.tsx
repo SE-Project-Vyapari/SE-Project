@@ -18,6 +18,7 @@ import { TransferList } from './modules/inventory/TransferList';
 import { ProductDetail } from './modules/inventory/ProductDetail';
 import { OrderList } from './modules/orders/OrderList';
 import { OrderDetail } from './modules/orders/OrderDetail';
+import { InvoicesList, InvoiceDetail } from './modules/invoices';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -42,7 +43,8 @@ function AppRoutes() {
         <Route path="/inventory" element={<InventoryList />} />
         <Route path="/inventory/transfers" element={<TransferList />} />
         <Route path="/inventory/:id" element={<ProductDetail />} />
-        <Route path="/invoices" element={<FeaturePlaceholder title="Invoices" />} />
+        <Route path="/invoices" element={<InvoicesList />} />
+        <Route path="/invoices/:id" element={<InvoiceDetail />} />
         <Route path="/customers" element={<FeaturePlaceholder title="Customers" />} />
         <Route path="/insights" element={<FeaturePlaceholder title="Customer Insights" />} />
         <Route path="/finance" element={<FeaturePlaceholder title="Finance" />} />
