@@ -83,10 +83,25 @@ export interface Customer {
   name: string;
   phone?: string;
   email?: string;
+  type?: 'retail' | 'wholesale';
+  address?: string;
+  optInForMessages?: boolean;
   totalSpent: number;
   outstandingBalance?: number;
   lastVisit?: string;
   createdAt: string;
+}
+
+export interface FollowUp {
+  id: string;
+  customerId: string;
+  note: string;
+  dueDate: string;
+  assigneeId?: string;
+  status: 'pending' | 'completed';
+  isSuggested?: boolean;
+  createdAt: string;
+  completedAt?: string;
 }
 
 export interface CustomerProductStat {

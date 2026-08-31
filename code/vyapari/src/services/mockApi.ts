@@ -659,5 +659,84 @@ export const mockApi = {
     eventBus.publish(Events.SALE_COMPLETED, { invoiceId, amountPaid: paymentAmount });
     
     return { invoice: { ...invoice, status: newStatus, amountPaid: newPaid }, payment };
+  },
+
+  /**
+   * createCustomer
+   */
+  async createCustomer(payload: {
+    businessId: string;
+    name: string;
+    phone?: string;
+    email?: string;
+    type?: 'retail' | 'wholesale';
+    address?: string;
+    optInForMessages?: boolean;
+  }): Promise<Types.Customer> {
+    await delay(200);
+    const now = new Date().toISOString();
+    const customer: Types.Customer = {
+      id: generateId(),
+      businessId: payload.businessId || 'b-1',
+      name: payload.name,
+      phone: payload.phone,
+      email: payload.email,
+      type: payload.type || 'retail',
+      address: payload.address,
+      optInForMessages: payload.optInForMessages ?? true,
+      totalSpent: 0,
+      outstandingBalance: 0,
+      createdAt: now
+    };
+    store.insert('customers', customer);
+    return customer;
+  },
+
+  /**
+   * createFollowUp
+   */
+  async createFollowUp(payload: {
+    customerId: string;
+    note: string;
+    dueDate: string;
+    assigneeId?: string;
+    isSuggested?: boolean;
+  }): Promise<Types.FollowUp> {
+    await delay(150);
+    const now = new Date().toISOString();
+    const followUp: Types.FollowUp = {
+      id: generateId(),
+      customerId: payload.customerId,
+      note: payload.note,
+      dueDate: payload.dueDate,
+      assigneeId: payload.assigneeId,
+      status: 'pending',
+      isSuggested: payload.isSuggested || false,
+      createdAt: now
+    };
+    store.insert('followUps', followUp);
+    return followUp;
+  },
+
+  /**
+   * completeFollowUp
+   */
+  async completeFollowUp(followUpId: string): Promise<Types.FollowUp> {
+    await delay(150);
+    const now = new Date().toISOString();
+    const state = store.getState();
+    const followUp = state.followUps.find(f => f.id === followUpId);
+    if (!followUp) throw new Error('Follow-up not found');
+
+    const updated = {
+      ...followUp,
+      status: 'completed' as const,
+      completedAt: now
+    };
+    store.update('followUps', followUpId, {
+      status: 'completed',
+      completedAt: now
+    });
+    return updated;
   }
 };

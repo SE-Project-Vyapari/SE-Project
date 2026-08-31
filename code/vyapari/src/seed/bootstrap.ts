@@ -52,35 +52,115 @@ export function seedDatabase() {
     });
   });
 
-  // 5 Customers
-  const customers = Array.from({ length: 5 }).map((_, i) => {
-    let outstandingBalance = 0;
-    let totalSpent = 0;
-    if (i === 0) {
-      outstandingBalance = 1500;
-    } else if (i === 1) {
-      totalSpent = 500;
-    } else if (i === 2) {
-      outstandingBalance = 250;
-      totalSpent = 750;
-    }
-    return {
-      id: `c-${i+1}`,
-      businessId: 'b-1',
-      name: `Customer ${i+1}`,
-      totalSpent,
-      outstandingBalance,
-      createdAt: now
-    };
-  });
-  customers.forEach(c => store.insert('customers', c));
-
-  // Seeding Orders and Invoice data for realistic list/detail displays
+  // Date helper
   const dateDaysAgo = (days: number) => {
     const d = new Date();
     d.setDate(d.getDate() - days);
     return d.toISOString();
   };
+
+  // 5 Customers
+  const customerList = [
+    {
+      id: 'c-1',
+      businessId: 'b-1',
+      name: 'Aarav Enterprises',
+      phone: '+91 98765 43210',
+      email: 'aarav.ent@example.com',
+      type: 'wholesale' as const,
+      address: 'Plot 12, Industrial Area, Phase 1, New Delhi',
+      optInForMessages: true,
+      totalSpent: 4500,
+      outstandingBalance: 1500,
+      lastVisit: dateDaysAgo(5),
+      createdAt: dateDaysAgo(60)
+    },
+    {
+      id: 'c-2',
+      businessId: 'b-1',
+      name: 'Priya Sharma',
+      phone: '+91 91234 56789',
+      email: 'priya.s@example.com',
+      type: 'retail' as const,
+      address: 'Flat 402, Sunshine Apts, Bengaluru',
+      optInForMessages: true,
+      totalSpent: 500,
+      outstandingBalance: 0,
+      lastVisit: dateDaysAgo(5),
+      createdAt: dateDaysAgo(30)
+    },
+    {
+      id: 'c-3',
+      businessId: 'b-1',
+      name: 'Rohan Gupta',
+      phone: '+91 99887 76655',
+      email: 'rohan.g@example.com',
+      type: 'retail' as const,
+      address: '15 Residency Road, Mumbai',
+      optInForMessages: false, // Opted out of messages
+      totalSpent: 750,
+      outstandingBalance: 250,
+      lastVisit: dateDaysAgo(10),
+      createdAt: dateDaysAgo(40)
+    },
+    {
+      id: 'c-4',
+      businessId: 'b-1',
+      name: 'Meera Patel',
+      phone: '+91 94567 12345',
+      email: 'meera.patel@example.com',
+      type: 'wholesale' as const,
+      address: 'Shop 8, Textile Market, Surat',
+      optInForMessages: true,
+      totalSpent: 3200,
+      outstandingBalance: 0,
+      lastVisit: dateDaysAgo(15),
+      createdAt: dateDaysAgo(50)
+    },
+    {
+      id: 'c-5',
+      businessId: 'b-1',
+      name: 'Vikram Singh',
+      phone: '+91 93456 78901',
+      email: 'vikram.singh@example.com',
+      type: 'retail' as const,
+      address: '74 Civil Lines, Jaipur',
+      optInForMessages: true,
+      totalSpent: 0, // Brand new customer
+      outstandingBalance: 0,
+      createdAt: now
+    }
+  ];
+  customerList.forEach(c => store.insert('customers', c));
+
+  // Seed sample follow-ups
+  store.insert('followUps', {
+    id: 'fu-1',
+    customerId: 'c-1',
+    note: 'Follow up regarding payment for Overdue Invoice INV-2026-001',
+    dueDate: dateDaysAgo(5), // Overdue
+    status: 'pending',
+    createdAt: dateDaysAgo(15)
+  });
+  store.insert('followUps', {
+    id: 'fu-2',
+    customerId: 'c-3',
+    note: 'Check customer satisfaction on recent delivery',
+    dueDate: dateDaysAgo(-3), // Due in 3 days
+    status: 'pending',
+    createdAt: dateDaysAgo(5)
+  });
+  store.insert('followUps', {
+    id: 'fu-3',
+    customerId: 'c-2',
+    note: 'Sent thank you note for prompt payment',
+    dueDate: dateDaysAgo(2),
+    status: 'completed',
+    createdAt: dateDaysAgo(4),
+    completedAt: dateDaysAgo(2)
+  });
+
+  // Seeding Orders and Invoice data for realistic list/detail displays
 
   // Seed Order 1 (Unpaid/Overdue for Customer 1)
   const ord1Id = 'ord-1';

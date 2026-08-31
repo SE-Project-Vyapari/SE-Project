@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../../../services/store';
 import type { CartItem } from '../PosPage';
 import { Button } from '../../../components/ui/Button';
 import { Trash2, UserPlus, CreditCard, Banknote, Smartphone, Minus, Plus } from 'lucide-react';
 import { Select } from '../../../components/ui/Select';
+import { AddCustomerModal } from '../../crm';
 
 interface CartPanelProps {
   cart: CartItem[];
@@ -22,6 +23,7 @@ export const CartPanel: React.FC<CartPanelProps> = ({
   cart, onUpdateCart, onRemoveFromCart, customerId, setCustomerId, paymentMethod, setPaymentMethod, onCheckout, isProcessing, onClear
 }) => {
   const store = useStore();
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   
   const subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   const totalDiscount = cart.reduce((sum, item) => {
@@ -64,10 +66,20 @@ export const CartPanel: React.FC<CartPanelProps> = ({
             ))}
           </Select>
         </div>
-        <Button style={{ padding: '0 12px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}>
+        <Button
+          onClick={() => setIsAddCustomerOpen(true)}
+          style={{ padding: '0 12px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', cursor: 'pointer' }}
+        >
           <UserPlus size={16} />
         </Button>
       </div>
+
+      {isAddCustomerOpen && (
+        <AddCustomerModal
+          onClose={() => setIsAddCustomerOpen(false)}
+          onCustomerCreated={newCust => setCustomerId(newCust.id)}
+        />
+      )}
 
       {/* Cart Items */}
       <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-16)', display: 'flex', flexDirection: 'column', gap: 16 }}>

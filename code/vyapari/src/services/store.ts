@@ -29,6 +29,7 @@ export interface AppState {
   messageLogs: Types.MessageLog[];
   chatbotQueryLogs: Types.ChatbotQueryLog[];
   auditEvents: Types.AuditEvent[];
+  followUps: Types.FollowUp[];
 }
 
 type Listener = () => void;
@@ -40,7 +41,8 @@ class Store {
     customerProductStats: [], orders: [], orderItems: [], invoices: [], invoiceLineItems: [], 
     sales: [], payments: [], expenses: [], ledgerEntries: [], attendanceRecords: [], 
     payrollRuns: [], payrollLineItems: [], forecastEntries: [], churnScores: [], 
-    notifications: [], notificationRules: [], messageLogs: [], chatbotQueryLogs: [], auditEvents: []
+    notifications: [], notificationRules: [], messageLogs: [], chatbotQueryLogs: [], auditEvents: [],
+    followUps: []
   };
   
   private listeners: Set<Listener> = new Set();
