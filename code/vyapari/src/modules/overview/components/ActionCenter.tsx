@@ -3,6 +3,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, AlertTriangle, CreditCard, Users } from 'lucide-react';
+import { isInvoiceOverdue } from '../../../services/mockApi';
 
 export const ActionCenter = () => {
   const store = useStore();
@@ -24,7 +25,7 @@ export const ActionCenter = () => {
   }
 
   // Overdue Invoices
-  const overdueCount = store.invoices.filter(i => i.status === 'overdue').length;
+  const overdueCount = store.invoices.filter(i => i.status === 'overdue' || isInvoiceOverdue(i)).length;
   if (overdueCount > 0) {
     actions.push({
       id: 'overdue-invoices',

@@ -84,6 +84,7 @@ export interface Customer {
   phone?: string;
   email?: string;
   totalSpent: number;
+  outstandingBalance?: number;
   lastVisit?: string;
   createdAt: string;
 }
@@ -122,9 +123,10 @@ export interface Invoice {
   invoiceNumber: string;
   customerId?: string;
   amount: number;
-  status: 'paid' | 'unpaid' | 'overdue' | 'cancelled';
+  status: 'paid' | 'unpaid' | 'overdue' | 'cancelled' | 'partially_paid';
   dueDate?: string;
   createdAt: string;
+  amountPaid?: number;
 }
 
 export interface InvoiceLineItem {
