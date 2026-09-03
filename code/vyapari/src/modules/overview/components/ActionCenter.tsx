@@ -37,17 +37,16 @@ export const ActionCenter = () => {
     });
   }
 
-  // High Churn Risk (Prompt 11 placeholder)
-  // We don't have churn scores yet, but simulating based on store state structure if any exist
-  const highChurnCount = store.churnScores?.filter(c => c.score > 70).length || 0;
+  // High Churn Risk (Wired to live Churn Intelligence scoring)
+  const highChurnCount = store.churnScores?.filter(c => c.riskLevel === 'high').length || 0;
   if (highChurnCount > 0) {
     actions.push({
       id: 'high-churn',
       icon: Users,
       color: 'var(--color-danger)',
-      message: `${highChurnCount} customers show high churn risk.`,
-      cta: 'Engage',
-      route: '/insights?filter=high-risk'
+      message: `${highChurnCount} customer-product relationships show high churn risk.`,
+      cta: 'Review',
+      route: '/insights?filter=high'
     });
   }
 

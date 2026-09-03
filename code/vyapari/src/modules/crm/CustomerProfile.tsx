@@ -213,6 +213,7 @@ export const CustomerProfile: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-24)' }}>
           <PreferredProducts customerId={customer.id} />
           <ChurnInsightsCard
+            customerId={customer.id}
             orderCount={totalOrders}
             totalSpent={totalSpent}
             lastPurchaseDate={lastPurchaseDate}

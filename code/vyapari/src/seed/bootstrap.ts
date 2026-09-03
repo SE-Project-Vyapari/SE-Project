@@ -1,4 +1,5 @@
 import { store } from '../services/store';
+import { mockApi } from '../services/mockApi';
 
 export function seedDatabase() {
   if (store.getState().businesses.length > 0) return; // Prevent duplicate seeding on hot reload
@@ -27,26 +28,39 @@ export function seedDatabase() {
   store.insert('users', { id: 'u-4', businessId: 'b-1', outletId: 'o-2', name: 'Dave Cashier', email: 'dave@test.com', role: 'cashier', createdAt: now });
   store.insert('users', { id: 'u-5', businessId: 'b-1', name: 'Eve Accountant', email: 'eve@test.com', role: 'accountant', createdAt: now });
 
-  // 10 Products
-  const products = Array.from({ length: 10 }).map((_, i) => ({
+  // 10 Products with realistic grocery & retail inventory
+  const productCatalogue = [
+    { name: 'Basmati Rice (5kg)', category: 'Grains & Staples', price: 450, cost: 350 },
+    { name: 'Organic Toor Dal (1kg)', category: 'Pulses', price: 180, cost: 130 },
+    { name: 'Fortune Sunflower Oil (1L)', category: 'Edible Oils', price: 165, cost: 135 },
+    { name: 'Chakki Fresh Atta (10kg)', category: 'Grains & Staples', price: 420, cost: 330 },
+    { name: 'Tata Salt (1kg)', category: 'Spices & Seasoning', price: 28, cost: 20 },
+    { name: 'Masala Chai Gold (500g)', category: 'Beverages', price: 290, cost: 210 },
+    { name: 'California Almonds (500g)', category: 'Dry Fruits', price: 450, cost: 360 },
+    { name: 'Whole Cashews (500g)', category: 'Dry Fruits', price: 520, cost: 410 },
+    { name: 'Pure Cow Ghee (1L)', category: 'Dairy & Ghee', price: 650, cost: 510 },
+    { name: 'Stainless Steel Kadhai', category: 'Cookware', price: 850, cost: 600 }
+  ];
+
+  const products = productCatalogue.map((p, i) => ({
     id: `p-${i+1}`,
     businessId: 'b-1',
-    name: `Test Product ${i+1}`,
-    sku: `SKU-${i+1}`,
-    price: (i + 1) * 100,
-    cost: (i + 1) * 60,
-    category: i % 2 === 0 ? 'Groceries' : 'Electronics',
+    name: p.name,
+    sku: `SKU-${1000 + i + 1}`,
+    price: p.price,
+    cost: p.cost,
+    category: p.category,
     createdAt: now
   }));
   products.forEach(p => store.insert('products', p));
 
-  // Inventory for products
+  // Inventory for products (p-10 Stainless Steel Kadhai is out of stock)
   products.forEach(p => {
     store.insert('inventoryRecords', {
       id: `inv-${p.id}`,
       productId: p.id,
       outletId: 'o-1',
-      quantity: 50,
+      quantity: p.id === 'p-10' ? 0 : 50,
       reorderLevel: 10,
       lastUpdated: now
     });
@@ -311,5 +325,105 @@ export function seedDatabase() {
     createdAt: dateDaysAgo(5)
   });
 
-  console.log('Database seeded with bootstrap data.');
+  // Additional historical orders for RFM repurchase pattern training & scoring
+  // c-1 (Aarav Enterprises): History of Basmati Rice (p-1) purchased 85d and 65d ago (combined with ord-1 45d ago -> High Churn Risk)
+  const ordHist1Id = 'ord-hist-1';
+  store.insert('orders', {
+    id: ordHist1Id,
+    outletId: 'o-1',
+    customerId: 'c-1',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 900,
+    createdAt: dateDaysAgo(85)
+  });
+  store.insert('orderItems', { id: 'oi-h1', orderId: ordHist1Id, productId: 'p-1', quantity: 2, unitPrice: 450, subtotal: 900 });
+
+  const ordHist2Id = 'ord-hist-2';
+  store.insert('orders', {
+    id: ordHist2Id,
+    outletId: 'o-1',
+    customerId: 'c-1',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 900,
+    createdAt: dateDaysAgo(65)
+  });
+  store.insert('orderItems', { id: 'oi-h2', orderId: ordHist2Id, productId: 'p-1', quantity: 2, unitPrice: 450, subtotal: 900 });
+
+  // c-1 also bought p-10 (out of stock item) in ord-1 45d ago
+  store.insert('orderItems', { id: 'oi-h2b', orderId: ord1Id, productId: 'p-10', quantity: 1, unitPrice: 850, subtotal: 850 });
+
+  // c-2 (Priya Sharma): History of Sunflower Oil (p-3) purchased 35d, 20d, and 5d ago (interval ~15d, on track -> Low Risk / Positive trend)
+  const ordHist3Id = 'ord-hist-3';
+  store.insert('orders', {
+    id: ordHist3Id,
+    outletId: 'o-1',
+    customerId: 'c-2',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 330,
+    createdAt: dateDaysAgo(35)
+  });
+  store.insert('orderItems', { id: 'oi-h3', orderId: ordHist3Id, productId: 'p-3', quantity: 2, unitPrice: 165, subtotal: 330 });
+
+  const ordHist4Id = 'ord-hist-4';
+  store.insert('orders', {
+    id: ordHist4Id,
+    outletId: 'o-1',
+    customerId: 'c-2',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 330,
+    createdAt: dateDaysAgo(20)
+  });
+  store.insert('orderItems', { id: 'oi-h4', orderId: ordHist4Id, productId: 'p-3', quantity: 2, unitPrice: 165, subtotal: 330 });
+
+  // And c-2 recent order ord-3 also bought p-3 5d ago
+  store.insert('orderItems', { id: 'oi-h5', orderId: ord3Id, productId: 'p-3', quantity: 2, unitPrice: 165, subtotal: 330 });
+
+  // c-4 (Meera Patel): History of Chakki Atta (p-4) purchased 55d and 28d ago (interval 27d, 28d elapsed -> Medium Risk)
+  const ordHist5Id = 'ord-hist-5';
+  store.insert('orders', {
+    id: ordHist5Id,
+    outletId: 'o-1',
+    customerId: 'c-4',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 840,
+    createdAt: dateDaysAgo(55)
+  });
+  store.insert('orderItems', { id: 'oi-h6', orderId: ordHist5Id, productId: 'p-4', quantity: 2, unitPrice: 420, subtotal: 840 });
+
+  const ordHist6Id = 'ord-hist-6';
+  store.insert('orders', {
+    id: ordHist6Id,
+    outletId: 'o-1',
+    customerId: 'c-4',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 840,
+    createdAt: dateDaysAgo(28)
+  });
+  store.insert('orderItems', { id: 'oi-h7', orderId: ordHist6Id, productId: 'p-4', quantity: 2, unitPrice: 420, subtotal: 840 });
+
+  // c-5 (Vikram Singh): Single historical purchase of p-5 (Tata Salt) 35d ago -> Insufficient History / At risk from day one
+  const ordHist7Id = 'ord-hist-7';
+  store.insert('orders', {
+    id: ordHist7Id,
+    outletId: 'o-1',
+    customerId: 'c-5',
+    cashierId: 'u-3',
+    status: 'completed',
+    totalAmount: 56,
+    createdAt: dateDaysAgo(35)
+  });
+  store.insert('orderItems', { id: 'oi-h8', orderId: ordHist7Id, productId: 'p-5', quantity: 2, unitPrice: 28, subtotal: 56 });
+
+  // Initialize churn scores for all customer-product pairs
+  mockApi.computeAllChurnScores().catch(err => {
+    console.error('Failed to compute initial churn scores:', err);
+  });
+
+  console.log('Database seeded with bootstrap data and RFM churn history.');
 }

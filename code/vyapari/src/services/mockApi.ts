@@ -172,35 +172,197 @@ export const mockApi = {
 
   /**
    * computeChurnScore
-   * Uses simple RFM scoring.
+   * Uses transparent RFM repurchase-interval scoring per customer-product pair.
    */
   async computeChurnScore(customerId: string, productId: string): Promise<Types.ChurnScore> {
-    await delay(200);
+    await delay(100);
     const state = store.getState();
-    const stat = state.customerProductStats.find(s => s.customerId === customerId && s.productId === productId);
-    
+    const customer = state.customers.find(c => c.id === customerId);
+    const inventory = state.inventoryRecords.find(i => i.productId === productId);
+
+    // Find all valid non-cancelled customer orders
+    const customerOrders = state.orders.filter(o => o.customerId === customerId && o.status !== 'cancelled');
+    const customerOrderIds = new Set(customerOrders.map(o => o.id));
+
+    // Find all purchase records of this product
+    const relevantItems = state.orderItems.filter(i => i.productId === productId && customerOrderIds.has(i.orderId));
+
+    const purchases = relevantItems.map(item => {
+      const parentOrder = customerOrders.find(o => o.id === item.orderId);
+      return {
+        orderId: item.orderId,
+        date: new Date(parentOrder?.createdAt || Date.now()),
+        quantity: item.quantity,
+        subtotal: item.subtotal
+      };
+    }).sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const isOutOfStock = inventory ? inventory.quantity <= 0 : false;
+    const isLowStock = inventory ? inventory.quantity <= inventory.reorderLevel : false;
+    const now = Date.now();
+
     let score = 50;
     let riskLevel: 'low' | 'medium' | 'high' = 'medium';
+    let status: 'active' | 'insufficient_history' = 'active';
+    let daysSinceLastPurchase = 0;
+    let averageIntervalDays = 0;
+    let daysOverdue = 0;
+    let revenueAtRisk = 0;
+    const factors: string[] = [];
+    let suggestedAction = 'Send reorder reminder';
 
-    if (stat) {
-      const daysSincePurchase = (Date.now() - new Date(stat.lastPurchased).getTime()) / (1000 * 3600 * 24);
-      // Simple mock logic
-      score = Math.min(100, Math.max(0, (daysSincePurchase / 30) * 100));
-      if (score > 75) riskLevel = 'high';
-      else if (score < 30) riskLevel = 'low';
-    } else {
-      score = 100;
+    if (purchases.length === 0) {
+      status = 'insufficient_history';
+      score = 90;
       riskLevel = 'high';
+      daysSinceLastPurchase = 999;
+      averageIntervalDays = 0;
+      daysOverdue = 0;
+      factors.push('Customer has never purchased this product before.');
+      factors.push('At risk from day one — initial product discovery needed.');
+      suggestedAction = 'Introduce product with promotional offer';
+    } else if (purchases.length === 1) {
+      status = 'insufficient_history';
+      const singlePurchase = purchases[0];
+      daysSinceLastPurchase = Math.floor((now - singlePurchase.date.getTime()) / (1000 * 3600 * 24));
+      averageIntervalDays = 0;
+      daysOverdue = 0;
+      revenueAtRisk = singlePurchase.subtotal;
+
+      factors.push(`Only 1 historical purchase recorded on ${singlePurchase.date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}.`);
+      factors.push(`${daysSinceLastPurchase} days have elapsed since initial purchase.`);
+      if (daysSinceLastPurchase > 30) {
+        score = Math.min(95, 65 + Math.floor(daysSinceLastPurchase / 10));
+        riskLevel = 'high';
+        factors.push('First-time buyer with no return purchase (At risk from day one).');
+        suggestedAction = customer?.type === 'wholesale'
+          ? 'Call to gather first-order feedback & discuss restocking'
+          : 'Send first-order satisfaction follow-up & repeat discount';
+      } else {
+        score = 40;
+        riskLevel = 'medium';
+        factors.push('Recent new buyer — awaiting standard repeat cycle.');
+        suggestedAction = 'Follow up for product satisfaction & usage feedback';
+      }
+    } else {
+      // k >= 2 purchases: calculate repurchase intervals
+      const intervals: number[] = [];
+      for (let i = 1; i < purchases.length; i++) {
+        const diffDays = Math.max(1, Math.round((purchases[i].date.getTime() - purchases[i - 1].date.getTime()) / (1000 * 3600 * 24)));
+        intervals.push(diffDays);
+      }
+
+      averageIntervalDays = Math.round(intervals.reduce((a, b) => a + b, 0) / intervals.length);
+      const lastPurchase = purchases[purchases.length - 1];
+      daysSinceLastPurchase = Math.floor((now - lastPurchase.date.getTime()) / (1000 * 3600 * 24));
+      daysOverdue = Math.max(0, daysSinceLastPurchase - averageIntervalDays);
+      const overdueRatio = daysSinceLastPurchase / Math.max(1, averageIntervalDays);
+
+      // Frequency trend analysis across cycles
+      let intervalChangePercent = 0;
+      if (intervals.length >= 2) {
+        const recentInterval = intervals[intervals.length - 1];
+        const previousAvg = intervals.slice(0, -1).reduce((a, b) => a + b, 0) / (intervals.length - 1);
+        intervalChangePercent = Math.round(((recentInterval - previousAvg) / previousAvg) * 100);
+      }
+
+      // Base RFM risk score derivation
+      if (overdueRatio <= 1.0) {
+        // Customer is repurchasing on track or faster than normal
+        score = Math.round(Math.max(5, Math.min(34, overdueRatio * 34)));
+        riskLevel = 'low';
+      } else if (overdueRatio <= 1.75) {
+        // Moderately past typical window
+        score = Math.round(35 + ((overdueRatio - 1.0) / 0.75) * 35);
+        riskLevel = 'medium';
+      } else {
+        // Significantly overdue
+        score = Math.round(Math.min(98, 71 + ((overdueRatio - 1.75) / 1.25) * 27));
+        riskLevel = 'high';
+      }
+
+      // Trend adjustment
+      if (intervalChangePercent > 20) {
+        score = Math.min(98, score + 5);
+      } else if (intervalChangePercent < -20 && riskLevel !== 'high') {
+        score = Math.max(5, score - 5);
+      }
+
+      if (score >= 70) riskLevel = 'high';
+      else if (score >= 35) riskLevel = 'medium';
+      else riskLevel = 'low';
+
+      // Revenue at risk calculation
+      const avgSpendPerOrder = purchases.reduce((sum, p) => sum + p.subtotal, 0) / purchases.length;
+      if (riskLevel === 'high') {
+        revenueAtRisk = Math.round(avgSpendPerOrder * 2);
+      } else if (riskLevel === 'medium') {
+        revenueAtRisk = Math.round(avgSpendPerOrder);
+      } else {
+        revenueAtRisk = 0;
+      }
+
+      // Build plain-language "Why?" factors
+      factors.push(`${daysSinceLastPurchase} days since last purchase on ${lastPurchase.date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}.`);
+      factors.push(`Previously purchased every ~${averageIntervalDays} days on average across ${purchases.length} cycles.`);
+      if (daysOverdue > 0) {
+        factors.push(`Currently ${daysOverdue} days past the typical ${averageIntervalDays}-day repurchase window.`);
+      } else {
+        factors.push(`Purchasing on schedule (within expected ${averageIntervalDays}-day cycle).`);
+      }
+
+      if (intervalChangePercent > 20) {
+        factors.push(`Repurchase frequency declined by ${intervalChangePercent}% between recent cycles.`);
+      } else if (intervalChangePercent < -15) {
+        factors.push(`Purchase frequency trending positively (accelerated by ${Math.abs(intervalChangePercent)}%).`);
+      }
+
+      // Suggested action derivation
+      if (isOutOfStock) {
+        suggestedAction = 'Restock product in inventory and alert customer';
+      } else if (riskLevel === 'high') {
+        suggestedAction = customer?.type === 'wholesale'
+          ? 'Schedule check-in call & offer bulk restock discount'
+          : 'Send reorder reminder with personalized discount';
+      } else if (riskLevel === 'medium') {
+        suggestedAction = 'Send automated reorder reminder';
+      } else {
+        suggestedAction = 'Maintain regular engagement & relationship';
+      }
     }
 
+    if (isOutOfStock) {
+      factors.push('⚠️ Product is currently OUT OF STOCK in inventory (Quantity: 0).');
+    } else if (isLowStock) {
+      factors.push(`⚠️ Product is low on stock (${inventory?.quantity} remaining, reorder level ${inventory?.reorderLevel}).`);
+    }
+
+    // Preserve existing reviewed status if present
+    const existing = state.churnScores.find(s => s.customerId === customerId && s.productId === productId);
     const churnRecord: Types.ChurnScore = {
-      id: generateId(),
+      id: existing?.id || generateId(),
       customerId,
+      productId,
       score,
       riskLevel,
+      status,
+      daysSinceLastPurchase,
+      averageIntervalDays,
+      daysOverdue,
+      revenueAtRisk,
+      factors,
+      suggestedAction,
+      reviewed: existing?.reviewed || false,
       calculatedAt: new Date().toISOString()
     };
-    store.insert('churnScores', churnRecord);
+
+    if (existing) {
+      store.update('churnScores', existing.id, churnRecord);
+    } else {
+      store.insert('churnScores', churnRecord);
+    }
+
+    eventBus.publish(Events.CHURN_RISK_CHANGED, { customerId, productId, score, riskLevel });
     return churnRecord;
   },
 
@@ -738,5 +900,65 @@ export const mockApi = {
       completedAt: now
     });
     return updated;
+  },
+
+  /**
+   * computeAllChurnScores
+   * Computes RFM churn scores across all customer-product pairs in database.
+   */
+  async computeAllChurnScores(): Promise<Types.ChurnScore[]> {
+    const state = store.getState();
+    const pairs = new Set<string>();
+
+    // Collect all unique (customerId, productId) from orderItems
+    state.orders.forEach(order => {
+      if (order.customerId && order.status !== 'cancelled') {
+        const items = state.orderItems.filter(i => i.orderId === order.id);
+        items.forEach(item => {
+          pairs.add(`${order.customerId}|${item.productId}`);
+        });
+      }
+    });
+
+    const results: Types.ChurnScore[] = [];
+    for (const pair of pairs) {
+      const [customerId, productId] = pair.split('|');
+      const score = await this.computeChurnScore(customerId, productId);
+      results.push(score);
+    }
+    return results;
+  },
+
+  /**
+   * sendCustomerMessage
+   * Dispatches a message and logs to messageLogs.
+   */
+  async sendCustomerMessage(payload: {
+    recipient: string;
+    content: string;
+    channel?: 'whatsapp' | 'sms' | 'email';
+    customerId?: string;
+  }): Promise<Types.MessageLog> {
+    await delay(300);
+    const now = new Date().toISOString();
+    const log: Types.MessageLog = {
+      id: generateId(),
+      recipient: payload.recipient,
+      content: payload.content,
+      channel: payload.channel || 'whatsapp',
+      customerId: payload.customerId,
+      status: 'delivered',
+      sentAt: now
+    };
+    store.insert('messageLogs', log);
+    return log;
+  },
+
+  /**
+   * markChurnScoreReviewed
+   */
+  async markChurnScoreReviewed(churnScoreId: string): Promise<void> {
+    await delay(100);
+    store.update('churnScores', churnScoreId, { reviewed: true });
   }
 };

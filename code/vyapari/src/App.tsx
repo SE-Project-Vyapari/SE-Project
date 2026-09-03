@@ -20,6 +20,7 @@ import { OrderList } from './modules/orders/OrderList';
 import { OrderDetail } from './modules/orders/OrderDetail';
 import { InvoicesList, InvoiceDetail } from './modules/invoices';
 import { CustomerList, CustomerProfile } from './modules/crm';
+import { ChurnInsightsPage } from './modules/churn-insights';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -48,7 +49,7 @@ function AppRoutes() {
         <Route path="/invoices/:id" element={<InvoiceDetail />} />
         <Route path="/customers" element={<CustomerList />} />
         <Route path="/customers/:id" element={<CustomerProfile />} />
-        <Route path="/insights" element={<FeaturePlaceholder title="Customer Insights" />} />
+        <Route path="/insights" element={<ChurnInsightsPage />} />
         <Route path="/finance" element={<FeaturePlaceholder title="Finance" />} />
         <Route path="/payroll" element={<FeaturePlaceholder title="Payroll" />} />
         <Route path="/analytics" element={<FeaturePlaceholder title="Analytics" />} />

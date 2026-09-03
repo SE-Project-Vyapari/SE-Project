@@ -1,1 +1,3 @@
-// public exports for churn-insights
+export { ChurnInsightsPage } from './ChurnInsightsPage';
+export { ChurnMetricsRow } from './components/ChurnMetricsRow';
+export { ChurnReviewDrawer } from './components/ChurnReviewDrawer';
