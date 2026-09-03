@@ -83,10 +83,25 @@ export interface Customer {
   name: string;
   phone?: string;
   email?: string;
+  type?: 'retail' | 'wholesale';
+  address?: string;
+  optInForMessages?: boolean;
   totalSpent: number;
   outstandingBalance?: number;
   lastVisit?: string;
   createdAt: string;
+}
+
+export interface FollowUp {
+  id: string;
+  customerId: string;
+  note: string;
+  dueDate: string;
+  assigneeId?: string;
+  status: 'pending' | 'completed';
+  isSuggested?: boolean;
+  createdAt: string;
+  completedAt?: string;
 }
 
 export interface CustomerProductStat {
@@ -215,8 +230,17 @@ export interface ForecastEntry {
 export interface ChurnScore {
   id: string;
   customerId: string;
+  productId?: string;
   score: number; // 0 to 100
   riskLevel: 'low' | 'medium' | 'high';
+  status?: 'active' | 'insufficient_history';
+  daysSinceLastPurchase?: number;
+  averageIntervalDays?: number;
+  daysOverdue?: number;
+  revenueAtRisk?: number;
+  factors?: string[];
+  suggestedAction?: string;
+  reviewed?: boolean;
   calculatedAt: string;
 }
 
@@ -242,7 +266,9 @@ export interface MessageLog {
   id: string;
   recipient: string; // phone or email
   content: string;
-  status: 'sent' | 'failed';
+  status: 'sent' | 'delivered' | 'failed';
+  channel?: 'whatsapp' | 'sms' | 'email';
+  customerId?: string;
   sentAt: string;
 }
 
