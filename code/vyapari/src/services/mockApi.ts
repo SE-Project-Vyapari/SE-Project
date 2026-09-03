@@ -144,10 +144,13 @@ export const mockApi = {
     const ledgerEntry: Types.LedgerEntry = {
       id: generateId(),
       businessId: payload.businessId,
+      outletId: payload.outletId,
       amount: totalAmount,
       type: 'credit',
       sourceType: 'sale',
       referenceId: sale.id,
+      description: `POS Sale #${sale.id.substring(0, 8)}`,
+      category: 'Sales',
       createdAt: now
     };
     store.insert('ledgerEntries', ledgerEntry);
@@ -801,6 +804,8 @@ export const mockApi = {
       type: 'credit',
       sourceType: 'payment',
       referenceId: paymentId,
+      description: `Payment for ${invoice.invoiceNumber} (${method.toUpperCase()})`,
+      category: 'Receivables',
       createdAt: now
     };
     store.insert('ledgerEntries', ledgerEntry);
@@ -960,5 +965,86 @@ export const mockApi = {
   async markChurnScoreReviewed(churnScoreId: string): Promise<void> {
     await delay(100);
     store.update('churnScores', churnScoreId, { reviewed: true });
+  },
+
+  /**
+   * addExpense
+   * Records an Expense and matching debit LedgerEntry.
+   */
+  async addExpense(payload: {
+    businessId?: string;
+    outletId: string;
+    category: string;
+    amount: number;
+    description: string;
+    date?: string;
+    recordedBy?: string;
+    recurring?: boolean;
+    status?: 'paid' | 'unpaid';
+  }): Promise<{ expense: Types.Expense; ledgerEntry: Types.LedgerEntry }> {
+    await delay(200);
+    const now = payload.date || new Date().toISOString();
+    const expenseId = generateId();
+
+    const expense: Types.Expense = {
+      id: expenseId,
+      businessId: payload.businessId || 'b-1',
+      outletId: payload.outletId,
+      category: payload.category,
+      amount: payload.amount,
+      description: payload.description,
+      date: now,
+      recordedBy: payload.recordedBy || 'u-1',
+      recurring: payload.recurring || false,
+      status: payload.status || 'paid',
+      createdAt: now
+    };
+    store.insert('expenses', expense);
+
+    const ledgerEntry: Types.LedgerEntry = {
+      id: generateId(),
+      businessId: payload.businessId || 'b-1',
+      outletId: payload.outletId,
+      amount: payload.amount,
+      type: 'debit',
+      sourceType: 'expense',
+      referenceId: expenseId,
+      description: payload.description,
+      category: payload.category,
+      createdAt: now
+    };
+    store.insert('ledgerEntries', ledgerEntry);
+
+    return { expense, ledgerEntry };
+  },
+
+  /**
+   * addIncome
+   * Records a non-sale credit LedgerEntry.
+   */
+  async addIncome(payload: {
+    businessId?: string;
+    outletId?: string;
+    category?: string;
+    amount: number;
+    description: string;
+    date?: string;
+  }): Promise<Types.LedgerEntry> {
+    await delay(200);
+    const now = payload.date || new Date().toISOString();
+    const ledgerEntry: Types.LedgerEntry = {
+      id: generateId(),
+      businessId: payload.businessId || 'b-1',
+      outletId: payload.outletId,
+      amount: payload.amount,
+      type: 'credit',
+      sourceType: 'income',
+      referenceId: generateId(),
+      description: payload.description,
+      category: payload.category || 'Other Income',
+      createdAt: now
+    };
+    store.insert('ledgerEntries', ledgerEntry);
+    return ledgerEntry;
   }
 };

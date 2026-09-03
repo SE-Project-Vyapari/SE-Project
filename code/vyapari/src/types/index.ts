@@ -173,21 +173,28 @@ export interface Payment {
 
 export interface Expense {
   id: string;
+  businessId?: string;
   outletId: string;
-  category: string;
+  category: 'Rent' | 'Utilities' | 'Salaries' | 'Inventory' | 'Logistics' | 'Marketing' | 'Miscellaneous' | string;
   amount: number;
   description: string;
   date: string;
   recordedBy: string;
+  recurring?: boolean;
+  status?: 'paid' | 'unpaid';
+  createdAt?: string;
 }
 
 export interface LedgerEntry {
   id: string;
   businessId: string;
+  outletId?: string;
   amount: number;
   type: 'credit' | 'debit';
-  sourceType: 'sale' | 'expense' | 'payroll' | 'payment';
+  sourceType: 'sale' | 'expense' | 'payroll' | 'payment' | 'income' | 'adjustment';
   referenceId: string;
+  description?: string;
+  category?: string;
   createdAt: string;
 }
 

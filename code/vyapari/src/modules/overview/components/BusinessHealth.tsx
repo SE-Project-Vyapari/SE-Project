@@ -3,6 +3,7 @@ import { Card } from '../../../components/ui/Card';
 import { TrendingUp, TrendingDown, Package, CreditCard, DollarSign } from 'lucide-react';
 import { isToday, isYesterday } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { formatINR } from '../../../utils/format';
 
 export const BusinessHealth = () => {
   const store = useStore();
@@ -46,11 +47,11 @@ export const BusinessHealth = () => {
 
   return (
     <div style={{ display: 'flex', gap: 'var(--spacing-16)', flexWrap: 'wrap' }}>
-      <MetricCard title="Today's Revenue" value={`₹${todayRev.toLocaleString()}`} delta={revDelta} icon={DollarSign} />
+      <MetricCard title="Today's Revenue" value={formatINR(todayRev)} delta={revDelta} icon={DollarSign} />
       <MetricCard title="Today's Orders" value={todayOrders} delta={orderDelta} icon={Package} />
-      <MetricCard title="Gross Profit" value={`₹${todayGP.toLocaleString()}`} delta={gpDelta} icon={TrendingUp} />
+      <MetricCard title="Gross Profit" value={formatINR(todayGP)} delta={gpDelta} icon={TrendingUp} />
       <MetricCard title="Low Stock Items" value={lowStockCount} icon={Package} onClick={() => navigate('/inventory')} />
-      <MetricCard title="Outstanding Pay" value={`₹${outstandings.toLocaleString()}`} icon={CreditCard} onClick={() => navigate('/invoices')} />
+      <MetricCard title="Outstanding Pay" value={formatINR(outstandings)} icon={CreditCard} onClick={() => navigate('/invoices')} />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../services/store';
 import { isInvoiceOverdue } from '../../services/mockApi';
 import { useNavigate } from 'react-router-dom';
+import { formatINR } from '../../utils/format';
 import styles from './styles/invoices.module.css';
 
 export const InvoicesList: React.FC = () => {
@@ -252,10 +253,10 @@ export const InvoicesList: React.FC = () => {
                       {getCustomerName(invoice.customerId)}
                     </td>
                     <td className="tabular-nums" style={{ padding: 16, fontSize: 14, textAlign: 'right' }}>
-                      ₹{gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatINR(gstAmount, { showDecimals: true })}
                     </td>
                     <td className="tabular-nums" style={{ padding: 16, fontSize: 14, fontWeight: 600, textAlign: 'right' }}>
-                      ₹{invoice.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatINR(invoice.amount, { showDecimals: true })}
                     </td>
                     <td style={{ padding: 16, fontSize: 14, textAlign: 'center' }}>
                       {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}

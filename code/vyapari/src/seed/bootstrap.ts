@@ -207,10 +207,13 @@ export function seedDatabase() {
   store.insert('ledgerEntries', {
     id: 'le-1',
     businessId: 'b-1',
+    outletId: 'o-1',
     amount: 1500,
     type: 'credit',
     sourceType: 'sale',
     referenceId: ord1Id,
+    description: 'Order Sale #ord-1 (INV-2026-001)',
+    category: 'Sales',
     createdAt: dateDaysAgo(45)
   });
 
@@ -254,19 +257,25 @@ export function seedDatabase() {
   store.insert('ledgerEntries', {
     id: 'le-2',
     businessId: 'b-1',
+    outletId: 'o-1',
     amount: 1000,
     type: 'credit',
     sourceType: 'sale',
     referenceId: ord2Id,
+    description: 'Order Sale #ord-2 (INV-2026-002)',
+    category: 'Sales',
     createdAt: dateDaysAgo(10)
   });
   store.insert('ledgerEntries', {
     id: 'le-3',
     businessId: 'b-1',
+    outletId: 'o-1',
     amount: 750,
     type: 'credit',
     sourceType: 'payment',
     referenceId: pm1Id,
+    description: 'Invoice Payment #INV-2026-002 (UPI)',
+    category: 'Receivables',
     createdAt: dateDaysAgo(10)
   });
 
@@ -309,20 +318,80 @@ export function seedDatabase() {
   store.insert('ledgerEntries', {
     id: 'le-4',
     businessId: 'b-1',
+    outletId: 'o-1',
     amount: 500,
     type: 'credit',
     sourceType: 'sale',
     referenceId: ord3Id,
+    description: 'Order Sale #ord-3 (INV-2026-003)',
+    category: 'Sales',
     createdAt: dateDaysAgo(5)
   });
   store.insert('ledgerEntries', {
     id: 'le-5',
     businessId: 'b-1',
+    outletId: 'o-1',
     amount: 500,
     type: 'credit',
     sourceType: 'payment',
     referenceId: pm2Id,
+    description: 'Invoice Payment #INV-2026-003 (Cash)',
+    category: 'Receivables',
     createdAt: dateDaysAgo(5)
+  });
+
+  // Seed sample expenses across 7 standard categories with corresponding debit ledger entries
+  const seedExpenses = [
+    { id: 'exp-1', category: 'Rent', amount: 25000, description: 'Store Premises Rent (Downtown Branch)', daysAgo: 5, recurring: true },
+    { id: 'exp-2', category: 'Utilities', amount: 4500, description: 'Commercial Electricity & Water Bill', daysAgo: 12, recurring: true },
+    { id: 'exp-3', category: 'Salaries', amount: 35000, description: 'Store Staff & Cashier Salaries', daysAgo: 15, recurring: true },
+    { id: 'exp-4', category: 'Inventory', amount: 18000, description: 'Bulk Wholesale Staples Restocking', daysAgo: 22, recurring: false },
+    { id: 'exp-5', category: 'Logistics', amount: 3200, description: 'Inter-branch Delivery & Freight Charges', daysAgo: 8, recurring: false },
+    { id: 'exp-6', category: 'Marketing', amount: 5000, description: 'Local Festival Flyers & Promotion', daysAgo: 18, recurring: false },
+    { id: 'exp-7', category: 'Miscellaneous', amount: 1200, description: 'Packaging Materials & Shelf Repair', daysAgo: 3, recurring: false }
+  ];
+
+  seedExpenses.forEach(exp => {
+    store.insert('expenses', {
+      id: exp.id,
+      businessId: 'b-1',
+      outletId: 'o-1',
+      category: exp.category,
+      amount: exp.amount,
+      description: exp.description,
+      date: dateDaysAgo(exp.daysAgo),
+      recordedBy: 'u-1',
+      recurring: exp.recurring,
+      status: 'paid',
+      createdAt: dateDaysAgo(exp.daysAgo)
+    });
+
+    store.insert('ledgerEntries', {
+      id: `le-${exp.id}`,
+      businessId: 'b-1',
+      outletId: 'o-1',
+      amount: exp.amount,
+      type: 'debit',
+      sourceType: 'expense',
+      referenceId: exp.id,
+      description: exp.description,
+      category: exp.category,
+      createdAt: dateDaysAgo(exp.daysAgo)
+    });
+  });
+
+  // Non-sale Income sample
+  store.insert('ledgerEntries', {
+    id: 'le-inc-1',
+    businessId: 'b-1',
+    outletId: 'o-1',
+    amount: 2500,
+    type: 'credit',
+    sourceType: 'income',
+    referenceId: 'inc-1',
+    description: 'Cardboard Carton & Scrap Resale',
+    category: 'Other Income',
+    createdAt: dateDaysAgo(6)
   });
 
   // Additional historical orders for RFM repurchase pattern training & scoring
