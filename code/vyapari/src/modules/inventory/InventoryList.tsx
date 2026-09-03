@@ -8,6 +8,7 @@ import { Select } from '../../components/ui/Select';
 import { Search, Plus, ArrowRightLeft, FileDown, Upload } from 'lucide-react';
 import { AddProductModal, AdjustStockModal, TransferStockModal } from './components/Modals';
 import { useNavigate } from 'react-router-dom';
+import { formatINR } from '../../utils/format';
 
 export const InventoryList = () => {
   const navigate = useNavigate();
@@ -79,9 +80,9 @@ export const InventoryList = () => {
         {r.status}
       </span>
     ) },
-    !isStaff ? { header: 'Cost', accessor: (r: any) => `₹${r.p.cost}` } : null,
-    { header: 'Price', accessor: (r: any) => `₹${r.p.price}` },
-    !isStaff ? { header: 'Value', accessor: (r: any) => `₹${(r.qty * r.p.cost).toFixed(2)}` } : null,
+    !isStaff ? { header: 'Cost', accessor: (r: any) => formatINR(r.p.cost) } : null,
+    { header: 'Price', accessor: (r: any) => formatINR(r.p.price) },
+    !isStaff ? { header: 'Value', accessor: (r: any) => formatINR(r.qty * r.p.cost, { showDecimals: true }) } : null,
     { header: 'Actions', accessor: (r: any) => (
       <div style={{ display: 'flex', gap: 8 }}>
         <Button onClick={() => setAdjustProductId(r.p.id)} style={{ padding: '4px 8px', fontSize: 12, backgroundColor: 'var(--color-surface)' }}>Adjust</Button>

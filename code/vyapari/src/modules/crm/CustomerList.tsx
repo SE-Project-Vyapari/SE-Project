@@ -3,6 +3,7 @@ import { useStore } from '../../services/store';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AddCustomerModal } from './components/AddCustomerModal';
 import { UserPlus, Search, ArrowRight } from 'lucide-react';
+import { formatINR } from '../../utils/format';
 import styles from './styles/crm.module.css';
 
 export const CustomerList: React.FC = () => {
@@ -236,11 +237,11 @@ export const CustomerList: React.FC = () => {
                     </td>
 
                     <td className="tabular-nums" style={{ padding: 16, fontSize: 14, fontWeight: 600, textAlign: 'right' }}>
-                      ₹{customer.totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatINR(customer.totalSpent, { showDecimals: true })}
                     </td>
 
                     <td className="tabular-nums" style={{ padding: 16, fontSize: 14, textAlign: 'right', fontWeight: outstanding > 0 ? 700 : 400, color: outstanding > 0 ? 'var(--color-danger)' : 'var(--color-text)' }}>
-                      ₹{outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatINR(outstanding, { showDecimals: true })}
                     </td>
 
                     <td style={{ padding: 16, fontSize: 14 }}>

@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/Button';
 import { Trash2, UserPlus, CreditCard, Banknote, Smartphone, Minus, Plus } from 'lucide-react';
 import { Select } from '../../../components/ui/Select';
 import { AddCustomerModal } from '../../crm';
+import { formatINR } from '../../../utils/format';
 
 interface CartPanelProps {
   cart: CartItem[];
@@ -118,19 +119,21 @@ export const CartPanel: React.FC<CartPanelProps> = ({
       <div style={{ padding: 'var(--spacing-16)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
           <span style={{ color: 'var(--color-muted-text)' }}>Subtotal</span>
-          <span>₹{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          <span className="tabular-nums">{formatINR(subtotal, { showDecimals: true })}</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
           <span style={{ color: 'var(--color-muted-text)' }}>Discount</span>
-          <span style={{ color: 'var(--color-success)' }}>-₹{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          <span style={{ color: 'var(--color-success)' }} className="tabular-nums">
+            {formatINR(-totalDiscount, { showDecimals: true })}
+          </span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, fontSize: 14 }}>
           <span style={{ color: 'var(--color-muted-text)' }}>Tax (GST 18%)</span>
-          <span>₹{tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          <span className="tabular-nums">{formatINR(tax, { showDecimals: true })}</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, fontSize: 20, fontWeight: 'bold' }}>
           <span>Total</span>
-          <span>₹{grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          <span className="tabular-nums">{formatINR(grandTotal, { showDecimals: true })}</span>
         </div>
 
         {/* Payment Methods */}
