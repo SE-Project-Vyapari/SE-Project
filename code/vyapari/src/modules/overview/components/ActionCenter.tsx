@@ -2,7 +2,7 @@ import { useStore } from '../../../services/store';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, AlertTriangle, CreditCard, Users } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CreditCard, Users, TrendingUp } from 'lucide-react';
 import { isInvoiceOverdue } from '../../../services/mockApi';
 
 export const ActionCenter = () => {
@@ -60,6 +60,29 @@ export const ActionCenter = () => {
       message: `${pendingPayroll} payroll ${pendingPayroll === 1 ? 'run is' : 'runs are'} pending calculation or approval.`,
       cta: 'Review Payroll',
       route: '/payroll'
+    });
+  }
+
+  // Demand Forecast Stock-out Risk (Prompt 16 live wiring)
+  const stockoutRiskCount = store.products.filter(p => {
+    const stock = store.inventoryRecords
+      .filter(r => r.productId === p.id)
+      .reduce((sum, r) => sum + r.quantity, 0);
+    // Recent 14-day velocity
+    const orderItems = store.orderItems.filter(oi => oi.productId === p.id);
+    const recentUnits = orderItems.reduce((sum, oi) => sum + oi.quantity, 0);
+    const forecast14d = Math.round((recentUnits / 30) * 14);
+    return forecast14d > 0 && stock < forecast14d;
+  }).length;
+
+  if (stockoutRiskCount > 0) {
+    actions.push({
+      id: 'forecast-stockout',
+      icon: TrendingUp,
+      color: 'var(--color-primary)',
+      message: `${stockoutRiskCount} ${stockoutRiskCount === 1 ? 'product is' : 'products are'} projected to stock out within 14 days.`,
+      cta: 'View Forecast',
+      route: '/forecasting'
     });
   }
 
