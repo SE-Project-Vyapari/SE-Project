@@ -1,0 +1,556 @@
+/* AI Assistant Module Styles - Business Intelligence Analyst Experience */
+
+.assistantContainer {
+  padding: var(--spacing-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--spacing-16);
+}
+
+.headerTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.headerTitle {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-dark);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerSubtitle {
+  color: var(--color-muted-text);
+  font-size: 14px;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-12);
+  align-items: center;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.actionButton:hover {
+  background: var(--color-background);
+  border-color: var(--color-muted-text);
+}
+
+.actionButtonPrimary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.actionButtonPrimary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* Query Search Panel */
+.searchPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  box-shadow: var(--shadow-sm);
+}
+
+.searchBarForm {
+  display: flex;
+  gap: var(--spacing-12);
+  align-items: center;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--color-muted-text);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 44px 0 44px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-background);
+  font-size: 15px;
+  color: var(--color-dark);
+  transition: all 0.15s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(198, 93, 58, 0.12);
+}
+
+.clearInputBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-muted-text);
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+}
+
+.clearInputBtn:hover {
+  color: var(--color-dark);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.askButton {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.askButton:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.askButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Prompt Chips */
+.chipsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chipsLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-muted-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chipsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.promptChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.promptChip:hover {
+  background: rgba(198, 93, 58, 0.08);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.chipPriority {
+  background: rgba(198, 93, 58, 0.08);
+  border-color: rgba(198, 93, 58, 0.3);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Answer Feed */
+.feedContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-20);
+}
+
+.feedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-8);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.feedTitle {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-muted-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clearFeedBtn {
+  background: none;
+  border: none;
+  color: var(--color-muted-text);
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+.clearFeedBtn:hover {
+  color: var(--color-danger);
+}
+
+/* Answer Block */
+.answerBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.queryHeaderTag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+.queryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-muted-text);
+}
+
+.queryString {
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.answerCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  box-shadow: var(--shadow-sm);
+}
+
+.answerCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: var(--spacing-12);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.answerIntentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-muted-text);
+}
+
+.answerSummaryText {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-dark);
+  line-height: 1.5;
+}
+
+.answerCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: var(--spacing-12);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Tables inside answers */
+.tableWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.answerTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.answerTable th {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 2px solid var(--color-border);
+  color: var(--color-muted-text);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.answerTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: middle;
+}
+
+.answerTable tbody tr:hover {
+  background: rgba(198, 93, 58, 0.02);
+}
+
+.textRight {
+  text-align: right;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+/* Quick Metrics inside answer */
+.metricMiniGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-12);
+}
+
+.metricMiniCard {
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metricMiniLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+}
+
+.metricMiniValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Step Guides for FAQ */
+.faqStepList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faqStepItem {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--color-border);
+}
+
+.faqStepNumber {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.faqStepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.faqStepTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.faqStepDesc {
+  font-size: 12px;
+  color: var(--color-muted-text);
+}
+
+/* Query Audit Log Drawer */
+.logDrawerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.logDrawerContent {
+  width: 580px;
+  max-width: 90vw;
+  background: var(--color-surface);
+  height: 100%;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.25s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.logDrawerHeader {
+  padding: var(--spacing-20);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logDrawerBody {
+  padding: var(--spacing-20);
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}
+
+/* Empty State */
+.emptyStateContainer {
+  padding: 64px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.emptyStateTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.emptyStateText {
+  font-size: 14px;
+  color: var(--color-muted-text);
+  max-width: 480px;
+  line-height: 1.5;
+}

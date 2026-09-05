@@ -26,6 +26,7 @@ import { EmployeeList, EmployeeDetail, AttendancePage } from './modules/employee
 import { PayrollPage } from './modules/payroll';
 import { AnalyticsPage } from './modules/analytics';
 import { ForecastingPage } from './modules/forecasting';
+import { AiAssistantPage } from './modules/ai-assistant';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -59,7 +60,7 @@ function AppRoutes() {
         <Route path="/payroll" element={<PayrollPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/forecasting" element={<ForecastingPage />} />
-        <Route path="/ai-assistant" element={<FeaturePlaceholder title="AI Assistant" />} />
+        <Route path="/ai-assistant" element={<AiAssistantPage />} />
         <Route path="/notifications" element={<FeaturePlaceholder title="Notifications" />} />
         <Route path="/employees" element={<EmployeeList />} />
         <Route path="/employees/attendance" element={<AttendancePage />} />

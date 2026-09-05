@@ -485,6 +485,26 @@ export const mockApi = {
   },
 
   /**
+   * logChatbotQuery
+   * Log query interaction with intent and resolution status for evaluation tracking
+   */
+  logChatbotQuery(query: string, intent: string, responseSummary: string, resolved: boolean = true, metadata?: any): Types.ChatbotQueryLog {
+    const log: Types.ChatbotQueryLog = {
+      id: generateId(),
+      userId: 'u-1',
+      query,
+      response: responseSummary,
+      intent,
+      resolved,
+      metadata: metadata ? JSON.stringify(metadata) : undefined,
+      timestamp: new Date().toISOString()
+    };
+
+    store.insert('chatbotQueryLogs', log);
+    return log;
+  },
+
+  /**
    * computeEmployeePayroll
    * Comprehensive per-employee salary computation based on Attendance records and Indian payroll standard:
    * - Daily Rate = Base Salary / Total Days in Month

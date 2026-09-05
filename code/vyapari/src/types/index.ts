@@ -352,6 +352,8 @@ export interface ChatbotQueryLog {
   query: string;
   response: string;
   intent: string;
+  resolved?: boolean;
+  metadata?: string;
   timestamp: string;
 }
 

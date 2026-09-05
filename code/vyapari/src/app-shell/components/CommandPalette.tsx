@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { store } from '../../services/store';
-import { Search, Package, Users, FileText, Briefcase, ShoppingCart } from 'lucide-react';
+import { Search, Package, Users, FileText, Briefcase, ShoppingCart, Bot } from 'lucide-react';
 
 export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [query, setQuery] = useState('');
@@ -51,6 +51,13 @@ export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean, onClose: 
 
     const eMatches = state.employees.filter(e => e.name.toLowerCase().includes(q)).slice(0, 3);
     if (eMatches.length) results.push({ group: 'Employees', items: eMatches.map(e => ({ icon: Briefcase, label: e.name, sub: 'Employee', path: '/employees' }))});
+
+    if ('ai assistant bot ask query help chat'.includes(q) || q.includes('ai') || q.includes('assistant')) {
+      results.push({
+        group: 'Intelligence',
+        items: [{ icon: Bot, label: 'AI Business Assistant', sub: 'Ask questions & analytics', path: '/ai-assistant' }]
+      });
+    }
   }
 
   const flatResults = results.flatMap(g => g.items);
