@@ -1,1 +1,2 @@
-// public exports for analytics
+export { AnalyticsPage } from './AnalyticsPage';
+export * from './types';
