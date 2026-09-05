@@ -50,16 +50,16 @@ export const ActionCenter = () => {
     });
   }
 
-  // Pending Payroll
-  const pendingPayroll = store.payrollRuns?.filter(p => p.status === 'draft').length || 0;
+  // Pending Payroll (Draft & Calculated runs needing review/approval)
+  const pendingPayroll = store.payrollRuns?.filter(p => p.status === 'draft' || p.status === 'calculated').length || 0;
   if (pendingPayroll > 0) {
     actions.push({
       id: 'pending-payroll',
       icon: AlertCircle,
       color: 'var(--color-warning)',
-      message: `${pendingPayroll} payroll runs are pending approval.`,
+      message: `${pendingPayroll} payroll ${pendingPayroll === 1 ? 'run is' : 'runs are'} pending calculation or approval.`,
       cta: 'Review Payroll',
-      route: '/payroll?filter=pending'
+      route: '/payroll'
     });
   }
 

@@ -709,6 +709,120 @@ export function seedDatabase() {
     }
   });
 
-  console.log('Database seeded with bootstrap data, RFM churn history, 25 employees, and 30-day attendance records.');
+  // =========================================================================
+  // SEED 2 MONTHS OF PAYROLL RUNS (Prior Month Paid + Current Month Calculated)
+  // =========================================================================
+  const activeEmps = employeesData.filter(e => e.status === 'active');
+
+  // 1. Prior Month (2026-08 / August 2026) - Fully Paid
+  const augRunId = 'pr-2026-08-seed';
+  const augLineItems: any[] = activeEmps.map(emp => {
+    const totalDaysInMonth = 31;
+    const isProRated = emp.daysJoined < 35; // e.g. recent joiners
+    const daysEmployed = isProRated ? Math.min(totalDaysInMonth, emp.daysJoined) : totalDaysInMonth;
+    const baseSalary = isProRated ? Math.round((daysEmployed / totalDaysInMonth) * emp.salary) : emp.salary;
+    const basicSalary = Math.round(baseSalary * 0.50);
+    const hra = Math.round(baseSalary * 0.30);
+    const specialAllowance = Math.max(0, baseSalary - basicSalary - hra);
+    const grossEarnings = basicSalary + hra + specialAllowance;
+
+    const dailyRate = Math.round((emp.salary / totalDaysInMonth) * 100) / 100;
+    const absentDays = emp.id === 'emp-11' ? 1 : 0;
+    const attendanceDeduction = Math.round(absentDays * dailyRate);
+    const statutoryDeductions = Math.round(basicSalary * 0.12);
+    const totalDeductions = attendanceDeduction + statutoryDeductions;
+    const netPay = Math.max(0, grossEarnings - totalDeductions);
+
+    return {
+      id: `pli-${augRunId}-${emp.id}`,
+      payrollRunId: augRunId,
+      employeeId: emp.id,
+      baseSalary,
+      hra,
+      specialAllowance,
+      grossEarnings,
+      workingDays: totalDaysInMonth,
+      presentDays: totalDaysInMonth - absentDays - (emp.id === 'emp-3' ? 2 : 0),
+      lateDays: 2,
+      leaveDays: emp.id === 'emp-3' ? 2 : 0,
+      absentDays,
+      hoursWorked: (totalDaysInMonth - absentDays) * 8.5,
+      dailyRate,
+      attendanceDeduction,
+      statutoryDeductions,
+      totalDeductions,
+      netPay,
+      isProRated,
+      isAttendanceIncomplete: false,
+      paymentStatus: 'paid' as const
+    };
+  });
+
+  augLineItems.forEach(item => store.insert('payrollLineItems', item));
+
+  const augTotalGross = augLineItems.reduce((sum, i) => sum + i.grossEarnings, 0);
+  const augTotalDeductions = augLineItems.reduce((sum, i) => sum + i.totalDeductions, 0);
+  const augTotalAmount = augLineItems.reduce((sum, i) => sum + i.netPay, 0);
+  const augPaidDate = dateDaysAgo(5);
+
+  store.insert('payrollRuns', {
+    id: augRunId,
+    businessId: 'b-1',
+    month: '2026-08',
+    totalEmployees: activeEmps.length,
+    totalGross: augTotalGross,
+    totalDeductions: augTotalDeductions,
+    totalAmount: augTotalAmount,
+    status: 'paid',
+    calculatedAt: dateDaysAgo(7),
+    approvedAt: dateDaysAgo(6),
+    approvedBy: 'u-1',
+    paidAt: augPaidDate,
+    paidBy: 'u-5',
+    ledgerEntryId: `le-pr-${augRunId}`,
+    createdAt: dateDaysAgo(8)
+  });
+
+  // Finance debit ledger entry for August payroll
+  store.insert('ledgerEntries', {
+    id: `le-pr-${augRunId}`,
+    businessId: 'b-1',
+    outletId: 'o-1',
+    amount: augTotalAmount,
+    type: 'debit',
+    sourceType: 'payroll',
+    referenceId: augRunId,
+    description: `Monthly Payroll Disbursement - 2026-08 (${activeEmps.length} Employees)`,
+    category: 'Salaries',
+    createdAt: augPaidDate
+  });
+
+  // 2. Current Month (2026-09 / September 2026) - Calculated / Ready for Review
+  const sepRunId = 'pr-2026-09-seed';
+  const sepLineItems: any[] = activeEmps.map(emp => {
+    return mockApi.computeEmployeePayroll(emp.id, '2026-09', sepRunId);
+  });
+
+  sepLineItems.forEach(item => store.insert('payrollLineItems', item));
+
+  const sepTotalGross = sepLineItems.reduce((sum, i) => sum + i.grossEarnings, 0);
+  const sepTotalDeductions = sepLineItems.reduce((sum, i) => sum + i.totalDeductions, 0);
+  const sepTotalAmount = sepLineItems.reduce((sum, i) => sum + i.netPay, 0);
+
+  store.insert('payrollRuns', {
+    id: sepRunId,
+    businessId: 'b-1',
+    month: '2026-09',
+    totalEmployees: activeEmps.length,
+    totalGross: sepTotalGross,
+    totalDeductions: sepTotalDeductions,
+    totalAmount: sepTotalAmount,
+    status: 'calculated',
+    calculatedAt: now,
+    createdAt: now
+  });
+
+  console.log('Database seeded with bootstrap data, RFM churn history, 25 employees, 30-day attendance, and 2 months payroll history.');
 }
+
 
