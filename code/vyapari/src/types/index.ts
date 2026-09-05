@@ -30,9 +30,33 @@ export interface Employee {
   id: string;
   userId?: string;
   businessId: string;
+  outletId?: string;
   name: string;
-  hourlyRate: number;
+  avatar?: string;
+  role: string;
+  department?: string;
+  phone: string;
+  email?: string;
+  joiningDate: string;
+  salary: number; // Monthly base salary in INR
+  hourlyRate?: number;
   status: 'active' | 'inactive';
+  leaveBalance?: {
+    paid: number;
+    casual: number;
+    sick: number;
+  };
+  bankDetails?: {
+    accountNo: string;
+    ifsc: string;
+    bankName: string;
+  };
+  panNumber?: string;
+  emergencyContact?: {
+    name: string;
+    relation: string;
+    phone: string;
+  };
 }
 
 export interface Product {
@@ -201,9 +225,27 @@ export interface LedgerEntry {
 export interface AttendanceRecord {
   id: string;
   employeeId: string;
-  date: string;
+  date: string; // YYYY-MM-DD
+  status: 'present' | 'absent' | 'late' | 'leave';
+  checkIn?: string; // e.g. "09:00" or "09:15 AM"
+  checkOut?: string; // e.g. "18:00" or "06:00 PM"
   hoursWorked: number;
-  status: 'present' | 'absent' | 'leave';
+  isIncomplete?: boolean; // Missing check-out flag
+  isEdited?: boolean; // Edited past record indicator
+  notes?: string;
+}
+
+export interface LeaveRecord {
+  id: string;
+  employeeId: string;
+  type: 'paid' | 'casual' | 'sick' | 'unpaid';
+  startDate: string;
+  endDate: string;
+  days: number;
+  reason: string;
+  status: 'approved' | 'pending' | 'rejected';
+  appliedOn: string;
+  approvedBy?: string;
 }
 
 export interface PayrollRun {

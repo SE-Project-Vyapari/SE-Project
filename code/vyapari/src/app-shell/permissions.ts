@@ -77,10 +77,18 @@ export const PERMISSIONS: Record<Role, string[]> = {
     '/', '/pos', '/orders', '/inventory', '/invoices', '/customers'
   ],
   accountant: [
-    '/', '/invoices', '/finance', '/payroll', '/reports'
+    '/', '/invoices', '/finance', '/payroll', '/employees', '/reports'
   ]
 };
 
 export const hasPermission = (role: Role, path: string): boolean => {
-  return PERMISSIONS[role]?.includes(path) || false;
+  const rolePerms = PERMISSIONS[role] || [];
+  if (rolePerms.includes(path)) return true;
+  // Subroute check (e.g., /employees/attendance, /employees/emp-1, /inventory/transfers)
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length > 0) {
+    const rootPath = `/${segments[0]}`;
+    if (rolePerms.includes(rootPath)) return true;
+  }
+  return false;
 };

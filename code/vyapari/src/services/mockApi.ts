@@ -403,7 +403,8 @@ export const mockApi = {
       // Mock computation based on Attendance
       const attendance = state.attendanceRecords.filter(a => a.employeeId === emp.id && a.date.startsWith(month));
       const hours = attendance.reduce((sum, record) => sum + record.hoursWorked, 0);
-      const gross = hours * emp.hourlyRate;
+      const rate = emp.hourlyRate || (emp.salary ? Math.round(emp.salary / (30 * 8)) : 100);
+      const gross = hours * rate;
       const deductions = gross * 0.1; // 10% flat tax mock
       const net = gross - deductions;
 
@@ -1046,5 +1047,265 @@ export const mockApi = {
     };
     store.insert('ledgerEntries', ledgerEntry);
     return ledgerEntry;
+  },
+
+  /**
+   * createEmployee
+   */
+  async createEmployee(payload: {
+    businessId: string;
+    outletId?: string;
+    name: string;
+    role: string;
+    department?: string;
+    phone: string;
+    email?: string;
+    joiningDate: string;
+    salary: number;
+    status?: 'active' | 'inactive';
+    panNumber?: string;
+    bankDetails?: { accountNo: string; ifsc: string; bankName: string };
+    emergencyContact?: { name: string; relation: string; phone: string };
+  }): Promise<Types.Employee> {
+    await delay(200);
+    const employee: Types.Employee = {
+      id: `e-${generateId()}`,
+      businessId: payload.businessId || 'b-1',
+      outletId: payload.outletId || 'o-1',
+      name: payload.name,
+      role: payload.role,
+      department: payload.department || 'Operations',
+      phone: payload.phone,
+      email: payload.email,
+      joiningDate: payload.joiningDate,
+      salary: payload.salary,
+      hourlyRate: Math.round(payload.salary / (30 * 8)),
+      status: payload.status || 'active',
+      leaveBalance: {
+        paid: 12,
+        casual: 8,
+        sick: 6
+      },
+      panNumber: payload.panNumber,
+      bankDetails: payload.bankDetails,
+      emergencyContact: payload.emergencyContact
+    };
+    store.insert('employees', employee);
+    return employee;
+  },
+
+  /**
+   * updateEmployee
+   */
+  async updateEmployee(id: string, updates: Partial<Types.Employee>): Promise<Types.Employee> {
+    await delay(150);
+    const state = store.getState();
+    const emp = state.employees.find(e => e.id === id);
+    if (!emp) throw new Error('Employee not found');
+
+    const updated = { ...emp, ...updates };
+    store.update('employees', id, updates);
+    return updated;
+  },
+
+  /**
+   * recordAttendance
+   * Records or updates check-in/out and status for an employee on a given date.
+   * Enforces single status per day and flags incomplete check-outs & past edits.
+   */
+  async recordAttendance(payload: {
+    employeeId: string;
+    date: string; // YYYY-MM-DD
+    status: 'present' | 'absent' | 'late' | 'leave';
+    checkIn?: string;
+    checkOut?: string;
+    notes?: string;
+  }): Promise<Types.AttendanceRecord> {
+    await delay(150);
+    const state = store.getState();
+    const existing = state.attendanceRecords.find(
+      r => r.employeeId === payload.employeeId && r.date === payload.date
+    );
+
+    // Compute working hours
+    let hoursWorked = 0;
+    let isIncomplete = false;
+
+    if (payload.status === 'present' || payload.status === 'late') {
+      if (payload.checkIn && payload.checkOut) {
+        const res = computeWorkingHours(payload.checkIn, payload.checkOut);
+        hoursWorked = res.hours;
+        isIncomplete = res.isIncomplete;
+      } else if (payload.checkIn && !payload.checkOut) {
+        hoursWorked = 0;
+        isIncomplete = true; // Incomplete checkout flag
+      } else {
+        hoursWorked = payload.status === 'late' ? 7.5 : 8.0;
+        isIncomplete = false;
+      }
+    } else {
+      hoursWorked = 0;
+      isIncomplete = false;
+    }
+
+    // Determine if this is an edit to a past date
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isPastDate = payload.date < todayStr;
+    const isEdited = existing ? true : isPastDate;
+
+    const record: Types.AttendanceRecord = {
+      id: existing?.id || `att-${generateId()}`,
+      employeeId: payload.employeeId,
+      date: payload.date,
+      status: payload.status,
+      checkIn: payload.checkIn,
+      checkOut: payload.checkOut,
+      hoursWorked,
+      isIncomplete,
+      isEdited: existing ? true : (isEdited || false),
+      notes: payload.notes
+    };
+
+    if (existing) {
+      store.update('attendanceRecords', existing.id, record);
+    } else {
+      store.insert('attendanceRecords', record);
+    }
+
+    return record;
+  },
+
+  /**
+   * bulkMarkAttendance
+   * Quick-marks all specified employees for a given day with optional exception adjustments.
+   */
+  async bulkMarkAttendance(payload: {
+    date: string; // YYYY-MM-DD
+    records: {
+      employeeId: string;
+      status: 'present' | 'absent' | 'late' | 'leave';
+      checkIn?: string;
+      checkOut?: string;
+      notes?: string;
+    }[];
+  }): Promise<Types.AttendanceRecord[]> {
+    await delay(300);
+    const results: Types.AttendanceRecord[] = [];
+    for (const item of payload.records) {
+      const record = await this.recordAttendance({
+        employeeId: item.employeeId,
+        date: payload.date,
+        status: item.status,
+        checkIn: item.checkIn || (item.status === 'present' ? '09:00' : item.status === 'late' ? '10:00' : undefined),
+        checkOut: item.checkOut || (['present', 'late'].includes(item.status) ? '18:00' : undefined),
+        notes: item.notes
+      });
+      results.push(record);
+    }
+    return results;
+  },
+
+  /**
+   * applyLeave
+   */
+  async applyLeave(payload: {
+    employeeId: string;
+    type: 'paid' | 'casual' | 'sick' | 'unpaid';
+    startDate: string;
+    endDate: string;
+    reason: string;
+    approvedBy?: string;
+  }): Promise<Types.LeaveRecord> {
+    await delay(200);
+    const start = new Date(payload.startDate);
+    const end = new Date(payload.endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    const leave: Types.LeaveRecord = {
+      id: `lv-${generateId()}`,
+      employeeId: payload.employeeId,
+      type: payload.type,
+      startDate: payload.startDate,
+      endDate: payload.endDate,
+      days,
+      reason: payload.reason,
+      status: 'approved',
+      appliedOn: new Date().toISOString(),
+      approvedBy: payload.approvedBy || 'u-1'
+    };
+    store.insert('leaveRecords', leave);
+
+    // Automatically mark attendance as leave for each day in range
+    const curr = new Date(start);
+    while (curr <= end) {
+      const dateStr = curr.toISOString().split('T')[0];
+      await this.recordAttendance({
+        employeeId: payload.employeeId,
+        date: dateStr,
+        status: 'leave',
+        notes: `Approved ${payload.type} leave: ${payload.reason}`
+      });
+      curr.setDate(curr.getDate() + 1);
+    }
+
+    return leave;
   }
 };
+
+/**
+ * Parses time strings like "09:30", "09:30 AM", "18:00" and calculates hours worked.
+ */
+export function computeWorkingHours(checkIn?: string, checkOut?: string): { hours: number; isIncomplete: boolean } {
+  if (!checkIn) return { hours: 0, isIncomplete: false };
+  if (!checkOut) return { hours: 0, isIncomplete: true };
+
+  const parseTime = (t: string): number | null => {
+    const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+    if (!match) return null;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const meridiem = match[3]?.toUpperCase();
+
+    if (meridiem === 'PM' && hours < 12) hours += 12;
+    if (meridiem === 'AM' && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+  };
+
+  const inMins = parseTime(checkIn);
+  const outMins = parseTime(checkOut);
+
+  if (inMins === null || outMins === null) {
+    return { hours: 0, isIncomplete: true };
+  }
+
+  let diff = outMins - inMins;
+  if (diff < 0) diff += 24 * 60; // Overnight shift
+
+  const hours = Math.round((diff / 60) * 10) / 10;
+  return { hours, isIncomplete: false };
+}
+
+/**
+ * ATTENDANCE TO PAYROLL INTEGRATION FORMULA (Prompt 13 & 14):
+ * 
+ * 1. Daily Rate = Base Salary / 30
+ * 2. Unpaid Days = (Unpaid Leave Days) + (Absent Days) + (Incomplete / Unexcused Days)
+ * 3. Attendance Deduction = Unpaid Days * Daily Rate
+ * 4. Gross Earnings = Base Salary - Attendance Deduction
+ * 5. Net Pay = Gross Earnings - Statutory Deductions (e.g., PF/TDS)
+ */
+export function computeAttendancePayrollDeduction(baseSalary: number, absentDays: number, unpaidLeaveDays: number): {
+  dailyRate: number;
+  totalUnpaidDays: number;
+  deductionAmount: number;
+  grossPayable: number;
+} {
+  const dailyRate = Math.round((baseSalary / 30) * 100) / 100;
+  const totalUnpaidDays = absentDays + unpaidLeaveDays;
+  const deductionAmount = Math.round(totalUnpaidDays * dailyRate);
+  const grossPayable = Math.max(0, baseSalary - deductionAmount);
+  return { dailyRate, totalUnpaidDays, deductionAmount, grossPayable };
+}
+

@@ -494,5 +494,221 @@ export function seedDatabase() {
     console.error('Failed to compute initial churn scores:', err);
   });
 
-  console.log('Database seeded with bootstrap data and RFM churn history.');
+  // =========================================================================
+  // SEED EMPLOYEES (24 Employees across 3 Outlets + Central Office)
+  // =========================================================================
+  const employeesData = [
+    { id: 'emp-1', userId: 'u-1', name: 'Aarav Sharma', role: 'Owner & Managing Director', department: 'Executive', outletId: 'o-1', phone: '+91 98111 22334', email: 'aarav@aaravstores.in', salary: 75000, daysJoined: 365, status: 'active' as const },
+    { id: 'emp-2', userId: 'u-2', name: 'Bob Verma', role: 'Store Manager', department: 'Operations', outletId: 'o-1', phone: '+91 98222 33445', email: 'bob.v@aaravstores.in', salary: 55000, daysJoined: 240, status: 'active' as const },
+    { id: 'emp-3', userId: 'u-3', name: 'Charlie Nair', role: 'Senior Cashier', department: 'Front Desk', outletId: 'o-1', phone: '+91 98333 44556', email: 'charlie.n@aaravstores.in', salary: 28000, daysJoined: 180, status: 'active' as const },
+    { id: 'emp-4', userId: 'u-4', name: 'Dave Gupta', role: 'Cashier', department: 'Front Desk', outletId: 'o-2', phone: '+91 98444 55667', email: 'dave.g@aaravstores.in', salary: 24000, daysJoined: 150, status: 'active' as const },
+    { id: 'emp-5', userId: 'u-5', name: 'Eve Sundaram', role: 'Head Accountant', department: 'Finance & Accounts', outletId: 'o-1', phone: '+91 98555 66778', email: 'eve.s@aaravstores.in', salary: 60000, daysJoined: 300, status: 'active' as const },
+    { id: 'emp-6', name: 'Rajesh Kulkarni', role: 'Store Manager', department: 'Operations', outletId: 'o-2', phone: '+91 98666 77889', email: 'rajesh.k@aaravstores.in', salary: 52000, daysJoined: 210, status: 'active' as const },
+    { id: 'emp-7', name: 'Ananya Iyer', role: 'Store Manager', department: 'Operations', outletId: 'o-3', phone: '+91 98777 88990', email: 'ananya.i@aaravstores.in', salary: 54000, daysJoined: 190, status: 'active' as const },
+    { id: 'emp-8', name: 'Vikram Malhotra', role: 'Inventory Supervisor', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 98888 99001', email: 'vikram.m@aaravstores.in', salary: 38000, daysJoined: 140, status: 'active' as const },
+    { id: 'emp-9', name: 'Pooja Deshmukh', role: 'Senior Cashier', department: 'Front Desk', outletId: 'o-3', phone: '+91 98999 00112', email: 'pooja.d@aaravstores.in', salary: 27000, daysJoined: 120, status: 'active' as const },
+    { id: 'emp-10', name: 'Suresh Reddy', role: 'Stock & Logistics Clerk', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 97111 11223', email: 'suresh.r@aaravstores.in', salary: 22000, daysJoined: 90, status: 'active' as const },
+    { id: 'emp-11', name: 'Sneha Patel', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-2', phone: '+91 97222 22334', email: 'sneha.p@aaravstores.in', salary: 23000, daysJoined: 80, status: 'active' as const },
+    { id: 'emp-12', name: 'Amit Joshi', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-3', phone: '+91 97333 33445', email: 'amit.j@aaravstores.in', salary: 23000, daysJoined: 75, status: 'active' as const },
+    { id: 'emp-13', name: 'Neha Choudhary', role: 'Junior Accountant', department: 'Finance & Accounts', outletId: 'o-1', phone: '+91 97444 44556', email: 'neha.c@aaravstores.in', salary: 32000, daysJoined: 60, status: 'active' as const },
+    { id: 'emp-14', name: 'Manoj Tiwari', role: 'Delivery & Dispatch Lead', department: 'Delivery & Dispatch', outletId: 'o-1', phone: '+91 97555 55667', email: 'manoj.t@aaravstores.in', salary: 25000, daysJoined: 55, status: 'active' as const },
+    { id: 'emp-15', name: 'Kavita Menon', role: 'Customer Relations Executive', department: 'Customer Service', outletId: 'o-3', phone: '+91 97666 66778', email: 'kavita.m@aaravstores.in', salary: 26000, daysJoined: 50, status: 'active' as const },
+    { id: 'emp-16', name: 'Deepak Chauhan', role: 'Cashier', department: 'Front Desk', outletId: 'o-2', phone: '+91 97777 77889', email: 'deepak.c@aaravstores.in', salary: 22000, daysJoined: 45, status: 'active' as const },
+    { id: 'emp-17', name: 'Sunita Rathi', role: 'Inventory Clerk', department: 'Logistics & Warehouse', outletId: 'o-2', phone: '+91 97888 88990', email: 'sunita.r@aaravstores.in', salary: 21000, daysJoined: 40, status: 'active' as const },
+    { id: 'emp-18', name: 'Harish Bhat', role: 'Security & Facilities Lead', department: 'Security & Facilities', outletId: 'o-1', phone: '+91 97999 99001', email: 'harish.b@aaravstores.in', salary: 24000, daysJoined: 35, status: 'active' as const },
+    { id: 'emp-19', name: 'Ritu Agarwal', role: 'Cashier', department: 'Front Desk', outletId: 'o-3', phone: '+91 96111 00112', email: 'ritu.a@aaravstores.in', salary: 22000, daysJoined: 32, status: 'active' as const },
+    { id: 'emp-20', name: 'Alok Pandey', role: 'Warehouse Assistant', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 96222 11223', email: 'alok.p@aaravstores.in', salary: 20000, daysJoined: 30, status: 'active' as const },
+    { id: 'emp-21', name: 'Meenakshi Pillai', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-1', phone: '+91 96333 22334', email: 'meenakshi.p@aaravstores.in', salary: 22000, daysJoined: 28, status: 'active' as const },
+    { id: 'emp-22', name: 'Tarun Rawat', role: 'Delivery Executive', department: 'Delivery & Dispatch', outletId: 'o-2', phone: '+91 96444 33445', email: 'tarun.r@aaravstores.in', salary: 19000, daysJoined: 20, status: 'active' as const },
+    // Mid-month joiners to test pre-employment greyed-out edge case:
+    { id: 'emp-23', name: 'Divya Saxena', role: 'Junior Cashier (Mid-Month Joiner)', department: 'Front Desk', outletId: 'o-1', phone: '+91 96555 44556', email: 'divya.s@aaravstores.in', salary: 20000, daysJoined: 12, status: 'active' as const },
+    { id: 'emp-24', name: 'Sandeep Yadav', role: 'Trainee Associate (Recent Joiner)', department: 'Sales & Floor', outletId: 'o-3', phone: '+91 96666 55667', email: 'sandeep.y@aaravstores.in', salary: 18000, daysJoined: 6, status: 'active' as const },
+    { id: 'emp-25', name: 'Kiran Gokhale', role: 'Former Cashier', department: 'Front Desk', outletId: 'o-1', phone: '+91 96777 66778', email: 'kiran.g@aaravstores.in', salary: 20000, daysJoined: 180, status: 'inactive' as const }
+  ];
+
+  employeesData.forEach(e => {
+    store.insert('employees', {
+      id: e.id,
+      userId: e.userId,
+      businessId: 'b-1',
+      outletId: e.outletId,
+      name: e.name,
+      role: e.role,
+      department: e.department,
+      phone: e.phone,
+      email: e.email,
+      joiningDate: dateDaysAgo(e.daysJoined).split('T')[0],
+      salary: e.salary,
+      hourlyRate: Math.round(e.salary / (30 * 8)),
+      status: e.status,
+      leaveBalance: {
+        paid: 12,
+        casual: 8,
+        sick: 6
+      },
+      panNumber: `ABCDE${1000 + parseInt(e.id.split('-')[1])}F`,
+      bankDetails: {
+        accountNo: `91827364${100 + parseInt(e.id.split('-')[1])}`,
+        ifsc: 'HDFC0001234',
+        bankName: 'HDFC Bank, Connaught Place'
+      },
+      emergencyContact: {
+        name: 'Family Contact',
+        relation: 'Spouse / Parent',
+        phone: '+91 99000 11222'
+      }
+    });
+  });
+
+  // Seed sample Leave Records
+  store.insert('leaveRecords', {
+    id: 'lv-1',
+    employeeId: 'emp-3',
+    type: 'casual',
+    startDate: dateDaysAgo(15).split('T')[0],
+    endDate: dateDaysAgo(14).split('T')[0],
+    days: 2,
+    reason: 'Family wedding function in hometown',
+    status: 'approved',
+    appliedOn: dateDaysAgo(20),
+    approvedBy: 'u-1'
+  });
+
+  store.insert('leaveRecords', {
+    id: 'lv-2',
+    employeeId: 'emp-8',
+    type: 'sick',
+    startDate: dateDaysAgo(8).split('T')[0],
+    endDate: dateDaysAgo(8).split('T')[0],
+    days: 1,
+    reason: 'Viral fever & medical checkup',
+    status: 'approved',
+    appliedOn: dateDaysAgo(9),
+    approvedBy: 'u-2'
+  });
+
+  store.insert('leaveRecords', {
+    id: 'lv-3',
+    employeeId: 'emp-13',
+    type: 'paid',
+    startDate: dateDaysAgo(4).split('T')[0],
+    endDate: dateDaysAgo(3).split('T')[0],
+    days: 2,
+    reason: 'Personal vacation',
+    status: 'approved',
+    appliedOn: dateDaysAgo(10),
+    approvedBy: 'u-1'
+  });
+
+  // =========================================================================
+  // SEED 30 DAYS OF ATTENDANCE HISTORY FOR ALL EMPLOYEES
+  // =========================================================================
+  employeesData.forEach(emp => {
+    const joiningDateStr = dateDaysAgo(emp.daysJoined).split('T')[0];
+
+    for (let dayAgo = 29; dayAgo >= 0; dayAgo--) {
+      const recordDate = new Date();
+      recordDate.setDate(recordDate.getDate() - dayAgo);
+      const dateStr = recordDate.toISOString().split('T')[0];
+
+      // If date is before joining date, do not seed attendance (pre-employment)
+      if (dateStr < joiningDateStr) {
+        continue;
+      }
+
+      // If inactive employee and date is recent, skip
+      if (emp.status === 'inactive' && dayAgo < 15) {
+        continue;
+      }
+
+      const dayOfWeek = recordDate.getDay(); // 0 = Sunday
+      const empNum = parseInt(emp.id.split('-')[1]);
+
+      let status: 'present' | 'absent' | 'late' | 'leave' = 'present';
+      let checkIn: string | undefined = '09:00';
+      let checkOut: string | undefined = '18:00';
+      let hoursWorked = 9.0;
+      let isIncomplete = false;
+      let notes: string | undefined = undefined;
+
+      // Handle specific leaves
+      if (emp.id === 'emp-3' && (dayAgo === 15 || dayAgo === 14)) {
+        status = 'leave';
+        checkIn = undefined;
+        checkOut = undefined;
+        hoursWorked = 0;
+        notes = 'Approved Casual Leave';
+      } else if (emp.id === 'emp-8' && dayAgo === 8) {
+        status = 'leave';
+        checkIn = undefined;
+        checkOut = undefined;
+        hoursWorked = 0;
+        notes = 'Approved Sick Leave';
+      } else if (emp.id === 'emp-13' && (dayAgo === 4 || dayAgo === 3)) {
+        status = 'leave';
+        checkIn = undefined;
+        checkOut = undefined;
+        hoursWorked = 0;
+        notes = 'Approved Paid Leave';
+      } else if (emp.id === 'emp-16' && dayAgo === 2) {
+        // Edge case: Incomplete checkout (punched in at 09:15, forgot punch out)
+        status = 'present';
+        checkIn = '09:15';
+        checkOut = undefined;
+        hoursWorked = 0;
+        isIncomplete = true;
+        notes = 'Missing punch-out recorded by terminal';
+      } else if (emp.id === 'emp-11' && dayAgo === 18) {
+        // Edge case: Unexcused Absent
+        status = 'absent';
+        checkIn = undefined;
+        checkOut = undefined;
+        hoursWorked = 0;
+        notes = 'Unexcused absence without prior notice';
+      } else if (emp.id === 'emp-22' && dayAgo === 7) {
+        // Edge case: Absent
+        status = 'absent';
+        checkIn = undefined;
+        checkOut = undefined;
+        hoursWorked = 0;
+        notes = 'Absent - Sick';
+      } else if ((dayAgo + empNum) % 11 === 0) {
+        // Occasional Late arrival pattern
+        status = 'late';
+        checkIn = '09:45';
+        checkOut = '18:15';
+        hoursWorked = 8.5;
+        notes = 'Traffic delay - 45 min late';
+      } else if ((dayAgo + empNum) % 19 === 0 && empNum > 10) {
+        // Occasional Planned Casual Leave
+        status = 'leave';
+        checkIn = undefined;
+        checkOut = undefined;
+        hoursWorked = 0;
+        notes = 'Single-day leave';
+      } else {
+        // Regular Present Day
+        status = 'present';
+        checkIn = dayOfWeek === 6 ? '09:30' : '09:00';
+        checkOut = dayOfWeek === 6 ? '17:30' : '18:00';
+        hoursWorked = dayOfWeek === 6 ? 8.0 : 9.0;
+      }
+
+      store.insert('attendanceRecords', {
+        id: `att-${emp.id}-${dateStr}`,
+        employeeId: emp.id,
+        date: dateStr,
+        status,
+        checkIn,
+        checkOut,
+        hoursWorked,
+        isIncomplete,
+        isEdited: false,
+        notes
+      });
+    }
+  });
+
+  console.log('Database seeded with bootstrap data, RFM churn history, 25 employees, and 30-day attendance records.');
 }
+
