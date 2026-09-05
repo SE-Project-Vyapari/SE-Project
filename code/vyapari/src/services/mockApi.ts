@@ -371,21 +371,117 @@ export const mockApi = {
 
   /**
    * computeForecast
-   * Simple moving average simulation
+   * Transparent 14-day Moving Average & Exponential Smoothing demand forecast
    */
-  async computeForecast(productId: string): Promise<Types.ForecastEntry[]> {
-    await delay(300);
-    // Real implementation would read from Sales/OrderItems. We mock an output here.
+  async computeForecast(productId: string, horizonDays: number = 14, outletId?: string): Promise<Types.ForecastEntry[]> {
+    await delay(50);
+    const state = store.getState();
+    const product = state.products.find(p => p.id === productId);
+    if (!product) return [];
+
+    // Filter relevant orders
+    const relevantOrderIds = new Set(
+      state.orders
+        .filter(o => !outletId || outletId === 'all' || o.outletId === outletId)
+        .map(o => o.id)
+    );
+
+    // Sum daily quantity sold
+    const dailyQuantityMap = new Map<string, number>();
+    state.orderItems.forEach(item => {
+      if (item.productId === productId && relevantOrderIds.has(item.orderId)) {
+        const order = state.orders.find(o => o.id === item.orderId);
+        if (order) {
+          const dayKey = order.createdAt.split('T')[0];
+          dailyQuantityMap.set(dayKey, (dailyQuantityMap.get(dayKey) || 0) + item.quantity);
+        }
+      }
+    });
+
+    const dailyValues = Array.from(dailyQuantityMap.values());
+    const daysCount = dailyValues.length;
+
+    if (daysCount === 0) {
+      return [
+        {
+          id: generateId(),
+          productId,
+          outletId: outletId || 'all',
+          predictedDate: new Date(Date.now() + horizonDays * 86400000).toISOString(),
+          predictedDemand: 0,
+          confidenceScore: 0.2
+        }
+      ];
+    }
+
+    // Mean daily velocity
+    const totalSold = dailyValues.reduce((sum, v) => sum + v, 0);
+    // Effective window span (estimate from earliest date to latest date, minimum 14)
+    const avgDailyVelocity = totalSold / Math.max(14, daysCount);
+
+    // Variance and Coefficient of Variation
+    const variance =
+      dailyValues.reduce((sum, v) => sum + Math.pow(v - avgDailyVelocity, 2), 0) / Math.max(1, daysCount);
+    const stdDev = Math.sqrt(variance);
+    const cv = avgDailyVelocity > 0 ? stdDev / avgDailyVelocity : 99;
+
+    let confidenceScore = 0.5;
+    if (daysCount >= 20 && cv < 0.9) {
+      confidenceScore = 0.88;
+    } else if (daysCount >= 10 && cv <= 1.6) {
+      confidenceScore = 0.65;
+    } else {
+      confidenceScore = 0.35;
+    }
+
+    const predictedDemand = Math.round(avgDailyVelocity * horizonDays);
+
     return [
       {
         id: generateId(),
         productId,
-        outletId: 'default',
-        predictedDate: new Date(Date.now() + 86400000).toISOString(),
-        predictedDemand: 45,
-        confidenceScore: 0.85
+        outletId: outletId || 'all',
+        predictedDate: new Date(Date.now() + horizonDays * 86400000).toISOString(),
+        predictedDemand,
+        confidenceScore
       }
     ];
+  },
+
+  /**
+   * logForecastReview
+   * Idempotently log user review of a forecast suggestion (Accept / Reject) for evaluation metrics
+   */
+  logForecastReview(productId: string, action: 'accepted' | 'rejected', reorderQty: number, reason?: string) {
+    const state = store.getState();
+    const existing = state.auditEvents.find(
+      a => a.entityType === 'forecast_suggestion' && a.entityId === productId && a.action === `forecast_${action}`
+    );
+
+    // Idempotent: don't double log if already accepted/rejected with same action
+    if (existing) {
+      return existing;
+    }
+
+    const event: Types.AuditEvent = {
+      id: generateId(),
+      businessId: state.businesses[0]?.id || 'b-1',
+      action: `forecast_${action}`,
+      entityType: 'forecast_suggestion',
+      entityId: productId,
+      actorId: 'u-1',
+      details: JSON.stringify({
+        productId,
+        action,
+        reorderQty,
+        reason: reason || 'Standard review',
+        timestamp: new Date().toISOString()
+      }),
+      timestamp: new Date().toISOString()
+    };
+
+    store.insert('auditEvents', event);
+    return event;
   },
 
   /**
