@@ -389,49 +389,274 @@ export const mockApi = {
   },
 
   /**
-   * runPayroll
+   * computeEmployeePayroll
+   * Comprehensive per-employee salary computation based on Attendance records and Indian payroll standard:
+   * - Daily Rate = Base Salary / Total Days in Month
+   * - Mid-Month Joiner Pro-rating = (Employed Days in Month / Total Days) * Base Salary
+   * - Gross Earnings = Basic (50%) + HRA (30%) + Special Allowance (20%)
+   * - Attendance Deduction = (Absent Days + Unpaid Leave Days) * Daily Rate
+   * - Statutory Deductions = 12% of Basic (EPF)
+   * - Net Pay = Gross Earnings - Total Deductions
    */
-  async runPayroll(businessId: string, month: string) {
-    await delay(400);
+  computeEmployeePayroll(employeeId: string, month: string, payrollRunId: string): Types.PayrollLineItem {
     const state = store.getState();
-    const employees = state.employees.filter(e => e.businessId === businessId && e.status === 'active');
-    
-    let totalPayroll = 0;
-    const runId = generateId();
-    
-    employees.forEach(emp => {
-      // Mock computation based on Attendance
-      const attendance = state.attendanceRecords.filter(a => a.employeeId === emp.id && a.date.startsWith(month));
-      const hours = attendance.reduce((sum, record) => sum + record.hoursWorked, 0);
-      const rate = emp.hourlyRate || (emp.salary ? Math.round(emp.salary / (30 * 8)) : 100);
-      const gross = hours * rate;
-      const deductions = gross * 0.1; // 10% flat tax mock
-      const net = gross - deductions;
+    const emp = state.employees.find(e => e.id === employeeId);
+    if (!emp) throw new Error(`Employee ${employeeId} not found`);
 
-      store.insert('payrollLineItems', {
-        id: generateId(),
-        payrollRunId: runId,
-        employeeId: emp.id,
-        hoursWorked: hours,
-        amount: gross,
-        deductions,
-        netPay: net
-      });
-      
-      totalPayroll += net;
+    const [yearStr, monthNumStr] = month.split('-');
+    const year = parseInt(yearStr, 10);
+    const monthNum = parseInt(monthNumStr, 10); // 1-12
+    const totalDaysInMonth = new Date(year, monthNum, 0).getDate();
+
+    // Check for mid-month joining pro-rating
+    let isProRated = false;
+    let effectiveBaseSalary = emp.salary;
+    const monthStartStr = `${month}-01`;
+    const monthEndStr = `${month}-${String(totalDaysInMonth).padStart(2, '0')}`;
+
+    if (emp.joiningDate > monthEndStr) {
+      effectiveBaseSalary = 0;
+      isProRated = true;
+    } else if (emp.joiningDate >= monthStartStr && emp.joiningDate <= monthEndStr) {
+      const joinDay = parseInt(emp.joiningDate.split('-')[2], 10);
+      const daysEmployed = totalDaysInMonth - joinDay + 1;
+      effectiveBaseSalary = Math.round((daysEmployed / totalDaysInMonth) * emp.salary);
+      isProRated = true;
+    }
+
+    // Daily wage rate
+    const dailyRate = Math.round((emp.salary / totalDaysInMonth) * 100) / 100;
+
+    // Filter attendance records for this employee in the given month
+    const empAttendance = state.attendanceRecords.filter(
+      r => r.employeeId === employeeId && r.date.startsWith(month)
+    );
+
+    let presentDays = 0;
+    let lateDays = 0;
+    let leaveDays = 0;
+    let absentDays = 0;
+    let hoursWorked = 0;
+    let hasIncompletePunch = false;
+
+    empAttendance.forEach(r => {
+      if (r.status === 'present') presentDays++;
+      else if (r.status === 'late') lateDays++;
+      else if (r.status === 'leave') leaveDays++;
+      else if (r.status === 'absent') absentDays++;
+
+      if (r.isIncomplete) hasIncompletePunch = true;
+      hoursWorked += r.hoursWorked || 0;
     });
+
+    const isAttendanceIncomplete = empAttendance.length === 0 || hasIncompletePunch;
+
+    // Earnings breakdown
+    const basicSalary = Math.round(effectiveBaseSalary * 0.50);
+    const hra = Math.round(effectiveBaseSalary * 0.30);
+    const specialAllowance = Math.max(0, effectiveBaseSalary - basicSalary - hra);
+    const grossEarnings = basicSalary + hra + specialAllowance;
+
+    // Deductions: Attendance deduction (Absent days * dailyRate) + EPF (12% of basic)
+    const unpaidDays = absentDays;
+    const attendanceDeduction = Math.round(unpaidDays * dailyRate);
+    const statutoryDeductions = Math.round(basicSalary * 0.12);
+    const totalDeductions = attendanceDeduction + statutoryDeductions;
+    const netPay = Math.max(0, grossEarnings - totalDeductions);
+
+    return {
+      id: `pli-${payrollRunId}-${emp.id}`,
+      payrollRunId,
+      employeeId,
+      baseSalary: effectiveBaseSalary,
+      hra,
+      specialAllowance,
+      grossEarnings,
+      workingDays: totalDaysInMonth,
+      presentDays,
+      lateDays,
+      leaveDays,
+      absentDays,
+      hoursWorked: Math.round(hoursWorked * 10) / 10,
+      dailyRate,
+      attendanceDeduction,
+      statutoryDeductions,
+      totalDeductions,
+      netPay,
+      isProRated,
+      isAttendanceIncomplete,
+      paymentStatus: 'pending',
+      notes: isProRated
+        ? `Pro-rated base salary (Joined on ${emp.joiningDate})`
+        : isAttendanceIncomplete
+        ? 'Incomplete attendance records for month'
+        : undefined
+    };
+  },
+
+  /**
+   * startPayrollRun
+   * Initiates a new payroll cycle in 'draft' status for the specified month.
+   */
+  async startPayrollRun(businessId: string, month: string): Promise<Types.PayrollRun> {
+    await delay(300);
+    const state = store.getState();
+    const existing = state.payrollRuns.find(r => r.businessId === businessId && r.month === month);
+    if (existing) {
+      return existing;
+    }
+
+    const activeEmployees = state.employees.filter(e => e.status === 'active');
+    const runId = `pr-${month}-${generateId()}`;
+    const now = new Date().toISOString();
+
+    // Create line items for each active employee
+    const lineItems: Types.PayrollLineItem[] = activeEmployees.map(emp =>
+      this.computeEmployeePayroll(emp.id, month, runId)
+    );
+
+    lineItems.forEach(item => store.insert('payrollLineItems', item));
+
+    const totalGross = lineItems.reduce((sum, item) => sum + item.grossEarnings, 0);
+    const totalDeductions = lineItems.reduce((sum, item) => sum + item.totalDeductions, 0);
+    const totalAmount = lineItems.reduce((sum, item) => sum + item.netPay, 0);
 
     const run: Types.PayrollRun = {
       id: runId,
       businessId,
       month,
-      totalAmount: totalPayroll,
-      status: 'processed',
-      createdAt: new Date().toISOString()
+      totalEmployees: activeEmployees.length,
+      totalGross,
+      totalDeductions,
+      totalAmount,
+      status: 'draft',
+      createdAt: now
     };
+
     store.insert('payrollRuns', run);
-    eventBus.publish(Events.PAYROLL_PROCESSED, { payrollRunId: runId });
     return run;
+  },
+
+  /**
+   * calculatePayrollRun
+   * Re-evaluates attendance data and updates calculation numbers for all employees.
+   */
+  async calculatePayrollRun(payrollRunId: string): Promise<Types.PayrollRun> {
+    await delay(400);
+    const state = store.getState();
+    const run = state.payrollRuns.find(r => r.id === payrollRunId);
+    if (!run) throw new Error('Payroll run not found');
+
+    const activeEmployees = state.employees.filter(e => e.status === 'active');
+    const updatedLineItems: Types.PayrollLineItem[] = [];
+
+    // Remove old line items for this run and re-generate clean computed records
+    const remainingLineItems = state.payrollLineItems.filter(p => p.payrollRunId !== payrollRunId);
+
+    activeEmployees.forEach(emp => {
+      const computed = this.computeEmployeePayroll(emp.id, run.month, payrollRunId);
+      updatedLineItems.push(computed);
+    });
+
+    store.setState({
+      payrollLineItems: [...remainingLineItems, ...updatedLineItems]
+    });
+
+    const totalGross = updatedLineItems.reduce((sum, item) => sum + item.grossEarnings, 0);
+    const totalDeductions = updatedLineItems.reduce((sum, item) => sum + item.totalDeductions, 0);
+    const totalAmount = updatedLineItems.reduce((sum, item) => sum + item.netPay, 0);
+    const now = new Date().toISOString();
+
+    const updatedRun: Types.PayrollRun = {
+      ...run,
+      totalEmployees: activeEmployees.length,
+      totalGross,
+      totalDeductions,
+      totalAmount,
+      status: 'calculated',
+      calculatedAt: now
+    };
+
+    store.update('payrollRuns', payrollRunId, updatedRun);
+    return updatedRun;
+  },
+
+  /**
+   * approvePayrollRun
+   * Transitions status to 'approved' (Authorized for Owner/Accountant roles).
+   */
+  async approvePayrollRun(payrollRunId: string, userId: string): Promise<Types.PayrollRun> {
+    await delay(250);
+    const state = store.getState();
+    const run = state.payrollRuns.find(r => r.id === payrollRunId);
+    if (!run) throw new Error('Payroll run not found');
+    if (run.status !== 'calculated' && run.status !== 'draft') {
+      throw new Error(`Cannot approve run with status '${run.status}'`);
+    }
+
+    const now = new Date().toISOString();
+    const updatedRun: Types.PayrollRun = {
+      ...run,
+      status: 'approved',
+      approvedAt: now,
+      approvedBy: userId
+    };
+
+    store.update('payrollRuns', payrollRunId, updatedRun);
+    return updatedRun;
+  },
+
+  /**
+   * markPayrollRunPaid
+   * Transitions status to 'paid' and posts a corresponding debit LedgerEntry to Finance.
+   */
+  async markPayrollRunPaid(payrollRunId: string, userId: string): Promise<Types.PayrollRun> {
+    await delay(400);
+    const state = store.getState();
+    const run = state.payrollRuns.find(r => r.id === payrollRunId);
+    if (!run) throw new Error('Payroll run not found');
+    if (run.status !== 'approved') {
+      throw new Error('Payroll run must be Approved before marking as Paid');
+    }
+
+    const now = new Date().toISOString();
+    const ledgerEntryId = `le-pr-${run.id}`;
+
+    // Post debit LedgerEntry to Finance
+    const ledgerEntry: Types.LedgerEntry = {
+      id: ledgerEntryId,
+      businessId: run.businessId,
+      outletId: 'o-1',
+      amount: run.totalAmount,
+      type: 'debit',
+      sourceType: 'payroll',
+      referenceId: run.id,
+      description: `Monthly Payroll Disbursement - ${run.month} (${run.totalEmployees} Employees)`,
+      category: 'Salaries',
+      createdAt: now
+    };
+    store.insert('ledgerEntries', ledgerEntry);
+
+    // Update line items to paid
+    const updatedLineItems = state.payrollLineItems.map(item => {
+      if (item.payrollRunId === payrollRunId) {
+        return { ...item, paymentStatus: 'paid' as const };
+      }
+      return item;
+    });
+    store.setState({ payrollLineItems: updatedLineItems });
+
+    const updatedRun: Types.PayrollRun = {
+      ...run,
+      status: 'paid',
+      paidAt: now,
+      paidBy: userId,
+      ledgerEntryId
+    };
+
+    store.update('payrollRuns', payrollRunId, updatedRun);
+    eventBus.publish(Events.PAYROLL_PROCESSED, { payrollRunId: run.id, totalAmount: run.totalAmount });
+    return updatedRun;
   },
 
   /**

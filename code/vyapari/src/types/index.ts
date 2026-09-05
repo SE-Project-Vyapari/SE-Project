@@ -251,9 +251,19 @@ export interface LeaveRecord {
 export interface PayrollRun {
   id: string;
   businessId: string;
-  month: string;
-  totalAmount: number;
-  status: 'draft' | 'processed' | 'paid';
+  month: string; // YYYY-MM (e.g. 2026-08 or 2026-09)
+  totalEmployees: number;
+  totalGross: number;
+  totalDeductions: number;
+  totalAmount: number; // Net Payable
+  status: 'draft' | 'calculated' | 'approved' | 'paid';
+  calculatedAt?: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  paidAt?: string;
+  paidBy?: string;
+  ledgerEntryId?: string;
+  notes?: string;
   createdAt: string;
 }
 
@@ -261,10 +271,25 @@ export interface PayrollLineItem {
   id: string;
   payrollRunId: string;
   employeeId: string;
+  baseSalary: number;
+  hra: number;
+  specialAllowance: number;
+  grossEarnings: number;
+  workingDays: number;
+  presentDays: number;
+  lateDays: number;
+  leaveDays: number;
+  absentDays: number;
   hoursWorked: number;
-  amount: number;
-  deductions: number;
+  dailyRate: number;
+  attendanceDeduction: number;
+  statutoryDeductions: number; // EPF & taxes
+  totalDeductions: number;
   netPay: number;
+  isProRated?: boolean;
+  isAttendanceIncomplete?: boolean;
+  paymentStatus?: 'pending' | 'paid';
+  notes?: string;
 }
 
 export interface ForecastEntry {

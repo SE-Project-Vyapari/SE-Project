@@ -1,0 +1,520 @@
+/* Payroll Management CSS Module */
+
+.container {
+  padding: var(--spacing-24);
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-20);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--spacing-16);
+}
+
+.titleGroup h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--color-muted-text);
+  font-size: var(--font-size-sm);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  flex-wrap: wrap;
+}
+
+/* KPI Summary Cards Grid */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-16);
+}
+
+.kpiCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-16);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-16);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.kpiIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpiContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpiLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted-text);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpiValue {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.kpiSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted-text);
+  margin-top: 2px;
+}
+
+/* Stepper Component */
+.stepperContainer {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-16) var(--spacing-24);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow-x: auto;
+}
+
+.stepperItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.stepCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  border: 2px solid var(--color-border);
+  background-color: var(--color-background);
+  color: var(--color-muted-text);
+  transition: all 0.2s ease;
+}
+
+.stepActive .stepCircle {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.stepCompleted .stepCircle {
+  border-color: #10b981;
+  background-color: #10b981;
+  color: #fff;
+}
+
+.stepInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.stepTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.stepSub {
+  font-size: 11px;
+  color: var(--color-muted-text);
+}
+
+.stepLine {
+  flex: 1;
+  height: 2px;
+  background-color: var(--color-border);
+  margin: 0 16px;
+  min-width: 40px;
+}
+
+.stepLineCompleted {
+  background-color: #10b981;
+}
+
+/* Run Details Card */
+.runDetailsCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.runHeaderBar {
+  padding: var(--spacing-16) var(--spacing-24);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-16);
+}
+
+.runMetricsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-24);
+  flex-wrap: wrap;
+}
+
+.runMetricBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.runMetricLabel {
+  font-size: 11px;
+  color: var(--color-muted-text);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.runMetricValue {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.actionBar {
+  padding: var(--spacing-12) var(--spacing-24);
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-12);
+}
+
+/* Primary Table */
+.tableContainer {
+  overflow-x: auto;
+}
+
+.payrollTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
+.payrollTable th {
+  background-color: var(--color-background);
+  color: var(--color-muted-text);
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payrollTable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.payrollTable tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Status Chips */
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.statusDraft {
+  background-color: rgba(107, 114, 128, 0.12);
+  color: #4b5563;
+}
+
+.statusCalculated {
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.statusApproved {
+  background-color: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+}
+
+.statusPaid {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+/* Payslip View Modal (Printable) */
+.payslipSheet {
+  background-color: #ffffff;
+  color: #1e293b;
+  padding: 32px;
+  border-radius: var(--radius-md);
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid #e2e8f0;
+  font-family: inherit;
+}
+
+.payslipHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #0f172a;
+}
+
+.businessBrand h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.businessBrand p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.payslipMetaTable {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background-color: #f8fafc;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+}
+
+.payslipMetaRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+
+.payslipMetaLabel {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.payslipMetaValue {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.salaryBreakdownTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.salaryBreakdownTable th {
+  background-color: #f1f5f9;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.salaryBreakdownTable td {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.netPayBox {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.08));
+  border: 2px solid #059669;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.netPayAmount {
+  font-size: 22px;
+  font-weight: 800;
+  color: #059669;
+  font-variant-numeric: tabular-nums;
+}
+
+.payslipFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 24px;
+  margin-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.signatureLine {
+  width: 180px;
+  border-top: 1px solid #0f172a;
+  text-align: center;
+  padding-top: 4px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Modals */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-16);
+  backdrop-filter: blur(2px);
+}
+
+.modalBox {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalBoxWide {
+  max-width: 860px;
+}
+
+.modalHeader {
+  padding: var(--spacing-16) var(--spacing-24);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--color-muted-text);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.closeBtn:hover {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.modalBody {
+  padding: var(--spacing-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}
+
+.modalFooter {
+  padding: var(--spacing-16) var(--spacing-24);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-12);
+  background-color: var(--color-background);
+}
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .payslipSheet, .payslipSheet * {
+    visibility: visible;
+  }
+  .payslipSheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 20px;
+  }
+  .noPrint {
+    display: none !important;
+  }
+}
