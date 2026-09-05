@@ -1,1 +1,9 @@
-// public exports for employees
+export { EmployeeList } from './EmployeeList';
+export { EmployeeDetail } from './EmployeeDetail';
+export { AttendancePage } from './AttendancePage';
+export { AttendanceMatrix } from './components/AttendanceMatrix';
+export { AttendanceTable } from './components/AttendanceTable';
+export { CheckInOutModal } from './components/CheckInOutModal';
+export { BulkAttendanceModal } from './components/BulkAttendanceModal';
+export { AddEmployeeModal } from './components/AddEmployeeModal';
+export { ApplyLeaveModal } from './components/ApplyLeaveModal';

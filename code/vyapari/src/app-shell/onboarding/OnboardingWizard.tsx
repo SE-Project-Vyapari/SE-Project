@@ -55,7 +55,20 @@ export const OnboardingWizard = () => {
 
     // Save Employees
     employees.forEach((emp, i) => {
-      store.insert('employees', { id: `emp-${Date.now()}-${i}`, businessId: bId, name: emp.name, hourlyRate: emp.salary / 160, status: 'active' });
+      store.insert('employees', {
+        id: `emp-${Date.now()}-${i}`,
+        businessId: bId,
+        outletId: oId,
+        name: emp.name,
+        role: emp.role || 'Staff',
+        department: 'Operations',
+        phone: '+91 98765 00000',
+        joiningDate: now.split('T')[0],
+        salary: emp.salary || 20000,
+        hourlyRate: (emp.salary || 20000) / (30 * 8),
+        status: 'active',
+        leaveBalance: { paid: 12, casual: 8, sick: 6 }
+      });
     });
 
     // Save Products and Inventory

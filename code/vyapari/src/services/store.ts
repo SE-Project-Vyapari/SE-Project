@@ -30,6 +30,7 @@ export interface AppState {
   chatbotQueryLogs: Types.ChatbotQueryLog[];
   auditEvents: Types.AuditEvent[];
   followUps: Types.FollowUp[];
+  leaveRecords: Types.LeaveRecord[];
 }
 
 type Listener = () => void;
@@ -42,7 +43,7 @@ class Store {
     sales: [], payments: [], expenses: [], ledgerEntries: [], attendanceRecords: [], 
     payrollRuns: [], payrollLineItems: [], forecastEntries: [], churnScores: [], 
     notifications: [], notificationRules: [], messageLogs: [], chatbotQueryLogs: [], auditEvents: [],
-    followUps: []
+    followUps: [], leaveRecords: []
   };
   
   private listeners: Set<Listener> = new Set();
