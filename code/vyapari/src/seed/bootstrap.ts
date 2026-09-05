@@ -489,6 +489,126 @@ export function seedDatabase() {
   });
   store.insert('orderItems', { id: 'oi-h8', orderId: ordHist7Id, productId: 'p-5', quantity: 2, unitPrice: 28, subtotal: 56 });
 
+  // =========================================================================
+  // SEED 90-DAY COMPREHENSIVE SALES & FINANCIAL HISTORY (For Deep Analytics)
+  // =========================================================================
+  const sampleCustIds = ['c-1', 'c-2', 'c-3', 'c-4', 'c-5', undefined, undefined];
+  const sampleOutlets = ['o-1', 'o-2', 'o-3'];
+
+  for (let day = 89; day >= 1; day--) {
+    // Generate 1 to 3 sales per day across outlets
+    const numSales = (day % 3 === 0) ? 3 : (day % 2 === 0) ? 2 : 1;
+
+    for (let s = 0; s < numSales; s++) {
+      const orderId = `ord-90d-${day}-${s}`;
+      const outletId = sampleOutlets[(day + s) % sampleOutlets.length];
+      const customerId = sampleCustIds[(day * 3 + s) % sampleCustIds.length];
+      const orderDate = dateDaysAgo(day);
+
+      // Select 1 to 3 items
+      const pIdx1 = (day + s * 2) % products.length;
+      const pIdx2 = (day + s + 3) % products.length;
+      const prod1 = products[pIdx1];
+      const prod2 = (day % 2 === 0) ? products[pIdx2] : null;
+
+      const qty1 = customerId === 'c-1' || customerId === 'c-4' ? 4 : 2;
+      const sub1 = prod1.price * qty1;
+      let totalAmount = sub1;
+
+      store.insert('orderItems', {
+        id: `oi-90d-${day}-${s}-1`,
+        orderId,
+        productId: prod1.id,
+        quantity: qty1,
+        unitPrice: prod1.price,
+        subtotal: sub1
+      });
+
+      if (prod2 && prod2.id !== prod1.id && prod2.id !== 'p-10') { // p-10 is out of stock recently
+        const qty2 = 1;
+        const sub2 = prod2.price * qty2;
+        totalAmount += sub2;
+
+        store.insert('orderItems', {
+          id: `oi-90d-${day}-${s}-2`,
+          orderId,
+          productId: prod2.id,
+          quantity: qty2,
+          unitPrice: prod2.price,
+          subtotal: sub2
+        });
+      }
+
+      store.insert('orders', {
+        id: orderId,
+        outletId,
+        customerId,
+        cashierId: 'u-3',
+        status: 'completed',
+        totalAmount,
+        history: [{ status: 'completed', timestamp: orderDate }],
+        createdAt: orderDate
+      });
+
+      store.insert('sales', {
+        id: `sale-90d-${day}-${s}`,
+        orderId,
+        outletId,
+        customerId,
+        total: totalAmount,
+        createdAt: orderDate
+      });
+
+      store.insert('ledgerEntries', {
+        id: `le-90d-${day}-${s}`,
+        businessId: 'b-1',
+        outletId,
+        amount: totalAmount,
+        type: 'credit',
+        sourceType: 'sale',
+        referenceId: orderId,
+        description: `POS Sale #${orderId}`,
+        category: 'Sales',
+        createdAt: orderDate
+      });
+    }
+
+    // Occasional operating expense entry every ~10 days
+    if (day % 10 === 0) {
+      const expId = `exp-90d-${day}`;
+      const expAmount = (day % 30 === 0) ? 25000 : 3500;
+      const expCat = (day % 30 === 0) ? 'Rent' : (day % 20 === 0) ? 'Utilities' : 'Logistics';
+      const expDesc = `${expCat} Operational Expense`;
+
+      store.insert('expenses', {
+        id: expId,
+        businessId: 'b-1',
+        outletId: 'o-1',
+        category: expCat,
+        amount: expAmount,
+        description: expDesc,
+        date: dateDaysAgo(day),
+        recordedBy: 'u-1',
+        recurring: true,
+        status: 'paid',
+        createdAt: dateDaysAgo(day)
+      });
+
+      store.insert('ledgerEntries', {
+        id: `le-${expId}`,
+        businessId: 'b-1',
+        outletId: 'o-1',
+        amount: expAmount,
+        type: 'debit',
+        sourceType: 'expense',
+        referenceId: expId,
+        description: expDesc,
+        category: expCat,
+        createdAt: dateDaysAgo(day)
+      });
+    }
+  }
+
   // Initialize churn scores for all customer-product pairs
   mockApi.computeAllChurnScores().catch(err => {
     console.error('Failed to compute initial churn scores:', err);
