@@ -109,7 +109,11 @@ export interface Customer {
   email?: string;
   type?: 'retail' | 'wholesale';
   address?: string;
-  optInForMessages?: boolean;
+  /**
+   * Indicates if the customer has opted‑in to receive automated messages.
+   * Defaults to true if omitted.
+   */
+  optedIn?: boolean;
   totalSpent: number;
   outstandingBalance?: number;
   lastVisit?: string;
