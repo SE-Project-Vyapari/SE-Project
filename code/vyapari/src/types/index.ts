@@ -109,7 +109,11 @@ export interface Customer {
   email?: string;
   type?: 'retail' | 'wholesale';
   address?: string;
-  optInForMessages?: boolean;
+  /**
+   * Indicates if the customer has opted‑in to receive automated messages.
+   * Defaults to true if omitted.
+   */
+  optedIn?: boolean;
   totalSpent: number;
   outstandingBalance?: number;
   lastVisit?: string;
@@ -332,15 +336,17 @@ export interface NotificationRule {
   id: string;
   businessId: string;
   triggerEvent: string; // e.g., 'stock.belowThreshold'
-  action: 'in_app' | 'sms' | 'email';
+  action: 'in_app' | 'sms' | 'email' | 'whatsapp';
   enabled: boolean;
 }
+
+export type MessageStatus = 'queued' | 'skipped' | 'sent' | 'delivered' | 'failed';
 
 export interface MessageLog {
   id: string;
   recipient: string; // phone or email
   content: string;
-  status: 'sent' | 'delivered' | 'failed';
+  status: MessageStatus;
   channel?: 'whatsapp' | 'sms' | 'email';
   customerId?: string;
   sentAt: string;

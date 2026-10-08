@@ -31,5 +31,8 @@ export const Events = {
   ORDER_STATUS_CHANGED: 'order.statusChanged',
   INVOICE_OVERDUE: 'invoice.overdue',
   CHURN_RISK_CHANGED: 'churn.riskChanged',
-  PAYROLL_PROCESSED: 'payroll.processed'
+  PAYROLL_PROCESSED: 'payroll.processed',
+  // Messaging events
+  MESSAGE_LOG_CREATED: 'message.logCreated',
+  MESSAGE_STATUS_UPDATED: 'message.statusUpdated',
 } as const;
