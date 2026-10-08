@@ -27,6 +27,10 @@ import { PayrollPage } from './modules/payroll';
 import { AnalyticsPage } from './modules/analytics';
 import { ForecastingPage } from './modules/forecasting';
 import { AiAssistantPage } from './modules/ai-assistant';
+import { NotificationProvider } from './context/NotificationContext';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { AutomationRulesPage } from './pages/AutomationRulesPage';
+import { MessageLogsPage } from './pages/MessageLogsPage';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -61,7 +65,9 @@ function AppRoutes() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/forecasting" element={<ForecastingPage />} />
         <Route path="/ai-assistant" element={<AiAssistantPage />} />
-        <Route path="/notifications" element={<FeaturePlaceholder title="Notifications" />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/automation-rules" element={<AutomationRulesPage />} />
+        <Route path="/message-logs" element={<MessageLogsPage />} />
         <Route path="/employees" element={<EmployeeList />} />
         <Route path="/employees/attendance" element={<AttendancePage />} />
         <Route path="/employees/:id" element={<EmployeeDetail />} />
@@ -77,9 +83,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

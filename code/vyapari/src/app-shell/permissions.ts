@@ -48,6 +48,8 @@ export const NAVIGATION_CONFIG: NavGroup[] = [
     name: 'COMMUNICATION',
     items: [
       { label: 'Notifications', path: '/notifications', icon: 'Bell' },
+      { label: 'Message Logs', path: '/message-logs', icon: 'MessageSquare' },
+      { label: 'Automation', path: '/automation-rules', icon: 'Zap' },
     ]
   },
   {
@@ -65,13 +67,13 @@ export const PERMISSIONS: Record<Role, string[]> = {
     '/', '/pos', '/orders', '/inventory', '/invoices', 
     '/customers', '/insights', '/finance', '/payroll', 
     '/analytics', '/forecasting', '/ai-assistant', 
-    '/notifications', '/employees', '/reports', '/settings'
+    '/notifications', '/message-logs', '/automation-rules', '/employees', '/reports', '/settings'
   ],
   manager: [
     '/', '/pos', '/orders', '/inventory', '/invoices', 
     '/customers', '/insights', '/finance', // Limited finance logic handled at page level
     '/analytics', '/forecasting', '/ai-assistant', 
-    '/notifications', '/employees', '/reports', '/settings'
+    '/notifications', '/message-logs', '/automation-rules', '/employees', '/reports', '/settings'
   ],
   cashier: [
     '/', '/pos', '/orders', '/inventory', '/invoices', '/customers'

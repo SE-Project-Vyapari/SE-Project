@@ -1,8 +1,10 @@
 import { useAuth } from '../auth/AuthContext';
 import { useStore } from '../../services/store';
 import { Search, Bell, LogOut, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
+  const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const outlets = useStore(state => state.outlets);
   const userOutlets = outlets.filter(o => o.businessId === currentUser?.businessId);
@@ -36,7 +38,7 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
           <span style={{ fontSize: 14 }}>Search... (Ctrl+K)</span>
         </button>
 
-        <div style={{ position: 'relative', cursor: 'pointer' }}>
+        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/notifications')}>
           <Bell size={20} color="var(--color-dark)" />
           {unreadCount > 0 && (
             <span style={{ position: 'absolute', top: -5, right: -5, backgroundColor: 'var(--color-danger)', color: 'white', fontSize: 10, padding: '2px 4px', borderRadius: 10, minWidth: 16, textAlign: 'center' }}>

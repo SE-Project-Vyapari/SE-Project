@@ -336,15 +336,17 @@ export interface NotificationRule {
   id: string;
   businessId: string;
   triggerEvent: string; // e.g., 'stock.belowThreshold'
-  action: 'in_app' | 'sms' | 'email';
+  action: 'in_app' | 'sms' | 'email' | 'whatsapp';
   enabled: boolean;
 }
+
+export type MessageStatus = 'queued' | 'skipped' | 'sent' | 'delivered' | 'failed';
 
 export interface MessageLog {
   id: string;
   recipient: string; // phone or email
   content: string;
-  status: 'sent' | 'delivered' | 'failed';
+  status: MessageStatus;
   channel?: 'whatsapp' | 'sms' | 'email';
   customerId?: string;
   sentAt: string;
