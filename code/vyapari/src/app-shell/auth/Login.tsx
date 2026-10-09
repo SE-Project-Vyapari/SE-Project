@@ -73,7 +73,7 @@ export const Login = () => {
               <label style={{ display: 'block', marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-14)', fontWeight: 500 }}>Email Address</label>
               <Input 
                 type="email" 
-                placeholder="owner@example.com"
+                placeholder="admin@vyapari.com"
                 value={email}
                 onChange={(e: any) => setEmail(e.target.value)}
                 required

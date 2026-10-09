@@ -22,7 +22,7 @@ export const PayrollStepper: React.FC<PayrollStepperProps> = ({ run }) => {
     {
       key: 'approved',
       label: '3. Approved',
-      sub: run.approvedAt ? `Approved by ${run.approvedBy || 'Owner'}` : 'Requires verification'
+      sub: run.approvedAt ? `Approved by ${run.approvedBy?.replace(/\s*\(Owner\)/i, '') || 'Admin'}` : 'Requires verification'
     },
     {
       key: 'paid',

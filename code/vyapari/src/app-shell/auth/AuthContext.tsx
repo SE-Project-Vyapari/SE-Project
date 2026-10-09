@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const loginAsDemo = () => {
-    // Specifically log in as Owner of Aarav General Store (u-1)
+    // Specifically log in as default Admin user (u-1)
     const demoUser = store.getState().users.find(u => u.id === 'u-1');
     if (demoUser) setCurrentUser(demoUser);
   };

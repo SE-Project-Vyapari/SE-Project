@@ -114,6 +114,7 @@ export interface Customer {
    * Defaults to true if omitted.
    */
   optedIn?: boolean;
+  optInForMessages?: boolean;
   totalSpent: number;
   outstandingBalance?: number;
   lastVisit?: string;

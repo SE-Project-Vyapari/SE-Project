@@ -28,7 +28,9 @@ export const Overview = () => {
       {/* Contextual Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 style={{ margin: '0 0 8px 0', fontSize: 24 }}>{greeting}, {currentUser?.name}</h1>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: 24 }}>
+            {greeting}, {currentUser?.name ? currentUser.name.replace(/\s*\(Owner\)/i, '').trim() : 'Admin'}
+          </h1>
           <p style={{ margin: 0, color: 'var(--color-muted-text)' }}>
             Here's how your business is doing today. <span style={{ fontWeight: 500, color: 'var(--color-text)' }}>{currentOutlet}</span> • {today}
           </p>

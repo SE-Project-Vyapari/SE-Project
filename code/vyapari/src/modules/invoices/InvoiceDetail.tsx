@@ -377,7 +377,7 @@ export const InvoiceDetail: React.FC = () => {
         {/* Invoice Footer Details */}
         <div className={styles.notesSection}>
           <h4>Terms & Notes</h4>
-          <p>1. All payments should be made to Aarav General Store directly.</p>
+          <p>1. All payments should be made to Vyapari Superstore directly.</p>
           <p>2. Subject to local judicial jurisdiction only.</p>
           <p>3. This is a computer-generated tax invoice and requires no physical signature.</p>
         </div>

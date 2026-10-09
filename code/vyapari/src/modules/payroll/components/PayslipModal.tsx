@@ -66,7 +66,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
 
   const employee = employees.find(e => e.id === lineItem.employeeId);
   const outlet = employee?.outletId ? outlets.find(o => o.id === employee.outletId) : outlets[0];
-  const business = businesses[0] || { name: 'Aarav General Store', taxId: '07AAAAA0000A1Z5' };
+  const business = businesses[0] || { name: 'Vyapari Superstore', taxId: '07AAAAA0000A1Z5' };
 
   const [yearStr, monthNumStr] = (run?.month || '2026-09').split('-');
   const monthDate = new Date(parseInt(yearStr, 10), parseInt(monthNumStr, 10) - 1, 1);

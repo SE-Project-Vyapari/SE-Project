@@ -160,7 +160,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
                 <label>Email Address</label>
                 <input
                   type="email"
-                  placeholder="ramesh@aaravstores.in"
+                  placeholder="ramesh@vyaparistores.in"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                 />

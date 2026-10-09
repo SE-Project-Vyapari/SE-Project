@@ -49,11 +49,13 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, borderLeft: '1px solid var(--color-border)', paddingLeft: 24 }}>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 14, fontWeight: 600 }}>{currentUser?.name}</div>
-            <div style={{ fontSize: 12, color: 'var(--color-muted-text)', textTransform: 'capitalize' }}>{currentUser?.role}</div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>{currentUser?.name ? currentUser.name.replace(/\s*\(Owner\)/i, '').trim() : 'Admin'}</div>
+            <div style={{ fontSize: 12, color: 'var(--color-muted-text)', textTransform: 'capitalize' }}>
+              {currentUser?.role === 'owner' ? 'Administrator' : currentUser?.role}
+            </div>
           </div>
           <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-            {currentUser?.name.charAt(0)}
+            {(currentUser?.name ? currentUser.name.replace(/\s*\(Owner\)/i, '').trim() : 'Admin').charAt(0)}
           </div>
           <button onClick={logout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted-text)' }} title="Logout">
             <LogOut size={20} />

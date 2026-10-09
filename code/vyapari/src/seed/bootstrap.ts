@@ -8,7 +8,7 @@ export function seedDatabase() {
   // 1 Business
   store.insert('businesses', {
     id: 'b-1',
-    name: 'Aarav General Store',
+    name: 'Vyapari Superstore',
     currency: 'INR',
     createdAt: now
   });
@@ -22,7 +22,7 @@ export function seedDatabase() {
   outlets.forEach(o => store.insert('outlets', o));
 
   // 5 Users
-  store.insert('users', { id: 'u-1', businessId: 'b-1', name: 'Aarav (Owner)', email: 'aarav@test.com', role: 'owner', createdAt: now });
+  store.insert('users', { id: 'u-1', businessId: 'b-1', name: 'Admin', email: 'admin@vyapari.com', role: 'owner', createdAt: now });
   store.insert('users', { id: 'u-2', businessId: 'b-1', outletId: 'o-1', name: 'Bob Manager', email: 'bob@test.com', role: 'manager', createdAt: now });
   store.insert('users', { id: 'u-3', businessId: 'b-1', outletId: 'o-1', name: 'Charlie Cashier', email: 'charlie@test.com', role: 'cashier', createdAt: now });
   store.insert('users', { id: 'u-4', businessId: 'b-1', outletId: 'o-2', name: 'Dave Cashier', email: 'dave@test.com', role: 'cashier', createdAt: now });
@@ -78,9 +78,9 @@ export function seedDatabase() {
     {
       id: 'c-1',
       businessId: 'b-1',
-      name: 'Aarav Enterprises',
+      name: 'Apex Enterprises',
       phone: '+91 98765 43210',
-      email: 'aarav.ent@example.com',
+      email: 'apex.ent@example.com',
       type: 'wholesale' as const,
       address: 'Plot 12, Industrial Area, Phase 1, New Delhi',
       optInForMessages: true,
@@ -395,7 +395,7 @@ export function seedDatabase() {
   });
 
   // Additional historical orders for RFM repurchase pattern training & scoring
-  // c-1 (Aarav Enterprises): History of Basmati Rice (p-1) purchased 85d and 65d ago (combined with ord-1 45d ago -> High Churn Risk)
+  // c-1 (Apex Enterprises): History of Basmati Rice (p-1) purchased 85d and 65d ago (combined with ord-1 45d ago -> High Churn Risk)
   const ordHist1Id = 'ord-hist-1';
   store.insert('orders', {
     id: ordHist1Id,
@@ -618,32 +618,32 @@ export function seedDatabase() {
   // SEED EMPLOYEES (24 Employees across 3 Outlets + Central Office)
   // =========================================================================
   const employeesData = [
-    { id: 'emp-1', userId: 'u-1', name: 'Aarav Sharma', role: 'Owner & Managing Director', department: 'Executive', outletId: 'o-1', phone: '+91 98111 22334', email: 'aarav@aaravstores.in', salary: 75000, daysJoined: 365, status: 'active' as const },
-    { id: 'emp-2', userId: 'u-2', name: 'Bob Verma', role: 'Store Manager', department: 'Operations', outletId: 'o-1', phone: '+91 98222 33445', email: 'bob.v@aaravstores.in', salary: 55000, daysJoined: 240, status: 'active' as const },
-    { id: 'emp-3', userId: 'u-3', name: 'Charlie Nair', role: 'Senior Cashier', department: 'Front Desk', outletId: 'o-1', phone: '+91 98333 44556', email: 'charlie.n@aaravstores.in', salary: 28000, daysJoined: 180, status: 'active' as const },
-    { id: 'emp-4', userId: 'u-4', name: 'Dave Gupta', role: 'Cashier', department: 'Front Desk', outletId: 'o-2', phone: '+91 98444 55667', email: 'dave.g@aaravstores.in', salary: 24000, daysJoined: 150, status: 'active' as const },
-    { id: 'emp-5', userId: 'u-5', name: 'Eve Sundaram', role: 'Head Accountant', department: 'Finance & Accounts', outletId: 'o-1', phone: '+91 98555 66778', email: 'eve.s@aaravstores.in', salary: 60000, daysJoined: 300, status: 'active' as const },
-    { id: 'emp-6', name: 'Rajesh Kulkarni', role: 'Store Manager', department: 'Operations', outletId: 'o-2', phone: '+91 98666 77889', email: 'rajesh.k@aaravstores.in', salary: 52000, daysJoined: 210, status: 'active' as const },
-    { id: 'emp-7', name: 'Ananya Iyer', role: 'Store Manager', department: 'Operations', outletId: 'o-3', phone: '+91 98777 88990', email: 'ananya.i@aaravstores.in', salary: 54000, daysJoined: 190, status: 'active' as const },
-    { id: 'emp-8', name: 'Vikram Malhotra', role: 'Inventory Supervisor', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 98888 99001', email: 'vikram.m@aaravstores.in', salary: 38000, daysJoined: 140, status: 'active' as const },
-    { id: 'emp-9', name: 'Pooja Deshmukh', role: 'Senior Cashier', department: 'Front Desk', outletId: 'o-3', phone: '+91 98999 00112', email: 'pooja.d@aaravstores.in', salary: 27000, daysJoined: 120, status: 'active' as const },
-    { id: 'emp-10', name: 'Suresh Reddy', role: 'Stock & Logistics Clerk', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 97111 11223', email: 'suresh.r@aaravstores.in', salary: 22000, daysJoined: 90, status: 'active' as const },
-    { id: 'emp-11', name: 'Sneha Patel', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-2', phone: '+91 97222 22334', email: 'sneha.p@aaravstores.in', salary: 23000, daysJoined: 80, status: 'active' as const },
-    { id: 'emp-12', name: 'Amit Joshi', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-3', phone: '+91 97333 33445', email: 'amit.j@aaravstores.in', salary: 23000, daysJoined: 75, status: 'active' as const },
-    { id: 'emp-13', name: 'Neha Choudhary', role: 'Junior Accountant', department: 'Finance & Accounts', outletId: 'o-1', phone: '+91 97444 44556', email: 'neha.c@aaravstores.in', salary: 32000, daysJoined: 60, status: 'active' as const },
-    { id: 'emp-14', name: 'Manoj Tiwari', role: 'Delivery & Dispatch Lead', department: 'Delivery & Dispatch', outletId: 'o-1', phone: '+91 97555 55667', email: 'manoj.t@aaravstores.in', salary: 25000, daysJoined: 55, status: 'active' as const },
-    { id: 'emp-15', name: 'Kavita Menon', role: 'Customer Relations Executive', department: 'Customer Service', outletId: 'o-3', phone: '+91 97666 66778', email: 'kavita.m@aaravstores.in', salary: 26000, daysJoined: 50, status: 'active' as const },
-    { id: 'emp-16', name: 'Deepak Chauhan', role: 'Cashier', department: 'Front Desk', outletId: 'o-2', phone: '+91 97777 77889', email: 'deepak.c@aaravstores.in', salary: 22000, daysJoined: 45, status: 'active' as const },
-    { id: 'emp-17', name: 'Sunita Rathi', role: 'Inventory Clerk', department: 'Logistics & Warehouse', outletId: 'o-2', phone: '+91 97888 88990', email: 'sunita.r@aaravstores.in', salary: 21000, daysJoined: 40, status: 'active' as const },
-    { id: 'emp-18', name: 'Harish Bhat', role: 'Security & Facilities Lead', department: 'Security & Facilities', outletId: 'o-1', phone: '+91 97999 99001', email: 'harish.b@aaravstores.in', salary: 24000, daysJoined: 35, status: 'active' as const },
-    { id: 'emp-19', name: 'Ritu Agarwal', role: 'Cashier', department: 'Front Desk', outletId: 'o-3', phone: '+91 96111 00112', email: 'ritu.a@aaravstores.in', salary: 22000, daysJoined: 32, status: 'active' as const },
-    { id: 'emp-20', name: 'Alok Pandey', role: 'Warehouse Assistant', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 96222 11223', email: 'alok.p@aaravstores.in', salary: 20000, daysJoined: 30, status: 'active' as const },
-    { id: 'emp-21', name: 'Meenakshi Pillai', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-1', phone: '+91 96333 22334', email: 'meenakshi.p@aaravstores.in', salary: 22000, daysJoined: 28, status: 'active' as const },
-    { id: 'emp-22', name: 'Tarun Rawat', role: 'Delivery Executive', department: 'Delivery & Dispatch', outletId: 'o-2', phone: '+91 96444 33445', email: 'tarun.r@aaravstores.in', salary: 19000, daysJoined: 20, status: 'active' as const },
+    { id: 'emp-1', userId: 'u-1', name: 'Admin', role: 'General Manager', department: 'Executive', outletId: 'o-1', phone: '+91 98111 22334', email: 'admin@vyaparistores.in', salary: 75000, daysJoined: 365, status: 'active' as const },
+    { id: 'emp-2', userId: 'u-2', name: 'Bob Verma', role: 'Store Manager', department: 'Operations', outletId: 'o-1', phone: '+91 98222 33445', email: 'bob.v@vyaparistores.in', salary: 55000, daysJoined: 240, status: 'active' as const },
+    { id: 'emp-3', userId: 'u-3', name: 'Charlie Nair', role: 'Senior Cashier', department: 'Front Desk', outletId: 'o-1', phone: '+91 98333 44556', email: 'charlie.n@vyaparistores.in', salary: 28000, daysJoined: 180, status: 'active' as const },
+    { id: 'emp-4', userId: 'u-4', name: 'Dave Gupta', role: 'Cashier', department: 'Front Desk', outletId: 'o-2', phone: '+91 98444 55667', email: 'dave.g@vyaparistores.in', salary: 24000, daysJoined: 150, status: 'active' as const },
+    { id: 'emp-5', userId: 'u-5', name: 'Eve Sundaram', role: 'Head Accountant', department: 'Finance & Accounts', outletId: 'o-1', phone: '+91 98555 66778', email: 'eve.s@vyaparistores.in', salary: 60000, daysJoined: 300, status: 'active' as const },
+    { id: 'emp-6', name: 'Rajesh Kulkarni', role: 'Store Manager', department: 'Operations', outletId: 'o-2', phone: '+91 98666 77889', email: 'rajesh.k@vyaparistores.in', salary: 52000, daysJoined: 210, status: 'active' as const },
+    { id: 'emp-7', name: 'Ananya Iyer', role: 'Store Manager', department: 'Operations', outletId: 'o-3', phone: '+91 98777 88990', email: 'ananya.i@vyaparistores.in', salary: 54000, daysJoined: 190, status: 'active' as const },
+    { id: 'emp-8', name: 'Vikram Malhotra', role: 'Inventory Supervisor', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 98888 99001', email: 'vikram.m@vyaparistores.in', salary: 38000, daysJoined: 140, status: 'active' as const },
+    { id: 'emp-9', name: 'Pooja Deshmukh', role: 'Senior Cashier', department: 'Front Desk', outletId: 'o-3', phone: '+91 98999 00112', email: 'pooja.d@vyaparistores.in', salary: 27000, daysJoined: 120, status: 'active' as const },
+    { id: 'emp-10', name: 'Suresh Reddy', role: 'Stock & Logistics Clerk', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 97111 11223', email: 'suresh.r@vyaparistores.in', salary: 22000, daysJoined: 90, status: 'active' as const },
+    { id: 'emp-11', name: 'Sneha Patel', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-2', phone: '+91 97222 22334', email: 'sneha.p@vyaparistores.in', salary: 23000, daysJoined: 80, status: 'active' as const },
+    { id: 'emp-12', name: 'Amit Joshi', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-3', phone: '+91 97333 33445', email: 'amit.j@vyaparistores.in', salary: 23000, daysJoined: 75, status: 'active' as const },
+    { id: 'emp-13', name: 'Neha Choudhary', role: 'Junior Accountant', department: 'Finance & Accounts', outletId: 'o-1', phone: '+91 97444 44556', email: 'neha.c@vyaparistores.in', salary: 32000, daysJoined: 60, status: 'active' as const },
+    { id: 'emp-14', name: 'Manoj Tiwari', role: 'Delivery & Dispatch Lead', department: 'Delivery & Dispatch', outletId: 'o-1', phone: '+91 97555 55667', email: 'manoj.t@vyaparistores.in', salary: 25000, daysJoined: 55, status: 'active' as const },
+    { id: 'emp-15', name: 'Kavita Menon', role: 'Customer Relations Executive', department: 'Customer Service', outletId: 'o-3', phone: '+91 97666 66778', email: 'kavita.m@vyaparistores.in', salary: 26000, daysJoined: 50, status: 'active' as const },
+    { id: 'emp-16', name: 'Deepak Chauhan', role: 'Cashier', department: 'Front Desk', outletId: 'o-2', phone: '+91 97777 77889', email: 'deepak.c@vyaparistores.in', salary: 22000, daysJoined: 45, status: 'active' as const },
+    { id: 'emp-17', name: 'Sunita Rathi', role: 'Inventory Clerk', department: 'Logistics & Warehouse', outletId: 'o-2', phone: '+91 97888 88990', email: 'sunita.r@vyaparistores.in', salary: 21000, daysJoined: 40, status: 'active' as const },
+    { id: 'emp-18', name: 'Harish Bhat', role: 'Security & Facilities Lead', department: 'Security & Facilities', outletId: 'o-1', phone: '+91 97999 99001', email: 'harish.b@vyaparistores.in', salary: 24000, daysJoined: 35, status: 'active' as const },
+    { id: 'emp-19', name: 'Ritu Agarwal', role: 'Cashier', department: 'Front Desk', outletId: 'o-3', phone: '+91 96111 00112', email: 'ritu.a@vyaparistores.in', salary: 22000, daysJoined: 32, status: 'active' as const },
+    { id: 'emp-20', name: 'Alok Pandey', role: 'Warehouse Assistant', department: 'Logistics & Warehouse', outletId: 'o-1', phone: '+91 96222 11223', email: 'alok.p@vyaparistores.in', salary: 20000, daysJoined: 30, status: 'active' as const },
+    { id: 'emp-21', name: 'Meenakshi Pillai', role: 'Sales Associate', department: 'Sales & Floor', outletId: 'o-1', phone: '+91 96333 22334', email: 'meenakshi.p@vyaparistores.in', salary: 22000, daysJoined: 28, status: 'active' as const },
+    { id: 'emp-22', name: 'Tarun Rawat', role: 'Delivery Executive', department: 'Delivery & Dispatch', outletId: 'o-2', phone: '+91 96444 33445', email: 'tarun.r@vyaparistores.in', salary: 19000, daysJoined: 20, status: 'active' as const },
     // Mid-month joiners to test pre-employment greyed-out edge case:
-    { id: 'emp-23', name: 'Divya Saxena', role: 'Junior Cashier (Mid-Month Joiner)', department: 'Front Desk', outletId: 'o-1', phone: '+91 96555 44556', email: 'divya.s@aaravstores.in', salary: 20000, daysJoined: 12, status: 'active' as const },
-    { id: 'emp-24', name: 'Sandeep Yadav', role: 'Trainee Associate (Recent Joiner)', department: 'Sales & Floor', outletId: 'o-3', phone: '+91 96666 55667', email: 'sandeep.y@aaravstores.in', salary: 18000, daysJoined: 6, status: 'active' as const },
-    { id: 'emp-25', name: 'Kiran Gokhale', role: 'Former Cashier', department: 'Front Desk', outletId: 'o-1', phone: '+91 96777 66778', email: 'kiran.g@aaravstores.in', salary: 20000, daysJoined: 180, status: 'inactive' as const }
+    { id: 'emp-23', name: 'Divya Saxena', role: 'Junior Cashier (Mid-Month Joiner)', department: 'Front Desk', outletId: 'o-1', phone: '+91 96555 44556', email: 'divya.s@vyaparistores.in', salary: 20000, daysJoined: 12, status: 'active' as const },
+    { id: 'emp-24', name: 'Sandeep Yadav', role: 'Trainee Associate (Recent Joiner)', department: 'Sales & Floor', outletId: 'o-3', phone: '+91 96666 55667', email: 'sandeep.y@vyaparistores.in', salary: 18000, daysJoined: 6, status: 'active' as const },
+    { id: 'emp-25', name: 'Kiran Gokhale', role: 'Former Cashier', department: 'Front Desk', outletId: 'o-1', phone: '+91 96777 66778', email: 'kiran.g@vyaparistores.in', salary: 20000, daysJoined: 180, status: 'inactive' as const }
   ];
 
   employeesData.forEach(e => {
