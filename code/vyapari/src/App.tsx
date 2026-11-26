@@ -33,13 +33,7 @@ import { AutomationRulesPage } from './pages/AutomationRulesPage';
 import { MessageLogsPage } from './pages/MessageLogsPage';
 import { EvaluationMetricsPage } from './pages/EvaluationMetricsPage';
 import { ReportsPage } from './modules/reports';
-
-const FeaturePlaceholder = ({ title }: { title: string }) => (
-  <div style={{ padding: 40 }}>
-    <h1>{title}</h1>
-    <p>This page is successfully routed and authorized.</p>
-  </div>
-);
+import { SettingsPage } from './modules/settings';
 
 function AppRoutes() {
   return (
@@ -75,7 +69,7 @@ function AppRoutes() {
         <Route path="/employees/attendance" element={<AttendancePage />} />
         <Route path="/employees/:id" element={<EmployeeDetail />} />
         <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/settings" element={<FeaturePlaceholder title="Settings" />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/evaluation" element={<EvaluationMetricsPage />} />
       </Route>
 

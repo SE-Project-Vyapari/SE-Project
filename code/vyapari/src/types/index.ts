@@ -4,8 +4,34 @@ export interface Business {
   id: string;
   name: string;
   taxId?: string;
+  address?: string;
+  phone?: string;
+  logoUrl?: string;
   currency: string;
   createdAt: string;
+}
+
+export interface AppSettings {
+  tax: {
+    defaultGstRate: number;
+    defaultHsnCode: string;
+  };
+  invoice: {
+    prefix: string;
+    defaultDueDays: number;
+    notesTemplate: string;
+  };
+  notifications: {
+    Inventory: boolean;
+    Orders: boolean;
+    Customers: boolean;
+    Finance: boolean;
+    System: boolean;
+  };
+  barcode: {
+    format: 'EAN-13' | 'UPC-A' | 'Code-128' | 'QR';
+    prefix: string;
+  };
 }
 
 export interface Outlet {
