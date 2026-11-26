@@ -15,7 +15,11 @@ class EventBus {
     };
   }
 
+  /** When true, events are dropped (used while bulk-seeding demo data). */
+  muted = false;
+
   publish(event: string, payload?: any): void {
+    if (this.muted) return;
     if (this.listeners[event]) {
       this.listeners[event].forEach(callback => callback(payload));
     }
