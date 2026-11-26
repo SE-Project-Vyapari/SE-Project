@@ -87,8 +87,33 @@ class Store {
     return this.state;
   }
 
+  private batchDepth = 0;
+
+  /** Suspend persistence/notifications (used by bulk seeding). */
+  beginBatch() {
+    this.batchDepth += 1;
+  }
+
+  endBatch() {
+    this.batchDepth = Math.max(0, this.batchDepth - 1);
+    if (this.batchDepth === 0) {
+      this.saveToStorage();
+      this.notify();
+    }
+  }
+
+  /** Reset every table (and settings) back to an empty state. */
+  reset() {
+    this.state = this.emptyState();
+    if (this.batchDepth === 0) {
+      this.saveToStorage();
+      this.notify();
+    }
+  }
+
   setState(newState: Partial<AppState>) {
     this.state = { ...this.state, ...newState };
+    if (this.batchDepth > 0) return;
     // Persist to localStorage
     this.saveToStorage();
     this.notify();

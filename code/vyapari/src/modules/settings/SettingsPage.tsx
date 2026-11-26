@@ -21,7 +21,10 @@ import {
   Plus,
   Trash2,
   Zap,
+  Database,
+  RefreshCw,
 } from 'lucide-react';
+import { generateDemoData, type DemoDataSummary } from '../../seed/generateDemoData';
 
 type SettingsTab =
   | 'business'
@@ -32,7 +35,8 @@ type SettingsTab =
   | 'notifications'
   | 'barcode'
   | 'security'
-  | 'integrations';
+  | 'integrations'
+  | 'demo';
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: 'business', label: 'Business Profile', icon: <Building2 size={16} /> },
@@ -44,6 +48,7 @@ const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: 'barcode', label: 'Barcode Settings', icon: <Barcode size={16} /> },
   { id: 'security', label: 'Security', icon: <Shield size={16} /> },
   { id: 'integrations', label: 'Integrations', icon: <Plug size={16} /> },
+  { id: 'demo', label: 'Demo Data', icon: <Database size={16} /> },
 ];
 
 const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -102,6 +107,26 @@ export const SettingsPage = () => {
 
   const showBanner = (ok: boolean, text: string) => {
     setStatusMsg({ ok, text });
+  };
+
+  const [regenerating, setRegenerating] = useState(false);
+  const [demoSummary, setDemoSummary] = useState<DemoDataSummary | null>(null);
+
+  const handleRegenerate = async () => {
+    if (!window.confirm('This resets ALL current data and generates a fresh demo dataset. Continue?')) return;
+    setRegenerating(true);
+    setStatusMsg(null);
+    try {
+      // Yield once so the "Generating..." state can paint before the synchronous-heavy seed runs
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const summary = await generateDemoData();
+      setDemoSummary(summary);
+      showBanner(true, 'Demo data regenerated successfully.');
+    } catch (err: any) {
+      showBanner(false, err?.message || 'Failed to regenerate demo data.');
+    } finally {
+      setRegenerating(false);
+    }
   };
 
   const handleTabChange = (tab: SettingsTab) => {
@@ -670,6 +695,51 @@ export const SettingsPage = () => {
                 <Button type="submit" style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>Update Password</Button>
               </div>
             </form>
+          )}
+
+          {/* 10. Demo Data */}
+          {activeTab === 'demo' && (
+            <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <h2 style={{ margin: 0, fontSize: 18 }}>Demo Data</h2>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--color-muted-text)' }}>
+                Regenerates a full synthetic dataset (60 products, 50 customers, 90 days of sales, invoices,
+                expenses, attendance and 2 months of payroll) through the same service-layer functions the app
+                uses, so ledgers, inventory and invoices stay consistent. All current data is replaced.
+              </p>
+              <div>
+                <Button
+                  type="button"
+                  onClick={handleRegenerate}
+                  disabled={regenerating}
+                  style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}
+                >
+                  <RefreshCw size={15} style={{ marginRight: 6 }} />
+                  {regenerating ? 'Generating...' : 'Regenerate demo data'}
+                </Button>
+              </div>
+              {demoSummary && (
+                <div style={{ fontSize: 13, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 8 }}>
+                  {[
+                    ['Products', demoSummary.products],
+                    ['Customers', demoSummary.customers],
+                    ['Employees', demoSummary.employees],
+                    ['Orders', demoSummary.orders],
+                    ['Invoices', demoSummary.invoices],
+                    ['Expenses', demoSummary.expenses],
+                    ['Attendance records', demoSummary.attendanceRecords],
+                    ['Payroll runs', demoSummary.payrollRuns],
+                    ['Churn scores', demoSummary.churnScores],
+                    ['Notifications', demoSummary.notifications],
+                    ['Message logs', demoSummary.messageLogs],
+                  ].map(([label, value]) => (
+                    <div key={label as string} style={{ padding: 10, borderRadius: 8, border: '1px solid var(--color-border)' }}>
+                      <div style={{ color: 'var(--color-muted-text)' }}>{label}</div>
+                      <div style={{ fontWeight: 700, fontSize: 18 }}>{value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {/* 9. Integrations */}

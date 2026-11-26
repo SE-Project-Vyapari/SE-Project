@@ -2,7 +2,11 @@ import { store } from './store';
 import { eventBus, Events } from './eventBus';
 import * as Types from '../types';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+/** Set `fast` while bulk-seeding so simulated latency is skipped. */
+export const seedControl = { fast: false };
+
+const delay = (ms: number) =>
+  seedControl.fast ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, ms));
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 11);
