@@ -323,12 +323,21 @@ export interface ChurnScore {
   calculatedAt: string;
 }
 
+export type NotificationCategory = 'Inventory' | 'Orders' | 'Customers' | 'Finance' | 'System';
+export type NotificationPriority = 'critical' | 'warning' | 'info';
+
 export interface Notification {
   id: string;
   businessId: string;
   title: string;
   message: string;
   type: 'alert' | 'info' | 'warning';
+  category?: NotificationCategory;
+  priority?: NotificationPriority;
+  entityType?: 'product' | 'order' | 'invoice' | 'customer' | 'payroll';
+  entityId?: string;
+  actionUrl?: string;
+  resolved?: boolean;
   read: boolean;
   createdAt: string;
 }
@@ -336,8 +345,12 @@ export interface Notification {
 export interface NotificationRule {
   id: string;
   businessId: string;
+  name?: string;
   triggerEvent: string; // e.g., 'stock.belowThreshold'
+  triggerLabel?: string;
+  recipientType?: 'Owner / Manager' | 'Customer';
   action: 'in_app' | 'sms' | 'email' | 'whatsapp';
+  template?: string;
   enabled: boolean;
 }
 
@@ -346,10 +359,15 @@ export type MessageStatus = 'queued' | 'skipped' | 'sent' | 'delivered' | 'faile
 export interface MessageLog {
   id: string;
   recipient: string; // phone or email
+  recipientName?: string;
   content: string;
+  templateName?: string;
   status: MessageStatus;
   channel?: 'whatsapp' | 'sms' | 'email';
   customerId?: string;
+  delayMs?: number;
+  errorReason?: string;
+  retryCount?: number;
   sentAt: string;
 }
 
