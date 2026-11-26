@@ -2,22 +2,23 @@
   /* Colors */
   --color-background: #F5F1EA;
   --color-surface: #FFFDF8;
-  --color-primary: #C65D3A;
+  --color-primary: #B54D2B;
   --color-dark: #292522;
   --color-secondary: #D99A6C;
   --color-text: #252321;
-  --color-primary-hover: #B25334;
-  --color-primary-active: #9D492E;
+  --color-primary-hover: #9E4123;
+  --color-primary-active: #88371C;
   --color-border: #E4DDD0;
-  --color-success: #5B7A5B;
+  --color-success: #466946;
   --color-warning: #B8863B;
-  --color-danger: #B84A3E;
-  --color-muted-text: #6B6560;
+  --color-danger: #B03A2E;
+  --color-info: #2B6CB0;
+  --color-muted-text: #5E5853;
 
   /* Typography */
   --font-display: "Fraunces", serif;
   --font-sans: "Inter", sans-serif;
-  
+
   /* Spacing */
   --spacing-4: 4px;
   --spacing-8: 8px;
@@ -76,7 +77,192 @@ button, input, select, textarea {
   font-family: inherit;
 }
 
-button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+.truncate-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive App Shell */
+.app-mobile-menu-btn {
+  display: none !important;
+}
+
+.app-sidebar-backdrop {
+  display: none;
+}
+
+/* Responsive POS Layout */
+.pos-layout {
+  display: flex;
+  height: 100%;
+  min-height: calc(100vh - 64px);
+  overflow: hidden;
+  background-color: var(--color-background);
+  position: relative;
+}
+
+.pos-grid-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-24);
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.pos-cart-pane {
+  width: 400px;
+  background-color: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.pos-mobile-cart-bar {
+  display: none;
+}
+
+.pos-mobile-cart-close {
+  display: none;
+}
+
+/* Table / Card Responsive Helpers */
+.desktop-table-only {
+  display: block;
+}
+
+.mobile-cards-only {
+  display: none;
+}
+
+.table-responsive-sticky {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-sticky table th:first-child,
+.table-responsive-sticky table td:first-child {
+  position: sticky;
+  left: 0;
+  background-color: var(--color-surface);
+  z-index: 2;
+}
+
+.mobile-filters-toggle {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  .pos-cart-pane {
+    width: 340px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-mobile-menu-btn {
+    display: inline-flex !important;
+  }
+
+  .app-outlet-pill {
+    display: none !important;
+  }
+
+  .app-search-text {
+    display: none;
+  }
+
+  .app-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease !important;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .app-sidebar-backdrop.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 80;
+  }
+
+  .pos-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 64px);
+    padding-bottom: 72px;
+  }
+
+  .pos-grid-pane {
+    padding: var(--spacing-16);
+  }
+
+  .pos-cart-pane {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    z-index: 95;
+    transform: translateY(100%);
+    transition: transform 0.24s ease;
+  }
+
+  .pos-cart-pane.open {
+    transform: translateY(0);
+  }
+
+  .pos-mobile-cart-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    justify-content: space-between;
+    align-items: center;
+    z-index: 45;
+  }
+
+  .pos-mobile-cart-close {
+    display: inline-flex;
+  }
+
+  .desktop-table-only {
+    display: none;
+  }
+
+  .mobile-cards-only {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-filters-toggle {
+    display: inline-flex !important;
+  }
+
+  .mobile-filters-collapsible.collapsed {
+    display: none !important;
+  }
 }

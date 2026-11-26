@@ -39,6 +39,7 @@ export const InventoryList = () => {
   
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [adjustProductId, setAdjustProductId] = useState<string | null>(null);
   const [transferProductId, setTransferProductId] = useState<string | null>(null);
 
@@ -121,28 +122,79 @@ export const InventoryList = () => {
         </div>
         <Button
           onClick={() => setIsScannerOpen(true)}
+          aria-label="Scan barcode to find product"
           style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
         >
           <Camera size={16} style={{ marginRight: 6 }} /> Scan to find
         </Button>
-        <Select value={category} onChange={(e: any) => setCategory(e.target.value)} style={{ width: 160 }}>
-          <option value="">All Categories</option>
-          {categories.map(c => <option key={c} value={c}>{c}</option>)}
-        </Select>
-        <Select value={statusFilter} onChange={(e: any) => setStatusFilter(e.target.value)} style={{ width: 160 }}>
-          <option value="">All Statuses</option>
-          <option value="Healthy">Healthy</option>
-          <option value="Low Stock">Low Stock</option>
-          <option value="Critical">Critical</option>
-          <option value="Out of Stock">Out of Stock</option>
-          <option value="Overstock">Overstock</option>
-        </Select>
-        <Button style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}><FileDown size={16} /></Button>
-        <Button style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}><Upload size={16} /></Button>
+        <Button
+          type="button"
+          className="mobile-filters-toggle"
+          onClick={() => setShowMoreFilters(prev => !prev)}
+          style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+        >
+          {showMoreFilters ? 'Hide Filters' : 'More Filters'}
+        </Button>
+        <div className={`mobile-filters-collapsible ${showMoreFilters ? '' : 'collapsed'}`} style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <Select aria-label="Filter by category" value={category} onChange={(e: any) => setCategory(e.target.value)} style={{ width: 160 }}>
+            <option value="">All Categories</option>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </Select>
+          <Select aria-label="Filter by stock status" value={statusFilter} onChange={(e: any) => setStatusFilter(e.target.value)} style={{ width: 160 }}>
+            <option value="">All Statuses</option>
+            <option value="Healthy">Healthy</option>
+            <option value="Low Stock">Low Stock</option>
+            <option value="Critical">Critical</option>
+            <option value="Out of Stock">Out of Stock</option>
+            <option value="Overstock">Overstock</option>
+          </Select>
+        </div>
+        <Button aria-label="Export inventory" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}><FileDown size={16} /></Button>
+        <Button aria-label="Import inventory" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}><Upload size={16} /></Button>
       </div>
 
-      <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+      {/* Desktop Table with Sticky Product Column */}
+      <div className="desktop-table-only table-responsive-sticky" style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
         <Table columns={columns} data={inventoryData} />
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="mobile-cards-only">
+        {inventoryData.map((r: any) => (
+          <div
+            key={r.p.id}
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)',
+              padding: 14,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ minWidth: 0, flex: 1 }} onClick={() => navigate(`/inventory/${r.p.id}`)}>
+                <div className="truncate-ellipsis" title={r.p.name} style={{ fontWeight: 600, fontSize: 15 }}>
+                  {r.p.name}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--color-muted-text)' }}>
+                  {r.p.sku} {r.p.barcode ? `• ${r.p.barcode}` : '• No barcode'}
+                </div>
+              </div>
+              <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, backgroundColor: r.statusColor, color: r.status === 'Out of Stock' || r.status === 'Critical' ? '#fff' : '#000', flexShrink: 0 }}>
+                {r.status}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
+              <span>Stock: <strong>{r.qty}</strong> • Price: <strong>{formatINR(r.p.price)}</strong></span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Button onClick={() => setAdjustProductId(r.p.id)} style={{ padding: '4px 10px', fontSize: 12, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>Adjust</Button>
+                <Button onClick={() => setTransferProductId(r.p.id)} style={{ padding: '4px 10px', fontSize: 12, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>Transfer</Button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <AddProductModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} businessId={currentUser?.businessId!} outletId={currentOutletId!} />
