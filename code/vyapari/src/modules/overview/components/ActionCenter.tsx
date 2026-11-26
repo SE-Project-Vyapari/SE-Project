@@ -3,7 +3,12 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, AlertTriangle, CreditCard, Users, TrendingUp } from 'lucide-react';
-import { isInvoiceOverdue } from '../../../services/mockApi';
+import {
+  getLowStockRecords,
+  getOverdueInvoices,
+  getHighChurnScores,
+  getPendingPayrollRuns,
+} from '../../../services/selectors';
 
 export const ActionCenter = () => {
   const store = useStore();
@@ -11,8 +16,8 @@ export const ActionCenter = () => {
 
   const actions = [];
 
-  // Low Stock
-  const lowStockCount = store.inventoryRecords.filter(i => i.quantity <= i.reorderLevel).length;
+  // Low Stock (includes critical and out of stock, consistent with BusinessHealth & Inventory)
+  const lowStockCount = getLowStockRecords(store.inventoryRecords).length;
   if (lowStockCount > 0) {
     actions.push({
       id: 'low-stock',
@@ -25,7 +30,7 @@ export const ActionCenter = () => {
   }
 
   // Overdue Invoices
-  const overdueCount = store.invoices.filter(i => i.status === 'overdue' || isInvoiceOverdue(i)).length;
+  const overdueCount = getOverdueInvoices(store.invoices).length;
   if (overdueCount > 0) {
     actions.push({
       id: 'overdue-invoices',
@@ -38,7 +43,7 @@ export const ActionCenter = () => {
   }
 
   // High Churn Risk (Wired to live Churn Intelligence scoring)
-  const highChurnCount = store.churnScores?.filter(c => c.riskLevel === 'high').length || 0;
+  const highChurnCount = getHighChurnScores(store.churnScores || []).length;
   if (highChurnCount > 0) {
     actions.push({
       id: 'high-churn',
@@ -51,7 +56,7 @@ export const ActionCenter = () => {
   }
 
   // Pending Payroll (Draft & Calculated runs needing review/approval)
-  const pendingPayroll = store.payrollRuns?.filter(p => p.status === 'draft' || p.status === 'calculated').length || 0;
+  const pendingPayroll = getPendingPayrollRuns(store.payrollRuns || []).length;
   if (pendingPayroll > 0) {
     actions.push({
       id: 'pending-payroll',

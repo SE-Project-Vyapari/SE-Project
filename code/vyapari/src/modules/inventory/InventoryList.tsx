@@ -9,11 +9,21 @@ import { Search, Plus, ArrowRightLeft, FileDown, Upload, Camera } from 'lucide-r
 import { AddProductModal, AdjustStockModal, TransferStockModal } from './components/Modals';
 import { BarcodeScannerModal } from '../scanner';
 import { mockApi } from '../../services/mockApi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formatINR } from '../../utils/format';
+import { getStockStatus } from '../../services/selectors';
+
+const FILTER_PARAM_MAP: Record<string, string> = {
+  low: 'Low Stock',
+  out: 'Out of Stock',
+  critical: 'Critical',
+  healthy: 'Healthy',
+  overstock: 'Overstock',
+};
 
 export const InventoryList = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { currentUser } = useAuth();
   const store = useStore();
   
@@ -22,7 +32,10 @@ export const InventoryList = () => {
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(() => {
+    const f = searchParams.get('filter') || '';
+    return FILTER_PARAM_MAP[f] || f;
+  });
   
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -37,20 +50,13 @@ export const InventoryList = () => {
       const qty = inv?.quantity || 0;
       const reorder = inv?.reorderLevel || 0;
       
-      let status = 'Healthy';
+      const status = getStockStatus(qty, reorder);
       let statusColor = 'var(--color-success)';
-      
-      if (qty === 0) {
-        status = 'Out of Stock';
+      if (status === 'Out of Stock' || status === 'Critical') {
         statusColor = 'var(--color-danger)';
-      } else if (qty <= reorder * 0.25) {
-        status = 'Critical';
-        statusColor = 'var(--color-danger)';
-      } else if (qty <= reorder) {
-        status = 'Low Stock';
+      } else if (status === 'Low Stock') {
         statusColor = 'var(--color-warning)';
-      } else if (qty >= reorder * 3 && reorder > 0) {
-        status = 'Overstock';
+      } else if (status === 'Overstock') {
         statusColor = 'var(--color-secondary)';
       }
 

@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { useStore } from '../../services/store';
 import { isInvoiceOverdue } from '../../services/mockApi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formatINR } from '../../utils/format';
 import styles from './styles/invoices.module.css';
 
 export const InvoicesList: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const store = useStore();
   const { invoices, customers, outlets, orderItems } = store;
 
   // Filter states
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('filter') || 'all');
   const [customerFilter, setCustomerFilter] = useState('all');
   const [outletFilter, setOutletFilter] = useState('all');
   const [startDate, setStartDate] = useState('');

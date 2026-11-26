@@ -103,6 +103,17 @@ export const mockApi = {
         lastUpdated: now
       });
 
+      // Record StockMovement for sale
+      store.insert('stockMovements', {
+        id: generateId(),
+        productId: item.productId,
+        outletId: payload.outletId,
+        quantityChange: -item.quantity,
+        type: 'sale',
+        referenceId: order.id,
+        createdAt: now
+      });
+
       // Fire threshold event if needed
       if (newQuantity <= inv.reorderLevel) {
         eventBus.publish(Events.STOCK_BELOW_THRESHOLD, { productId: item.productId, outletId: payload.outletId, remaining: newQuantity });
@@ -121,10 +132,11 @@ export const mockApi = {
     store.insert('sales', sale);
     
     // 3. Create Invoice
+    const invPrefix = state.settings?.invoice?.prefix || 'INV';
     const invoice: Types.Invoice = {
       id: generateId(),
       orderId: order.id,
-      invoiceNumber: `INV-${Date.now()}`,
+      invoiceNumber: `${invPrefix}-${Date.now()}`,
       customerId: payload.customerId,
       amount: totalAmount,
       status: 'paid', // Assuming POS cash sale
@@ -133,7 +145,7 @@ export const mockApi = {
     };
     store.insert('invoices', invoice);
 
-    // Update customer total spent
+    // Update customer total spent & recompute churn scores live
     if (payload.customerId) {
       const customer = state.customers.find(c => c.id === payload.customerId);
       if (customer) {
@@ -167,10 +179,17 @@ export const mockApi = {
       entityType: 'Sale',
       entityId: sale.id,
       actorId: payload.cashierId,
-      details: JSON.stringify({ saleCreatedAt: now, invoiceGeneratedAt: now }),
+      details: `POS Sale ${invoice.invoiceNumber} — Rs. ${totalAmount.toLocaleString('en-IN')}`,
       timestamp: now
     };
     store.insert('auditEvents', auditEvent);
+
+    // Recompute churn score for customer-product pairs when live (skipped during bulk seed)
+    if (payload.customerId && !seedControl.fast) {
+      for (const item of payload.items) {
+        await this.computeChurnScore(payload.customerId, item.productId);
+      }
+    }
 
     eventBus.publish(Events.SALE_COMPLETED, { saleId: sale.id });
     
