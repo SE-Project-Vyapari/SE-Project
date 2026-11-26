@@ -1,8 +1,13 @@
+import React from 'react';
 
-export const Select = ({ children, ...props }: any) => {
+export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = ({
+  children,
+  className = '',
+  ...props
+}) => {
   return (
-    <div className="select-base" {...props}>
-      {children || 'Select'}
-    </div>
+    <select className={`select-base ${className}`.trim()} {...props}>
+      {children}
+    </select>
   );
 };

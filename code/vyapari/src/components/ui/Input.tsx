@@ -1,8 +1,10 @@
+import React from 'react';
 
-export const Input = ({ children, ...props }: any) => {
-  return (
-    <div className="input-base" {...props}>
-      {children || 'Input'}
-    </div>
-  );
-};
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className = '', ...props }, ref) => {
+  return <input ref={ref} className={`input-base ${className}`.trim()} {...props} />;
+});
+
+Input.displayName = 'Input';

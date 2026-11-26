@@ -93,6 +93,129 @@ a:focus-visible,
   white-space: nowrap;
 }
 
+/* Base UI Primitives */
+.card-base {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-16);
+}
+
+.button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: opacity 0.15s, background-color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.button-base:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.button-base:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.input-base,
+.select-base {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.table-base {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table-base th {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-muted-text);
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table-base td {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table-base tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-base tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(25, 22, 20, 0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 200;
+}
+
+.modal-base {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
 /* Responsive App Shell */
 .app-mobile-menu-btn {
   display: none !important;
