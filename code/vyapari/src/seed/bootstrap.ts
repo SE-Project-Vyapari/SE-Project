@@ -28,18 +28,18 @@ export function seedDatabase() {
   store.insert('users', { id: 'u-4', businessId: 'b-1', outletId: 'o-2', name: 'Dave Cashier', email: 'dave@test.com', role: 'cashier', createdAt: now });
   store.insert('users', { id: 'u-5', businessId: 'b-1', name: 'Eve Accountant', email: 'eve@test.com', role: 'accountant', createdAt: now });
 
-  // 10 Products with realistic grocery & retail inventory
+  // 10 Products with realistic grocery & retail inventory + valid/missing/malformed barcodes
   const productCatalogue = [
-    { name: 'Basmati Rice (5kg)', category: 'Grains & Staples', price: 450, cost: 350 },
-    { name: 'Organic Toor Dal (1kg)', category: 'Pulses', price: 180, cost: 130 },
-    { name: 'Fortune Sunflower Oil (1L)', category: 'Edible Oils', price: 165, cost: 135 },
-    { name: 'Chakki Fresh Atta (10kg)', category: 'Grains & Staples', price: 420, cost: 330 },
-    { name: 'Tata Salt (1kg)', category: 'Spices & Seasoning', price: 28, cost: 20 },
-    { name: 'Masala Chai Gold (500g)', category: 'Beverages', price: 290, cost: 210 },
-    { name: 'California Almonds (500g)', category: 'Dry Fruits', price: 450, cost: 360 },
-    { name: 'Whole Cashews (500g)', category: 'Dry Fruits', price: 520, cost: 410 },
-    { name: 'Pure Cow Ghee (1L)', category: 'Dairy & Ghee', price: 650, cost: 510 },
-    { name: 'Stainless Steel Kadhai', category: 'Cookware', price: 850, cost: 600 }
+    { name: 'Basmati Rice (5kg)', category: 'Grains & Staples', price: 450, cost: 350, barcode: '8901058851234' },
+    { name: 'Organic Toor Dal (1kg)', category: 'Pulses', price: 180, cost: 130, barcode: '8901058851241' },
+    { name: 'Fortune Sunflower Oil (1L)', category: 'Edible Oils', price: 165, cost: 135, barcode: '8901058851258' },
+    { name: 'Chakki Fresh Atta (10kg)', category: 'Grains & Staples', price: 420, cost: 330, barcode: '8901058851265' },
+    { name: 'Tata Salt (1kg)', category: 'Spices & Seasoning', price: 28, cost: 20, barcode: '8901058851272' },
+    { name: 'Masala Chai Gold (500g)', category: 'Beverages', price: 290, cost: 210, barcode: '8901058851289' },
+    { name: 'California Almonds (500g)', category: 'Dry Fruits', price: 450, cost: 360, barcode: '8901058851296' },
+    { name: 'Whole Cashews (500g)', category: 'Dry Fruits', price: 520, cost: 410, barcode: undefined }, // Missing barcode
+    { name: 'Pure Cow Ghee (1L)', category: 'Dairy & Ghee', price: 650, cost: 510, barcode: 'BAD!!CODE#99' }, // Intentionally malformed barcode
+    { name: 'Stainless Steel Kadhai', category: 'Cookware', price: 850, cost: 600, barcode: '8901058851302' } // Valid barcode, 0 stock
   ];
 
   const products = productCatalogue.map((p, i) => ({
@@ -47,6 +47,7 @@ export function seedDatabase() {
     businessId: 'b-1',
     name: p.name,
     sku: `SKU-${1000 + i + 1}`,
+    barcode: p.barcode,
     price: p.price,
     cost: p.cost,
     category: p.category,
