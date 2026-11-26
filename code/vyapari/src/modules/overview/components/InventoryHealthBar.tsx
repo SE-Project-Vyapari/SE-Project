@@ -1,15 +1,16 @@
 import { useStore } from '../../../services/store';
 import { Card } from '../../../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
+import { getStockStatus } from '../../../services/selectors';
 
 export const InventoryHealthBar = () => {
   const store = useStore();
   const navigate = useNavigate();
 
   const total = store.inventoryRecords.length;
-  const outOfStock = store.inventoryRecords.filter(i => i.quantity === 0).length;
-  const critical = store.inventoryRecords.filter(i => i.quantity > 0 && i.quantity <= i.reorderLevel / 2).length;
-  const low = store.inventoryRecords.filter(i => i.quantity > i.reorderLevel / 2 && i.quantity <= i.reorderLevel).length;
+  const outOfStock = store.inventoryRecords.filter(i => getStockStatus(i.quantity, i.reorderLevel) === 'Out of Stock').length;
+  const critical = store.inventoryRecords.filter(i => getStockStatus(i.quantity, i.reorderLevel) === 'Critical').length;
+  const low = store.inventoryRecords.filter(i => getStockStatus(i.quantity, i.reorderLevel) === 'Low Stock').length;
   const healthy = total - outOfStock - critical - low;
 
   if (total === 0) return null;

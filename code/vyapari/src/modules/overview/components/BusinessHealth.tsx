@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown, Package, CreditCard, DollarSign } from 'lucid
 import { isToday, isYesterday } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { formatINR } from '../../../utils/format';
+import { getLowStockRecords, getOutstandingTotal } from '../../../services/selectors';
 
 export const BusinessHealth = () => {
   const store = useStore();
@@ -21,13 +22,26 @@ export const BusinessHealth = () => {
   const yestOrders = yestSales.length;
   const orderDelta = yestOrders === 0 ? 100 : ((todayOrders - yestOrders) / yestOrders) * 100;
 
-  // Simplified Gross Profit (assuming flat 20% margin if cost isn't strictly linked, or sum item cost)
-  const todayGP = todayRev * 0.2; // mock logic
-  const yestGP = yestRev * 0.2;
+  // Compute Gross Profit from actual orderItem costs (matching Sales Analytics & Reports)
+  const computeGrossProfit = (salesList: typeof store.sales) => {
+    let cost = 0;
+    let rev = 0;
+    salesList.forEach(s => {
+      rev += s.total;
+      const items = store.orderItems.filter(oi => oi.orderId === s.orderId);
+      items.forEach(oi => {
+        const prod = store.products.find(p => p.id === oi.productId);
+        cost += (prod?.cost || 0) * oi.quantity;
+      });
+    });
+    return rev - cost;
+  };
+  const todayGP = computeGrossProfit(todaySales);
+  const yestGP = computeGrossProfit(yestSales);
   const gpDelta = yestGP === 0 ? 100 : ((todayGP - yestGP) / yestGP) * 100;
 
-  const lowStockCount = store.inventoryRecords.filter(i => i.quantity <= i.reorderLevel && i.quantity > 0).length;
-  const outstandings = store.invoices.filter(i => i.status !== 'paid').reduce((sum, i) => sum + i.amount, 0);
+  const lowStockCount = getLowStockRecords(store.inventoryRecords).length;
+  const outstandings = getOutstandingTotal(store.invoices);
 
   const MetricCard = ({ title, value, delta, icon: Icon, onClick }: any) => (
     <Card style={{ padding: 'var(--spacing-16)', flex: 1, cursor: onClick ? 'pointer' : 'default', borderLeft: onClick ? '3px solid var(--color-primary)' : 'none' }} onClick={onClick}>
