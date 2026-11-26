@@ -66,6 +66,7 @@ function AppRoutes() {
         <Route path="/forecasting" element={<ForecastingPage />} />
         <Route path="/ai-assistant" element={<AiAssistantPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/notifications/automation" element={<AutomationRulesPage />} />
         <Route path="/automation-rules" element={<AutomationRulesPage />} />
         <Route path="/message-logs" element={<MessageLogsPage />} />
         <Route path="/employees" element={<EmployeeList />} />

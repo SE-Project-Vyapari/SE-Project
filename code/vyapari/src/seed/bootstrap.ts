@@ -942,6 +942,206 @@ export function seedDatabase() {
     createdAt: now
   });
 
+  // =========================================================================
+  // SEED NOTIFICATIONS, AUTOMATION RULES & MESSAGE LOGS
+  // =========================================================================
+  const hoursAgo = (h: number) => {
+    const d = new Date();
+    d.setHours(d.getHours() - h);
+    return d.toISOString();
+  };
+
+  store.insert('notifications', {
+    id: 'notif-1',
+    businessId: 'b-1',
+    title: 'Low Stock Alert',
+    message: 'Stainless Steel Kadhai at Downtown Branch is out of stock (0 left, reorder at 10).',
+    type: 'warning',
+    category: 'Inventory',
+    priority: 'warning',
+    entityType: 'product',
+    entityId: 'p-10',
+    actionUrl: '/inventory/p-10',
+    read: false,
+    createdAt: hoursAgo(2)
+  });
+
+  store.insert('notifications', {
+    id: 'notif-2',
+    businessId: 'b-1',
+    title: 'Invoice Overdue',
+    message: 'Invoice INV-2026-001 (Apex Enterprises, Rs. 1,500) is 30 days overdue.',
+    type: 'alert',
+    category: 'Finance',
+    priority: 'critical',
+    entityType: 'invoice',
+    entityId: 'inv-1',
+    actionUrl: '/invoices/inv-1',
+    read: false,
+    createdAt: hoursAgo(5)
+  });
+
+  store.insert('notifications', {
+    id: 'notif-3',
+    businessId: 'b-1',
+    title: 'High Churn Risk Detected',
+    message: 'Apex Enterprises crossed into High churn risk on Basmati Rice (5kg).',
+    type: 'warning',
+    category: 'Customers',
+    priority: 'warning',
+    entityType: 'customer',
+    entityId: 'c-1',
+    actionUrl: '/customers/c-1',
+    read: false,
+    createdAt: hoursAgo(8)
+  });
+
+  store.insert('notifications', {
+    id: 'notif-4',
+    businessId: 'b-1',
+    title: 'Order Ready for Pickup',
+    message: 'Order #ord-2 for Rohan Gupta was marked ready for pickup at Downtown Branch.',
+    type: 'info',
+    category: 'Orders',
+    priority: 'info',
+    entityType: 'order',
+    entityId: 'ord-2',
+    actionUrl: '/orders/ord-2',
+    read: true,
+    createdAt: dateDaysAgo(10)
+  });
+
+  store.insert('notifications', {
+    id: 'notif-5',
+    businessId: 'b-1',
+    title: 'Payroll Processed',
+    message: `August 2026 payroll run processed for ${activeEmps.length} employees (Rs. ${Math.round(augTotalAmount).toLocaleString('en-IN')}).`,
+    type: 'info',
+    category: 'Finance',
+    priority: 'info',
+    entityType: 'payroll',
+    entityId: augRunId,
+    actionUrl: '/payroll',
+    read: true,
+    createdAt: augPaidDate
+  });
+
+  store.insert('notifications', {
+    id: 'notif-6',
+    businessId: 'b-1',
+    title: 'Sandbox Messaging Active',
+    message: 'WhatsApp & SMS automation simulator is running in sandbox mode.',
+    type: 'info',
+    category: 'System',
+    priority: 'info',
+    read: true,
+    createdAt: dateDaysAgo(1)
+  });
+
+  // 3 Default Automation Rules
+  store.insert('notificationRules', {
+    id: 'rule-low-stock',
+    businessId: 'b-1',
+    name: 'Low Stock Alert',
+    triggerEvent: 'stock.belowThreshold',
+    triggerLabel: 'Stock < Reorder Level',
+    recipientType: 'Owner / Manager',
+    action: 'whatsapp',
+    template: 'Low Stock Alert: {{productName}} at {{outletName}} has dropped to {{remaining}} units (reorder level: {{reorderLevel}}). Please restock soon.',
+    enabled: true
+  });
+
+  store.insert('notificationRules', {
+    id: 'rule-order-ready',
+    businessId: 'b-1',
+    name: 'Order Ready',
+    triggerEvent: 'order.statusChanged',
+    triggerLabel: 'Order Status = Ready',
+    recipientType: 'Customer',
+    action: 'whatsapp',
+    template: 'Hi {{customerName}}, your order #{{orderId}} (Rs. {{amount}}) is now READY for pickup at {{outletName}}. Thank you for shopping with Vyapari!',
+    enabled: true
+  });
+
+  store.insert('notificationRules', {
+    id: 'rule-customer-retention',
+    businessId: 'b-1',
+    name: 'Customer Retention',
+    triggerEvent: 'churn.riskChanged',
+    triggerLabel: 'Churn Risk Crosses High Threshold',
+    recipientType: 'Customer',
+    action: 'whatsapp',
+    template: 'Hi {{customerName}}, we miss you at Vyapari Superstore! Enjoy 10% off your next order of {{favoriteProduct}} this week.',
+    enabled: true
+  });
+
+  // Seeded MessageLog History (mix of Delivered, Failed, Skipped, Sent)
+  store.insert('messageLogs', {
+    id: 'msg-1',
+    recipient: '+91 91234 56789',
+    recipientName: 'Priya Sharma',
+    customerId: 'c-2',
+    channel: 'whatsapp',
+    templateName: 'Order Ready Notification',
+    content: 'Hi Priya Sharma, your order #ord-3 (Rs. 500) is now READY for pickup at Downtown Branch. Thank you for shopping with Vyapari!',
+    status: 'delivered',
+    delayMs: 2400,
+    sentAt: dateDaysAgo(5)
+  });
+
+  store.insert('messageLogs', {
+    id: 'msg-2',
+    recipient: '+91 99887 76655',
+    recipientName: 'Rohan Gupta',
+    customerId: 'c-3',
+    channel: 'whatsapp',
+    templateName: 'Order Ready Notification',
+    content: 'Hi Rohan Gupta, your order #ord-2 (Rs. 1000) is now READY for pickup at Downtown Branch. Thank you for shopping with Vyapari!',
+    status: 'skipped',
+    delayMs: 0,
+    errorReason: 'Customer opted out of automated messages',
+    sentAt: dateDaysAgo(10)
+  });
+
+  store.insert('messageLogs', {
+    id: 'msg-3',
+    recipient: '+91 98765 43210',
+    recipientName: 'Apex Enterprises',
+    customerId: 'c-1',
+    channel: 'sms',
+    templateName: 'Overdue Invoice Reminder',
+    content: 'Reminder: Invoice #INV-2026-001 for Rs. 1500 is overdue. Please settle at your earliest convenience.',
+    status: 'failed',
+    delayMs: 2500,
+    errorReason: 'Simulated gateway timeout (sandbox)',
+    sentAt: hoursAgo(4)
+  });
+
+  store.insert('messageLogs', {
+    id: 'msg-4',
+    recipient: 'Owner / Manager (+91 98100 00001)',
+    recipientName: 'Owner / Manager',
+    channel: 'whatsapp',
+    templateName: 'Low Stock Alert',
+    content: 'Low Stock Alert: Stainless Steel Kadhai at Downtown Branch has dropped to 0 units (reorder level: 10). Please restock soon.',
+    status: 'delivered',
+    delayMs: 2150,
+    sentAt: hoursAgo(2)
+  });
+
+  store.insert('messageLogs', {
+    id: 'msg-5',
+    recipient: '+91 94567 12345',
+    recipientName: 'Meera Patel',
+    customerId: 'c-4',
+    channel: 'whatsapp',
+    templateName: 'Customer Retention Offer',
+    content: 'Hi Meera Patel, we miss you at Vyapari Superstore! Enjoy 10% off your next order of Chakki Fresh Atta (10kg) this week.',
+    status: 'sent',
+    delayMs: 1000,
+    sentAt: hoursAgo(1)
+  });
+
   console.log('Database seeded with bootstrap data, RFM churn history, 25 employees, 30-day attendance, and 2 months payroll history.');
 }
 

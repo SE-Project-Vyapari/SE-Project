@@ -151,8 +151,12 @@ class Store {
     this.insert('messageLogs', log);
   }
 
-  updateMessageLogStatus(id: string, status: Types.MessageStatus) {
-    this.update('messageLogs', id, { status });
+  updateMessageLogStatus(
+    id: string,
+    status: Types.MessageStatus,
+    extra?: Partial<Types.MessageLog>
+  ) {
+    this.update('messageLogs', id, { status, ...extra });
   }
 }
 
