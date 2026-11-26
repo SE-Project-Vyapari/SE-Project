@@ -308,7 +308,7 @@ export const SettingsPage = () => {
   };
 
   return (
-    <div style={{ padding: 'var(--spacing-32)', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ padding: 'var(--page-padding)', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
         <h1 style={{ margin: '0 0 6px 0', fontSize: 24 }}>Settings</h1>
         <p style={{ margin: 0, color: 'var(--color-muted-text)' }}>
@@ -316,7 +316,7 @@ export const SettingsPage = () => {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'start' }}>
+      <div className="vy-settings-layout">
         {/* Left Sub-nav */}
         <nav
           style={{
@@ -383,7 +383,7 @@ export const SettingsPage = () => {
         </nav>
 
         {/* Right Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
           {statusMsg && (
             <div
               style={{
@@ -407,7 +407,7 @@ export const SettingsPage = () => {
           {activeTab === 'business' && (
             <form onSubmit={saveBusinessProfile} style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>Business Profile</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: 14 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={{ fontSize: 13, fontWeight: 600 }}>Business Name</label>
                   <Input value={bizName} onChange={(e: any) => setBizName(e.target.value)} required />
@@ -521,6 +521,7 @@ export const SettingsPage = () => {
                 </Button>
               </form>
 
+              <div className="table-wrap">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--color-border)', fontSize: 12, color: 'var(--color-muted-text)' }}>
@@ -577,6 +578,7 @@ export const SettingsPage = () => {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -587,7 +589,7 @@ export const SettingsPage = () => {
               <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid var(--color-border)', fontSize: 13, color: 'var(--color-muted-text)' }}>
                 Changes to default GST rate and HSN/SAC apply to <strong>new invoices only</strong>. Historical invoices are never retroactively altered.
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: 14 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={{ fontSize: 13, fontWeight: 600 }}>Default GST Rate (%)</label>
                   <select value={defaultGstRate} onChange={e => setDefaultGstRate(Number(e.target.value))} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--color-border)' }}>
@@ -613,7 +615,7 @@ export const SettingsPage = () => {
           {activeTab === 'invoice' && (
             <form onSubmit={saveInvoiceSettings} style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>Invoice Settings</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: 14 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={{ fontSize: 13, fontWeight: 600 }}>Invoice Number Prefix</label>
                   <Input value={invPrefix} onChange={(e: any) => setInvPrefix(e.target.value)} placeholder="INV" />
@@ -678,7 +680,7 @@ export const SettingsPage = () => {
           {activeTab === 'barcode' && (
             <form onSubmit={saveBarcodeSettings} style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>Barcode Settings</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: 14 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={{ fontSize: 13, fontWeight: 600 }}>Default Barcode Format</label>
                   <select value={barcodeFormat} onChange={e => setBarcodeFormat(e.target.value as any)} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--color-border)' }}>

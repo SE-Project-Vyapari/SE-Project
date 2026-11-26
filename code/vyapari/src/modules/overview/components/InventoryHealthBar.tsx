@@ -24,19 +24,19 @@ export const InventoryHealthBar = () => {
 
   return (
     <Card style={{ padding: 'var(--spacing-24)' }}>
-      <h3 style={{ margin: '0 0 16px 0' }}>Inventory Health</h3>
+      <h3 className="vy-card-title" style={{ marginBottom: 16 }}>Inventory Health</h3>
       
-      <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 2, height: 14, borderRadius: 999, overflow: 'hidden', marginBottom: 16, backgroundColor: 'var(--color-surface-sunken)' }}>
         {segments.map(seg => seg.count > 0 && (
           <div 
             key={seg.label}
+            className="vy-health-seg"
             onClick={() => navigate(`/inventory?filter=${seg.filter}`)}
             style={{ 
               width: `${(seg.count / total) * 100}%`, 
               backgroundColor: seg.color,
               cursor: 'pointer',
-              transition: 'opacity 0.2s'
-            }}
+                          }}
             title={`${seg.label}: ${seg.count}`}
           />
         ))}

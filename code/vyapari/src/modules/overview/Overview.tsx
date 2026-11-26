@@ -23,20 +23,20 @@ export const Overview = () => {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <div style={{ padding: 'var(--spacing-32)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-24)' }}>
+    <div className="vy-page">
       
       {/* Contextual Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h1 style={{ margin: '0 0 8px 0', fontSize: 24 }}>
+      <div className="vy-page-header" style={{ alignItems: 'flex-end' }}>
+        <div style={{ minWidth: 0 }}>
+          <h1 className="vy-page-title">
             {greeting}, {currentUser?.name ? currentUser.name.replace(/\s*\(Owner\)/i, '').trim() : 'Admin'}
           </h1>
-          <p style={{ margin: 0, color: 'var(--color-muted-text)' }}>
+          <p className="vy-page-subtitle">
             Here's how your business is doing today. <span style={{ fontWeight: 500, color: 'var(--color-text)' }}>{currentOutlet}</span> • {today}
           </p>
         </div>
         
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="vy-actions">
           <Button onClick={() => navigate('/pos')} style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>
             <ShoppingCart size={16} style={{ marginRight: 8 }} /> New Sale
           </Button>
@@ -56,18 +56,18 @@ export const Overview = () => {
       <BusinessHealth />
 
       {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--spacing-24)' }}>
+      <div className="vy-dash-grid">
         {/* Left Column (Spans 2) */}
-        <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-24)' }}>
+        <div className="vy-dash-main">
           <SalesChart />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-24)' }}>
+          <div className="vy-dash-pair">
             <InventoryHealthBar />
             <ActionCenter />
           </div>
         </div>
 
         {/* Right Column (Spans 1) */}
-        <div style={{ gridColumn: 'span 1' }}>
+        <div style={{ minWidth: 0 }}>
           <ActivityFeed />
         </div>
       </div>

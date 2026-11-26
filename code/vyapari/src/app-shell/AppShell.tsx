@@ -64,7 +64,7 @@ export const AppShell = () => {
           onMobileMenuOpen={() => setMobileMenuOpen(prev => !prev)}
         />
         
-        <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--color-background)' }}>
+        <main style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', backgroundColor: 'var(--color-background)' }}>
           <RoleGuard>
             <Outlet />
           </RoleGuard>
@@ -77,7 +77,7 @@ export const AppShell = () => {
         <div
           role="status"
           aria-live="polite"
-          style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: 'var(--color-primary)', color: 'white', padding: '12px 24px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', zIndex: 9999 }}
+          className="vy-toast"
         >
           {toastMessage}
         </div>

@@ -152,6 +152,7 @@ export const PosPage = () => {
         outletId,
         cashierId,
         customerId,
+        paymentMethod,
         items: cart.map(c => ({
           productId: c.productId,
           quantity: c.quantity,
@@ -208,12 +209,13 @@ export const PosPage = () => {
       {/* Main Product Area */}
       <div className="pos-grid-pane">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-          <h1 style={{ margin: 0, fontSize: 24 }}>Point of Sale</h1>
+          <h1 className="vy-page-title" style={{ fontSize: 24 }}>Point of Sale</h1>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               type="button"
               onClick={() => setIsShortcutsOpen(true)}
               aria-label="Keyboard shortcuts"
+              className="ui-hover-outline"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -233,6 +235,7 @@ export const PosPage = () => {
             <button
               type="button"
               onClick={() => navigate('/settings/evaluation')}
+              className="ui-hover-outline"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

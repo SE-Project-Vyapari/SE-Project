@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-24);
+  padding: var(--page-padding);
   padding-bottom: var(--spacing-48);
 }
 
@@ -472,3 +473,14 @@
   color: var(--color-text);
   cursor: pointer;
 }
+
+/* --- UI polish: consistent interaction states --- */
+.summaryCard:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.btnSecondary { transition: background-color var(--transition-fast), border-color var(--transition-fast); }
+.btnSecondary:hover:not(:disabled) { background-color: var(--color-surface-hover); border-color: var(--color-border-strong); }
+.btnPrimary:hover:not(:disabled) { background-color: var(--color-primary-hover); opacity: 1; }
+.btnPrimary:focus-visible, .btnSecondary:focus-visible, .btnExport:focus-visible, .presetBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }

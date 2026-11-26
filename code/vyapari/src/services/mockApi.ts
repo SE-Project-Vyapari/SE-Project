@@ -50,6 +50,8 @@ export const mockApi = {
     cashierId: string;
     customerId?: string;
     items: { productId: string; quantity: number; unitPrice: number }[];
+    /** Set by the POS. 'credit' leaves the invoice unpaid; other methods record a Payment. */
+    paymentMethod?: Types.Payment['method'] | 'credit';
   }) {
     await delay(350);
 
@@ -66,6 +68,12 @@ export const mockApi = {
         throw new Error(`Insufficient stock for product ${item.productId}`);
       }
       totalAmount += item.quantity * item.unitPrice;
+    }
+
+    const paymentMethod = payload.paymentMethod;
+    const isCredit = paymentMethod === 'credit';
+    if (isCredit && !payload.customerId) {
+      throw new Error('Credit sales require a selected customer.');
     }
 
     // 1. Create Order
@@ -132,27 +140,50 @@ export const mockApi = {
     store.insert('sales', sale);
     
     // 3. Create Invoice
+    // Paid immediately for cash/card/UPI; credit sales stay unpaid until settled via
+    // markInvoicePaid (which then updates totalSpent and outstandingBalance).
     const invPrefix = state.settings?.invoice?.prefix || 'INV';
+    const dueDays = state.settings?.invoice?.defaultDueDays ?? 15;
     const invoice: Types.Invoice = {
       id: generateId(),
       orderId: order.id,
       invoiceNumber: `${invPrefix}-${Date.now()}`,
       customerId: payload.customerId,
       amount: totalAmount,
-      status: 'paid', // Assuming POS cash sale
+      status: isCredit ? 'unpaid' : 'paid',
+      dueDate: isCredit ? new Date(Date.now() + dueDays * 86400000).toISOString() : undefined,
       createdAt: now,
-      amountPaid: totalAmount
+      amountPaid: isCredit ? 0 : totalAmount
     };
     store.insert('invoices', invoice);
 
-    // Update customer total spent & recompute churn scores live
+    // 3b. Record how the customer paid (only when the caller states a method, i.e. the POS;
+    // credit sales have no payment yet)
+    if (paymentMethod && !isCredit) {
+      const payment: Types.Payment = {
+        id: generateId(),
+        invoiceId: invoice.id,
+        amount: totalAmount,
+        method: paymentMethod,
+        status: 'success',
+        createdAt: now
+      };
+      store.insert('payments', payment);
+    }
+
+    // Update customer totals & recompute churn scores live
     if (payload.customerId) {
       const customer = state.customers.find(c => c.id === payload.customerId);
       if (customer) {
-        store.update('customers', payload.customerId, {
-          totalSpent: (customer.totalSpent || 0) + totalAmount,
-          lastVisit: now
-        });
+        store.update('customers', payload.customerId, isCredit
+          ? {
+              outstandingBalance: (customer.outstandingBalance || 0) + totalAmount,
+              lastVisit: now
+            }
+          : {
+              totalSpent: (customer.totalSpent || 0) + totalAmount,
+              lastVisit: now
+            });
       }
     }
 
@@ -165,7 +196,7 @@ export const mockApi = {
       type: 'credit',
       sourceType: 'sale',
       referenceId: sale.id,
-      description: `POS Sale #${sale.id.substring(0, 8)}`,
+      description: `POS Sale #${sale.id.substring(0, 8)}${paymentMethod ? ` (${isCredit ? 'Credit' : paymentMethod.toUpperCase()})` : ''}`,
       category: 'Sales',
       createdAt: now
     };

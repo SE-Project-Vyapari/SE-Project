@@ -79,7 +79,7 @@ export const NotificationsPage = () => {
   return (
     <div
       style={{
-        padding: 'var(--spacing-32)',
+        padding: 'var(--page-padding)',
         display: 'flex',
         flexDirection: 'column',
         gap: 'var(--spacing-24)',

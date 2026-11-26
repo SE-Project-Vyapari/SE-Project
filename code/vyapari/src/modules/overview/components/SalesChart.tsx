@@ -27,15 +27,15 @@ export const SalesChart = () => {
   }, [store.sales, range]);
 
   return (
-    <Card style={{ padding: 'var(--spacing-24)', gridColumn: 'span 2' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h3 style={{ margin: 0 }}>Sales Trend</h3>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <select value={metric} onChange={e => setMetric(e.target.value as any)} style={{ padding: 6, borderRadius: 4, border: '1px solid var(--color-border)' }}>
+    <Card style={{ padding: 'var(--spacing-24)' }}>
+      <div className="vy-card-header">
+        <h3 className="vy-card-title">Sales Trend</h3>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <select aria-label="Chart metric" className="vy-select vy-select--sm" value={metric} onChange={e => setMetric(e.target.value as any)} style={{ width: 'auto' }}>
             <option value="revenue">Revenue</option>
             <option value="orders">Orders</option>
           </select>
-          <select value={range} onChange={e => setRange(Number(e.target.value))} style={{ padding: 6, borderRadius: 4, border: '1px solid var(--color-border)' }}>
+          <select aria-label="Date range" className="vy-select vy-select--sm" value={range} onChange={e => setRange(Number(e.target.value))} style={{ width: 'auto' }}>
             <option value={1}>Today</option>
             <option value={7}>Last 7 Days</option>
             <option value={30}>Last 30 Days</option>
@@ -43,19 +43,19 @@ export const SalesChart = () => {
         </div>
       </div>
       
-      <div style={{ height: 300, width: '100%' }}>
+      <div style={{ height: 300, width: '100%', minWidth: 0 }}>
         {data.length === 0 ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted-text)' }}>
             No sales data for this period.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
               <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-text)' }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-text)' }} />
-              <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: 'var(--shadow-md)' }} />
-              <Line type="monotone" dataKey={metric} stroke="var(--color-primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              <Tooltip cursor={{ stroke: 'var(--color-border-strong)', strokeDasharray: '4 4' }} contentStyle={{ borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', fontSize: 13 }} />
+              <Line type="monotone" dataKey={metric} stroke="var(--color-primary)" strokeWidth={2.5} dot={{ r: 3.5, strokeWidth: 2, fill: 'var(--color-surface)' }} activeDot={{ r: 6, strokeWidth: 2, stroke: 'var(--color-surface)' }} />
             </LineChart>
           </ResponsiveContainer>
         )}

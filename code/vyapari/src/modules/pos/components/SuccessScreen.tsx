@@ -22,7 +22,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ data, onReset }) =
     <div
       role="status"
       aria-live="polite"
-      style={{ display: 'flex', minHeight: '100vh', padding: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)' }}
+      style={{ display: 'flex', minHeight: '100%', padding: 'var(--page-padding)', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)' }}
     >
       <div style={{ 
         width: '100%',
@@ -91,7 +91,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ data, onReset }) =
           </Button>
         </div>
 
-        <Button onClick={onReset} style={{ width: '100%', backgroundColor: 'var(--color-primary)', color: 'white', padding: '12px 0', fontSize: 16 }}>
+        <Button onClick={onReset} variant="primary" style={{ width: '100%', minHeight: 46 }}>
           New Sale
         </Button>
       </div>

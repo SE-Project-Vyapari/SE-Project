@@ -4,6 +4,7 @@ import { useStore } from '../../services/store';
 import { mockApi, isInvoiceOverdue } from '../../services/mockApi';
 import { ArrowLeft, Printer, Download, Send, CreditCard, X } from 'lucide-react';
 import styles from './styles/invoices.module.css';
+import { getGstRate } from '../../utils/gst';
 
 export const InvoiceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,21 +54,17 @@ export const InvoiceDetail: React.FC = () => {
     const description = product ? product.name : 'Unknown Product';
     const category = product?.category?.toLowerCase() || '';
 
-    // Derive GST Rate % and HSN Code based on category
-    let gstRate = 12; // default
+    // GST rate comes from the shared category rule (same as POS); HSN code by category
+    const gstRate = getGstRate(category);
     let hsnCode = '990000'; // default service/misc HSN
     
     if (category.includes('grocery') || category.includes('food')) {
-      gstRate = 5;
       hsnCode = '1905';
     } else if (category.includes('electronics') || category.includes('device')) {
-      gstRate = 18;
       hsnCode = '8471';
     } else if (category.includes('apparel') || category.includes('clothing')) {
-      gstRate = 5;
       hsnCode = '6109';
     } else if (category.includes('stationery')) {
-      gstRate = 12;
       hsnCode = '4820';
     }
 

@@ -70,7 +70,8 @@ export const Topbar = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 var(--spacing-24)',
+        padding: '0 var(--page-padding)',
+        gap: 12,
         position: 'relative',
         zIndex: 40,
       }}
@@ -78,7 +79,7 @@ export const Topbar = ({
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <button
           type="button"
-          className="app-mobile-menu-btn"
+          className="app-mobile-menu-btn ui-hover-outline"
           aria-label="Open navigation menu"
           onClick={onMobileMenuOpen}
           style={{
@@ -94,15 +95,18 @@ export const Topbar = ({
           <Menu size={20} color="var(--color-dark)" />
         </button>
         <div
-          className="app-outlet-pill"
+          className="app-outlet-pill ui-hover-outline"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 8,
             cursor: 'pointer',
-            padding: '8px 12px',
+            height: 36,
+            padding: '0 12px',
             borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--color-border)',
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
           }}
         >
           {currentUser?.outletId
@@ -116,7 +120,9 @@ export const Topbar = ({
         <button
           onClick={onSearchOpen}
           aria-label="Open command search (Ctrl+K)"
+          className="ui-hover-outline"
           style={{
+            height: 36,
             display: 'flex',
             alignItems: 'center',
             gap: 8,
@@ -139,6 +145,7 @@ export const Topbar = ({
             aria-label="Open notifications"
             aria-expanded={bellOpen}
             onClick={() => setBellOpen(prev => !prev)}
+            className="ui-hover-tint"
             style={{
               position: 'relative',
               background: bellOpen ? 'var(--color-background)' : 'transparent',
@@ -451,11 +458,15 @@ export const Topbar = ({
           <button
             onClick={logout}
             aria-label="Logout"
+            className="ui-hover-tint"
             style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--color-muted-text)',
+              padding: 8,
+              borderRadius: 'var(--radius-sm)',
+              display: 'inline-flex',
             }}
             title="Logout"
           >

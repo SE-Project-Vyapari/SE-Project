@@ -7,7 +7,7 @@ import { Card } from '../../components/ui/Card';
 import logoMonogram from '../../assets/logo-monogram.svg';
 
 const FlowDiagram = () => (
-  <svg viewBox="0 0 400 400" width="100%" height="100%" style={{ maxWidth: 400 }}>
+  <svg viewBox="-40 20 480 360" width="100%" style={{ maxWidth: 420, height: 'auto' }} role="img" aria-label="Inventory, Sales, Finance and Insights connected through Vyapari">
     <g fill="none" stroke="var(--color-border)" strokeWidth="2" strokeDasharray="4 4">
       <circle cx="200" cy="200" r="120" />
     </g>
@@ -52,45 +52,47 @@ export const Login = () => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
+    <div className="vy-auth">
       
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-48)', borderRight: '1px solid var(--color-border)' }}>
-        <h2 style={{ marginBottom: 'var(--spacing-16)', color: 'var(--color-primary)' }}>One business. One system.</h2>
-        <p style={{ color: 'var(--color-muted-text)', marginBottom: 'var(--spacing-48)' }}>Connect your inventory, sales, and finance effortlessly.</p>
+      <div className="vy-auth__hero">
+        <h2 style={{ marginBottom: 'var(--spacing-12)', color: 'var(--color-primary)', fontSize: 28, textAlign: 'center' }}>One business. One system.</h2>
+        <p style={{ color: 'var(--color-muted-text)', marginBottom: 'var(--spacing-32)', textAlign: 'center' }}>Connect your inventory, sales, and finance effortlessly.</p>
         <FlowDiagram />
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-48)' }}>
-        <Card style={{ width: '100%', maxWidth: 400, padding: 'var(--spacing-32)' }}>
+      <div className="vy-auth__form">
+        <Card style={{ width: '100%', maxWidth: 400, padding: 'var(--spacing-32)', boxShadow: 'var(--shadow-md)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-32)' }}>
             <img src={logoMonogram} alt="Vyapari" width={48} style={{ marginBottom: 'var(--spacing-16)' }} />
-            <h3>Welcome to Vyapari</h3>
+            <h3 style={{ fontSize: 22, marginBottom: 4 }}>Welcome to Vyapari</h3>
             <p style={{ color: 'var(--color-muted-text)' }}>Sign in to your business</p>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-16)' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: 'var(--spacing-4)', fontSize: 'var(--font-size-14)', fontWeight: 500 }}>Email Address</label>
+              <label htmlFor="login-email" className="vy-field-label">Email Address</label>
               <Input 
+                id="login-email"
                 type="email" 
                 placeholder="admin@vyapari.com"
                 value={email}
                 onChange={(e: any) => setEmail(e.target.value)}
                 required
-                style={{ width: '100%', padding: 'var(--spacing-8) var(--spacing-12)' }}
+                style={{ width: '100%' }}
               />
             </div>
             
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-4)' }}>
-                <label style={{ fontSize: 'var(--font-size-14)', fontWeight: 500 }}>Password</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                <label htmlFor="login-password" className="vy-field-label" style={{ marginBottom: 0 }}>Password</label>
                 <a href="#" onClick={handleForgot} style={{ fontSize: 'var(--font-size-12)' }}>Forgot Password?</a>
               </div>
               <Input 
+                id="login-password"
                 type="password" 
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: 'var(--spacing-8) var(--spacing-12)' }}
+                style={{ width: '100%' }}
               />
             </div>
             
@@ -100,7 +102,7 @@ export const Login = () => {
               </p>
             )}
 
-            <Button type="submit" style={{ width: '100%', padding: 'var(--spacing-12)', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', marginTop: 'var(--spacing-8)' }}>
+            <Button type="submit" variant="primary" block style={{ marginTop: 'var(--spacing-8)', minHeight: 44 }}>
               Sign In
             </Button>
           </form>
@@ -109,7 +111,7 @@ export const Login = () => {
             <span style={{ background: 'var(--color-surface)', padding: '0 var(--spacing-8)', color: 'var(--color-muted-text)', fontSize: 'var(--font-size-12)' }}>OR</span>
           </div>
 
-          <Button onClick={handleDemoLogin} style={{ width: '100%', padding: 'var(--spacing-12)', backgroundColor: 'var(--color-secondary)', color: 'var(--color-dark)', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>
+          <Button onClick={handleDemoLogin} variant="soft" block style={{ minHeight: 44 }}>
             Continue with demo account
           </Button>
 
