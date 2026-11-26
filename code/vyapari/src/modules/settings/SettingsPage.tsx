@@ -356,6 +356,30 @@ export const SettingsPage = () => {
               </button>
             );
           })}
+          {currentUser?.role === 'owner' && (
+            <button
+              type="button"
+              onClick={() => navigate('/settings/evaluation')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                borderRadius: 8,
+                border: '1px dashed var(--color-border)',
+                backgroundColor: 'transparent',
+                color: 'var(--color-primary)',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                textAlign: 'left',
+                marginTop: 6,
+              }}
+            >
+              <Zap size={16} />
+              <span>Evaluation Dashboard →</span>
+            </button>
+          )}
         </nav>
 
         {/* Right Panel */}
