@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User } from '../../types';
-import { store } from '../../services/store';
+import { store, useStore } from '../../services/store';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -12,26 +12,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const users = useStore(state => state.users);
+
+  // Always resolve against live store.users so role updates propagate immediately
+  const currentUser = sessionUserId ? users.find(u => u.id === sessionUserId) || null : null;
 
   const login = (email: string) => {
-    // Basic mock login
     const user = store.getState().users.find(u => u.email === email);
     if (user) {
-      setCurrentUser(user);
+      setSessionUserId(user.id);
     } else {
       alert('User not found in mock store');
     }
   };
 
   const loginAsDemo = () => {
-    // Specifically log in as default Admin user (u-1)
     const demoUser = store.getState().users.find(u => u.id === 'u-1');
-    if (demoUser) setCurrentUser(demoUser);
+    if (demoUser) setSessionUserId(demoUser.id);
   };
 
   const logout = () => {
-    setCurrentUser(null);
+    setSessionUserId(null);
   };
 
   return (

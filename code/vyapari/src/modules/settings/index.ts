@@ -1,1 +1,1 @@
-// public exports for settings
+export { SettingsPage } from './SettingsPage';

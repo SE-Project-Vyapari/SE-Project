@@ -31,6 +31,7 @@ export interface AppState {
   auditEvents: Types.AuditEvent[];
   followUps: Types.FollowUp[];
   leaveRecords: Types.LeaveRecord[];
+  settings: Types.AppSettings;
 }
 
 type Listener = () => void;
@@ -64,6 +65,12 @@ class Store {
       payrollRuns: [], payrollLineItems: [], forecastEntries: [], churnScores: [],
       notifications: [], notificationRules: [], messageLogs: [], chatbotQueryLogs: [], auditEvents: [],
       followUps: [], leaveRecords: [],
+      settings: {
+        tax: { defaultGstRate: 12, defaultHsnCode: '990000' },
+        invoice: { prefix: 'INV', defaultDueDays: 15, notesTemplate: 'Thank you for your business!' },
+        notifications: { Inventory: true, Orders: true, Customers: true, Finance: true, System: true },
+        barcode: { format: 'EAN-13', prefix: '8901058' },
+      },
     };
   }
 
@@ -97,7 +104,7 @@ class Store {
   }
 
   // Helper to append a single record to a table
-  insert<K extends keyof AppState>(table: K, record: AppState[K][0]) {
+  insert<K extends Exclude<keyof AppState, 'settings'>>(table: K, record: AppState[K][0]) {
     this.setState({
       [table]: [...this.state[table], record]
     } as any);
@@ -105,7 +112,7 @@ class Store {
 
   // Helper to update a single record by id
   // Update a single record by id
-  update<K extends keyof AppState>(table: K, id: string, updates: Partial<AppState[K][0]>) {
+  update<K extends Exclude<keyof AppState, 'settings'>>(table: K, id: string, updates: Partial<AppState[K][0]>) {
     const list = this.state[table] as any[];
     this.setState({
       [table]: list.map(item => item.id === id ? { ...item, ...updates } : item),
