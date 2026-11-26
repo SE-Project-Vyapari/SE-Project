@@ -4,12 +4,25 @@ import { useAuth } from '../auth/AuthContext';
 import * as Icons from 'lucide-react';
 import logoMonogram from '../../assets/logo-monogram.svg';
 
-export const Sidebar = ({ collapsed, setCollapsed }: { collapsed: boolean, setCollapsed: (v: boolean) => void }) => {
+export const Sidebar = ({
+  collapsed,
+  setCollapsed,
+  mobileOpen = false,
+  onCloseMobile,
+}: {
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}) => {
   const { currentUser } = useAuth();
   const role = currentUser?.role || 'cashier';
 
   return (
-    <aside style={{
+    <aside
+      aria-label="Primary Navigation"
+      className={`app-sidebar ${mobileOpen ? 'open' : ''}`}
+      style={{
       width: collapsed ? 80 : 260,
       backgroundColor: 'var(--color-dark)',
       color: 'var(--color-surface)',
@@ -22,11 +35,11 @@ export const Sidebar = ({ collapsed, setCollapsed }: { collapsed: boolean, setCo
     }}>
       <div style={{ padding: 'var(--spacing-16)', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src={logoMonogram} alt="Logo" width={32} />
+          <img src={logoMonogram} alt="Vyapari Logo" width={32} />
           {!collapsed && <span style={{ fontWeight: 'bold', fontSize: 20 }}>Vyapari</span>}
         </div>
         {!collapsed && (
-          <button onClick={() => setCollapsed(true)} style={{ background: 'none', border: 'none', color: 'var(--color-surface)', cursor: 'pointer' }}>
+          <button onClick={() => setCollapsed(true)} aria-label="Collapse sidebar" style={{ background: 'none', border: 'none', color: 'var(--color-surface)', cursor: 'pointer' }}>
             <Icons.ChevronLeft size={20} />
           </button>
         )}
@@ -34,7 +47,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: { collapsed: boolean, setCo
       
       {collapsed && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <button onClick={() => setCollapsed(false)} style={{ background: 'none', border: 'none', color: 'var(--color-surface)', cursor: 'pointer' }}>
+          <button onClick={() => setCollapsed(false)} aria-label="Expand sidebar" style={{ background: 'none', border: 'none', color: 'var(--color-surface)', cursor: 'pointer' }}>
             <Icons.ChevronRight size={20} />
           </button>
         </div>
@@ -58,6 +71,8 @@ export const Sidebar = ({ collapsed, setCollapsed }: { collapsed: boolean, setCo
                   <NavLink
                     key={item.path}
                     to={item.path}
+                    onClick={() => onCloseMobile?.()}
+                    aria-label={item.label}
                     style={({ isActive }) => ({
                       display: 'flex',
                       alignItems: 'center',

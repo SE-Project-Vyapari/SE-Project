@@ -12,11 +12,18 @@ import {
   XCircle,
   Info,
   Zap,
+  Menu,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
-export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
+export const Topbar = ({
+  onSearchOpen,
+  onMobileMenuOpen,
+}: {
+  onSearchOpen: () => void;
+  onMobileMenuOpen?: () => void;
+}) => {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const outlets = useStore(state => state.outlets);
@@ -68,8 +75,26 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
         zIndex: 40,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button
+          type="button"
+          className="app-mobile-menu-btn"
+          aria-label="Open navigation menu"
+          onClick={onMobileMenuOpen}
+          style={{
+            background: 'none',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: 8,
+            cursor: 'pointer',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Menu size={20} color="var(--color-dark)" />
+        </button>
         <div
+          className="app-outlet-pill"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -87,23 +112,24 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <button
           onClick={onSearchOpen}
+          aria-label="Open command search (Ctrl+K)"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 8,
             background: 'var(--color-background)',
             border: '1px solid var(--color-border)',
-            padding: '6px 16px',
+            padding: '6px 12px',
             borderRadius: 'var(--radius-sm)',
             cursor: 'pointer',
             color: 'var(--color-muted-text)',
           }}
         >
           <Search size={16} />
-          <span style={{ fontSize: 14 }}>Search... (Ctrl+K)</span>
+          <span className="app-search-text" style={{ fontSize: 14 }}>Search... (Ctrl+K)</span>
         </button>
 
         {/* Bell Icon + Notification Overlay */}
@@ -111,6 +137,7 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
           <button
             type="button"
             aria-label="Open notifications"
+            aria-expanded={bellOpen}
             onClick={() => setBellOpen(prev => !prev)}
             style={{
               position: 'relative',
@@ -423,6 +450,7 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen: () => void }) => {
           </div>
           <button
             onClick={logout}
+            aria-label="Logout"
             style={{
               background: 'none',
               border: 'none',

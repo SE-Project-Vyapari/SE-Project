@@ -37,3 +37,4 @@ export function getHighChurnScores(churnScores: Types.ChurnScore[]): Types.Churn
 export function getPendingPayrollRuns(payrollRuns: Types.PayrollRun[]): Types.PayrollRun[] {
   return payrollRuns.filter(p => p.status === 'draft' || p.status === 'calculated');
 }
+

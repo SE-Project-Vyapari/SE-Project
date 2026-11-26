@@ -84,8 +84,58 @@ export const OrderList = () => {
         </Select>
       </div>
 
-      <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+      {/* Desktop Table */}
+      <div className="desktop-table-only table-responsive-sticky" style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
         <Table columns={columns} data={filteredOrders} />
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="mobile-cards-only">
+        {filteredOrders.map(o => {
+          const customerName = store.customers.find(c => c.id === o.customerId)?.name || 'Guest Walk-in';
+          return (
+            <div
+              key={o.id}
+              onClick={() => navigate(`/orders/${o.id}`)}
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border)',
+                padding: 14,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: 14 }}>
+                  #{o.id.toUpperCase()}
+                </span>
+                <span
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 12,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    backgroundColor: statusColors[o.status] || 'gray',
+                    color: '#fff',
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {o.status}
+                </span>
+              </div>
+              <div className="truncate-ellipsis" title={customerName} style={{ fontWeight: 600, fontSize: 15 }}>
+                {customerName}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-muted-text)' }}>
+                <span>{new Date(o.createdAt).toLocaleDateString()}</span>
+                <strong style={{ color: 'var(--color-text)' }}>₹{o.totalAmount.toFixed(2)}</strong>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {isCreateOpen && <CreateOrderModal isOpen={true} onClose={() => setIsCreateOpen(false)} />}

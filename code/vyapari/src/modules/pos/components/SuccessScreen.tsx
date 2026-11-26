@@ -19,9 +19,14 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ data, onReset }) =
   const recentInvoice = store.invoices[store.invoices.length - 1]; // Assume last created
 
   return (
-    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)' }}>
+    <div
+      role="status"
+      aria-live="polite"
+      style={{ display: 'flex', minHeight: '100vh', padding: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)' }}
+    >
       <div style={{ 
-        width: 480, 
+        width: '100%',
+        maxWidth: 480, 
         backgroundColor: 'var(--color-surface)', 
         padding: 'var(--spacing-32)', 
         borderRadius: 'var(--radius-lg)', 

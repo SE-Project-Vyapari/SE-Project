@@ -66,7 +66,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           />
           <Search size={18} style={{ position: 'absolute', left: 12, top: 10, color: 'var(--color-muted-text)' }} />
         </div>
-        <Button onClick={onOpenScanner} style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}>
+        <Button
+          onClick={onOpenScanner}
+          aria-label="Scan barcode"
+          style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+        >
           <Camera size={18} style={{ marginRight: 8 }} /> Scan
         </Button>
       </div>
@@ -98,8 +102,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           const isOOS = qty === 0;
 
           return (
-            <div 
+            <button 
+              type="button"
               key={p.id}
+              disabled={isOOS}
               onClick={() => { if (!isOOS) onAdd(p.id, p.price); }}
               style={{ 
                 backgroundColor: 'var(--color-surface)', 
@@ -112,7 +118,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 flexDirection: 'column',
                 gap: 8,
                 position: 'relative',
-                transition: 'transform 0.1s'
+                transition: 'transform 0.1s',
+                textAlign: 'left',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -127,9 +134,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   {isOOS ? 'Out of stock' : `${qty} in stock`}
                 </span>
               </div>
-              <h3 style={{ margin: 0, fontSize: 16 }}>{p.name}</h3>
+              <h3 className="truncate-ellipsis" title={p.name} style={{ margin: 0, fontSize: 16, width: '100%' }}>{p.name}</h3>
               <div style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>₹{p.price.toLocaleString()}</div>
-            </div>
+            </button>
           );
         })}
         {filteredProducts.length === 0 && (

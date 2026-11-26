@@ -7,9 +7,25 @@ import { RoleGuard } from './components/RoleGuard';
 import { eventBus, Events } from '../services/eventBus';
 
 export const AppShell = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 1024 : false
+  );
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 1024 && window.innerWidth > 768) {
+        setSidebarCollapsed(true);
+      }
+      if (window.innerWidth > 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const handleOpenCmd = () => setCmdOpen(true);
@@ -30,10 +46,23 @@ export const AppShell = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+      <div
+        className={`app-sidebar-backdrop ${mobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        setCollapsed={setSidebarCollapsed}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
+      />
       
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Topbar onSearchOpen={() => setCmdOpen(true)} />
+        <Topbar
+          onSearchOpen={() => setCmdOpen(true)}
+          onMobileMenuOpen={() => setMobileMenuOpen(prev => !prev)}
+        />
         
         <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--color-background)' }}>
           <RoleGuard>
@@ -45,7 +74,11 @@ export const AppShell = () => {
       <CommandPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
       
       {toastMessage && (
-        <div style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: 'var(--color-primary)', color: 'white', padding: '12px 24px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', zIndex: 9999 }}>
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ position: 'fixed', bottom: 24, right: 24, backgroundColor: 'var(--color-primary)', color: 'white', padding: '12px 24px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', zIndex: 9999 }}
+        >
           {toastMessage}
         </div>
       )}

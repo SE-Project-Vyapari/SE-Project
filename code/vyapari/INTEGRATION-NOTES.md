@@ -27,3 +27,4 @@ Created `src/services/selectors.ts` so all modules compute identical numbers:
 - **Outstanding Receivables (`getOutstandingTotal`)**: `BusinessHealth` previously summed full `amount` of all non-`paid` invoices (including `cancelled` and ignoring partial payments). It now uses `getOutstandingTotal` (`amount - amountPaid`, excluding `paid` and `cancelled`).
 - **Gross Profit (`BusinessHealth`)**: Updated to compute actual `revenue - sum(orderItem.quantity * product.cost)` matching `SalesAnalyticsTab` and `ReportsPage`.
 - **Action Center Deep-Links**: Wired `?filter=` query parameter reading in `InventoryList` (`low`, `out`, `critical`, `healthy`, `overstock`) and `InvoicesList` (`overdue`, `unpaid`, `paid`, `partially_paid`) so clicking Action Center or Inventory Health Bar links applies the exact filter immediately.
+

@@ -9,7 +9,8 @@ import { CartPanel } from './components/CartPanel';
 import { ScannerModal } from './components/ScannerModal';
 import { SuccessScreen } from './components/SuccessScreen';
 import type { ScanFeedback } from '../scanner';
-import { Clock } from 'lucide-react';
+import { Clock, Keyboard, ShoppingBag, X } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
 
 export interface CartItem {
   productId: string;
@@ -36,6 +37,8 @@ export const PosPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [successData, setSuccessData] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -55,6 +58,15 @@ export const PosPage = () => {
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
         handleCheckout();
+      }
+      // '?' to open keyboard shortcuts modal
+      if (
+        e.key === '?' &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault();
+        setIsShortcutsOpen(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -185,31 +197,59 @@ export const PosPage = () => {
     return <SuccessScreen data={successData} onReset={resetPos} />;
   }
 
+  const totalCartItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+  const totalCartAmount = cart.reduce((sum, item) => {
+    const p = item.unitPrice - (item.discountType === 'amount' ? item.discount : (item.unitPrice * (item.discount / 100)));
+    return sum + (p * item.quantity);
+  }, 0);
+
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--color-background)' }}>
+    <div className="pos-layout">
       {/* Main Product Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 'var(--spacing-24)', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div className="pos-grid-pane">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
           <h1 style={{ margin: 0, fontSize: 24 }}>Point of Sale</h1>
-          <button
-            type="button"
-            onClick={() => navigate('/settings/evaluation')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 6,
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-surface)',
-              color: 'var(--color-muted-text)',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            <Clock size={14} /> Scan-to-Bill Metrics
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => setIsShortcutsOpen(true)}
+              aria-label="Keyboard shortcuts"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-muted-text)',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Keyboard size={14} /> Shortcuts (?)
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/settings/evaluation')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-muted-text)',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Clock size={14} /> Scan-to-Bill Metrics
+            </button>
+          </div>
         </div>
         
         <ProductGrid 
@@ -224,8 +264,27 @@ export const PosPage = () => {
         />
       </div>
 
-      {/* Cart Panel Sidebar */}
-      <div style={{ width: 400, backgroundColor: 'var(--color-surface)', borderLeft: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+      {/* Cart Panel Sidebar (Desktop) / Bottom Sheet (Mobile) */}
+      <div className={`pos-cart-pane ${mobileCartOpen ? 'open' : ''}`}>
+        <div
+          className="pos-mobile-cart-close"
+          style={{
+            padding: '12px 16px',
+            borderBottom: '1px solid var(--color-border)',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <strong>Current Cart ({totalCartItems})</strong>
+          <button
+            type="button"
+            aria-label="Close cart"
+            onClick={() => setMobileCartOpen(false)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+          >
+            <X size={20} />
+          </button>
+        </div>
         <CartPanel 
           cart={cart}
           onUpdateCart={handleUpdateCart}
@@ -241,6 +300,57 @@ export const PosPage = () => {
           }}
         />
       </div>
+
+      {/* Mobile Floating Cart Bar */}
+      <div className="pos-mobile-cart-bar">
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--color-muted-text)' }}>
+            {totalCartItems} {totalCartItems === 1 ? 'item' : 'items'} in cart
+          </div>
+          <div style={{ fontWeight: 700, fontSize: 16 }}>
+            ₹{totalCartAmount.toLocaleString('en-IN')}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMobileCartOpen(true)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '10px 18px',
+            borderRadius: 8,
+            border: 'none',
+            backgroundColor: 'var(--color-primary)',
+            color: 'white',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          <ShoppingBag size={16} /> View Cart
+        </button>
+      </div>
+
+      {isShortcutsOpen && (
+        <Modal isOpen={true} onClose={() => setIsShortcutsOpen(false)} title="POS Keyboard Shortcuts">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 14 }}>
+            {[
+              ['/', 'Focus product search bar'],
+              ['Enter (in search)', 'Quick-add top matching in-stock product'],
+              ['Ctrl + Enter', 'Complete Sale / Checkout'],
+              ['?', 'Toggle this shortcuts dialog'],
+              ['Ctrl + K', 'Open global Command Palette'],
+            ].map(([key, desc]) => (
+              <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottom: '1px solid var(--color-border)' }}>
+                <span style={{ color: 'var(--color-muted-text)' }}>{desc}</span>
+                <kbd style={{ padding: '3px 8px', borderRadius: 6, backgroundColor: 'var(--color-background)', border: '1px solid var(--color-border)', fontWeight: 600, fontSize: 12 }}>
+                  {key}
+                </kbd>
+              </div>
+            ))}
+          </div>
+        </Modal>
+      )}
 
       {isScannerOpen && (
         <ScannerModal
