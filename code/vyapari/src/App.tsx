@@ -32,6 +32,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { AutomationRulesPage } from './pages/AutomationRulesPage';
 import { MessageLogsPage } from './pages/MessageLogsPage';
 import { EvaluationMetricsPage } from './pages/EvaluationMetricsPage';
+import { ReportsPage } from './modules/reports';
 
 const FeaturePlaceholder = ({ title }: { title: string }) => (
   <div style={{ padding: 40 }}>
@@ -73,7 +74,7 @@ function AppRoutes() {
         <Route path="/employees" element={<EmployeeList />} />
         <Route path="/employees/attendance" element={<AttendancePage />} />
         <Route path="/employees/:id" element={<EmployeeDetail />} />
-        <Route path="/reports" element={<FeaturePlaceholder title="Reports" />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/settings" element={<FeaturePlaceholder title="Settings" />} />
         <Route path="/settings/evaluation" element={<EvaluationMetricsPage />} />
       </Route>

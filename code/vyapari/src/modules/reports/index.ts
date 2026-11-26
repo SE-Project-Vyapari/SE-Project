@@ -1,1 +1,1 @@
-// public exports for reports
+export { ReportsPage } from './ReportsPage';
