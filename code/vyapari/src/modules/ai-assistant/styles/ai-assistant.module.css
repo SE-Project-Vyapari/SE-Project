@@ -1,7 +1,7 @@
 /* AI Assistant Module Styles - Business Intelligence Analyst Experience */
 
 .assistantContainer {
-  padding: var(--spacing-24);
+  padding: var(--page-padding);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-24);
@@ -554,3 +554,5 @@
   max-width: 480px;
   line-height: 1.5;
 }
+
+.headerActions { flex-wrap: wrap; }

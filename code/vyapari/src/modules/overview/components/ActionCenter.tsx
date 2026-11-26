@@ -93,7 +93,7 @@ export const ActionCenter = () => {
 
   return (
     <Card style={{ padding: 'var(--spacing-24)', display: 'flex', flexDirection: 'column' }}>
-      <h3 style={{ margin: '0 0 16px 0' }}>Action Center</h3>
+      <h3 className="vy-card-title" style={{ marginBottom: 16 }}>Action Center</h3>
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {actions.length === 0 ? (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-muted-text)' }}>
@@ -103,8 +103,8 @@ export const ActionCenter = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {actions.map(action => (
-              <div key={action.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div key={action.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: 12, backgroundColor: 'var(--color-surface-sunken)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 180px', minWidth: 0 }}>
                   <action.icon color={action.color} size={20} />
                   <span style={{ fontSize: 14 }}>{action.message}</span>
                 </div>

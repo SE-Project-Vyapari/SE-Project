@@ -1,5 +1,5 @@
 .container {
-  padding: var(--spacing-32);
+  padding: var(--page-padding);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-24);
@@ -491,4 +491,22 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-16);
+}
+
+/* --- UI polish: consistent interaction states --- */
+.metricCard {
+  transition: background-color var(--transition-base), border-color var(--transition-base),
+    box-shadow var(--transition-base), transform var(--transition-base);
+}
+.metricCard:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.drawerCloseBtn:hover { background-color: var(--color-primary-soft); color: var(--color-dark); }
+.btnPrimary:hover:not(:disabled) { background-color: var(--color-primary-hover); }
+.btnPrimary:focus-visible, .btnSecondary:focus-visible, .btnReview:focus-visible, .reviewBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+@media (max-width: 520px) {
+  .factorsGrid { grid-template-columns: 1fr; }
 }

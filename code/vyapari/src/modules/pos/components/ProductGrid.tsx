@@ -55,16 +55,17 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Controls */}
       <div style={{ display: 'flex', gap: 12 }}>
-        <div style={{ flex: 1, position: 'relative' }}>
+        <div className="vy-search">
           <Input 
+            aria-label="Search products"
             ref={searchInputRef}
             placeholder="Search name, SKU, or barcode (Press '/' to focus)" 
             value={searchQuery}
             onChange={(e: any) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            style={{ paddingLeft: 40 }}
+            style={{ paddingLeft: 40, width: '100%' }}
           />
-          <Search size={18} style={{ position: 'absolute', left: 12, top: 10, color: 'var(--color-muted-text)' }} />
+          <Search size={18} />
         </div>
         <Button
           onClick={onOpenScanner}
@@ -76,18 +77,22 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Categories */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8 }}>
+      <div className="vy-chip-row" role="group" aria-label="Filter by category">
         <button 
+          type="button"
           onClick={() => setCategoryFilter('')} 
-          style={{ padding: '6px 16px', borderRadius: 16, border: 'none', backgroundColor: categoryFilter === '' ? 'var(--color-primary)' : 'var(--color-surface)', color: categoryFilter === '' ? '#fff' : 'var(--color-text)', cursor: 'pointer' }}
+          className={`vy-chip${categoryFilter === '' ? ' vy-chip--active' : ''}`}
+          aria-pressed={categoryFilter === ''}
         >
           All
         </button>
         {categories.map(c => (
           <button 
             key={c}
+            type="button"
             onClick={() => setCategoryFilter(c)} 
-            style={{ padding: '6px 16px', borderRadius: 16, border: 'none', backgroundColor: categoryFilter === c ? 'var(--color-primary)' : 'var(--color-surface)', color: categoryFilter === c ? '#fff' : 'var(--color-text)', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            className={`vy-chip${categoryFilter === c ? ' vy-chip--active' : ''}`}
+            aria-pressed={categoryFilter === c}
           >
             {c}
           </button>
@@ -95,7 +100,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+      <div className="vy-product-grid">
         {filteredProducts.map(p => {
           const inv = store.inventoryRecords.find(r => r.productId === p.id && r.outletId === outletId);
           const qty = inv?.quantity || 0;
@@ -106,41 +111,23 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               type="button"
               key={p.id}
               disabled={isOOS}
+              aria-label={`Add ${p.name} to cart, ₹${p.price.toLocaleString()}${isOOS ? ', out of stock' : ''}`}
               onClick={() => { if (!isOOS) onAdd(p.id, p.price); }}
-              style={{ 
-                backgroundColor: 'var(--color-surface)', 
-                borderRadius: 'var(--radius-md)', 
-                padding: 16, 
-                border: '1px solid var(--color-border)',
-                cursor: isOOS ? 'not-allowed' : 'pointer',
-                opacity: isOOS ? 0.6 : 1,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                position: 'relative',
-                transition: 'transform 0.1s',
-                textAlign: 'left',
-              }}
+              className={`vy-product-card${isOOS ? ' vy-product-card--disabled' : ''}`}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 12, color: 'var(--color-muted-text)' }}>{p.sku}</span>
-                <span style={{ 
-                  fontSize: 11, 
-                  padding: '2px 6px', 
-                  borderRadius: 12, 
-                  backgroundColor: isOOS ? 'var(--color-danger)' : qty <= (inv?.reorderLevel || 5) ? 'var(--color-warning)' : 'var(--color-success)',
-                  color: isOOS ? '#fff' : '#000'
-                }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, width: '100%' }}>
+                <span style={{ fontSize: 12, color: 'var(--color-muted-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.sku}</span>
+                <span className={`vy-stock-badge ${isOOS ? 'vy-stock-badge--out' : qty <= (inv?.reorderLevel || 5) ? 'vy-stock-badge--low' : 'vy-stock-badge--ok'}`}>
                   {isOOS ? 'Out of stock' : `${qty} in stock`}
                 </span>
               </div>
-              <h3 className="truncate-ellipsis" title={p.name} style={{ margin: 0, fontSize: 16, width: '100%' }}>{p.name}</h3>
-              <div style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>₹{p.price.toLocaleString()}</div>
+              <h3 className="vy-product-card__name" title={p.name}>{p.name}</h3>
+              <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--color-primary)', fontVariantNumeric: 'tabular-nums' }}>₹{p.price.toLocaleString()}</div>
             </button>
           );
         })}
         {filteredProducts.length === 0 && (
-          <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', color: 'var(--color-muted-text)' }}>
+          <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', color: 'var(--color-muted-text)', border: '1px dashed var(--color-border-strong)', borderRadius: 'var(--radius-md)' }}>
             No products found.
           </div>
         )}

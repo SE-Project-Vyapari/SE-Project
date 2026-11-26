@@ -22,10 +22,7 @@ export const TransferList = () => {
     { header: 'To', accessor: (r: any) => store.outlets.find(o => o.id === r.toOutletId)?.name },
     { header: 'Qty', accessor: (r: any) => r.quantity },
     { header: 'Status', accessor: (r: any) => (
-      <span style={{ 
-        padding: '4px 8px', borderRadius: 12, fontSize: 12, 
-        backgroundColor: r.status === 'completed' ? 'var(--color-success)' : r.status === 'pending' ? 'var(--color-warning)' : 'var(--color-danger)' 
-      }}>
+      <span className="vy-pill" style={{ ['--pill' as any]: r.status === 'completed' ? 'var(--color-success)' : r.status === 'pending' ? 'var(--color-warning)' : 'var(--color-danger)' }}>
         {r.status}
       </span>
     ) },
@@ -39,10 +36,10 @@ export const TransferList = () => {
   ];
 
   return (
-    <div style={{ padding: 'var(--spacing-24)' }}>
-      <h1 style={{ marginBottom: 24 }}>Stock Transfers</h1>
-      <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-        <Table columns={columns} data={transfers} />
+    <div className="vy-page">
+      <h1 className="vy-page-title">Stock Transfers</h1>
+      <div className="vy-card" style={{ overflow: 'hidden' }}>
+        <Table columns={columns} data={transfers} emptyMessage="No stock transfers yet." />
       </div>
     </div>
   );

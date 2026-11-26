@@ -42,51 +42,48 @@ export const OrderList = () => {
 
   const columns = [
     { header: 'Order ID', accessor: (r: any) => (
-      <span style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 500 }} onClick={() => navigate(`/orders/${r.id}`)}>
+      <a href={`/orders/${r.id}`} style={{ fontWeight: 600 }} onClick={(e) => { e.preventDefault(); navigate(`/orders/${r.id}`); }}>
         {r.id.toUpperCase()}
-      </span>
+      </a>
     )},
     { header: 'Date', accessor: (r: any) => new Date(r.createdAt).toLocaleString() },
     { header: 'Customer', accessor: (r: any) => store.customers.find(c => c.id === r.customerId)?.name || 'Guest Walk-in' },
     { header: 'Outlet', accessor: (r: any) => store.outlets.find(o => o.id === r.outletId)?.name },
     { header: 'Amount', accessor: (r: any) => `₹${r.totalAmount.toFixed(2)}` },
     { header: 'Status', accessor: (r: any) => (
-      <span style={{ 
-        padding: '4px 8px', borderRadius: 12, fontSize: 12, 
-        backgroundColor: statusColors[r.status] || 'gray', color: '#fff', textTransform: 'capitalize' 
-      }}>
+      <span className="vy-pill" style={{ ['--pill' as any]: statusColors[r.status] || 'var(--color-muted-text)' }}>
         {r.status}
       </span>
     )}
   ];
 
   return (
-    <div style={{ padding: 'var(--spacing-24)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ margin: 0 }}>Orders</h1>
+    <div className="vy-page">
+      <div className="vy-page-header">
+        <h1 className="vy-page-title">Orders</h1>
         <Button onClick={() => setIsCreateOpen(true)} style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>
           <Plus size={16} style={{ marginRight: 8 }} /> Create Order
         </Button>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-          <Input placeholder="Search Order ID or Customer..." value={search} onChange={(e: any) => setSearch(e.target.value)} style={{ paddingLeft: 36, width: '100%' }} />
-          <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--color-muted-text)' }} />
+      <div className="vy-toolbar">
+        <div className="vy-search">
+          <Input aria-label="Search orders" placeholder="Search Order ID or Customer..." value={search} onChange={(e: any) => setSearch(e.target.value)} style={{ paddingLeft: 36, width: '100%' }} />
+          <Search size={16} />
         </div>
-        <Select value={statusFilter} onChange={(e: any) => setStatusFilter(e.target.value)} style={{ width: 160 }}>
+        <Select aria-label="Filter by status" value={statusFilter} onChange={(e: any) => setStatusFilter(e.target.value)} style={{ width: 170 }}>
           <option value="">All Statuses</option>
           {Object.keys(statusColors).map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
         </Select>
-        <Select value={outletFilter} onChange={(e: any) => setOutletFilter(e.target.value)} style={{ width: 160 }}>
+        <Select aria-label="Filter by outlet" value={outletFilter} onChange={(e: any) => setOutletFilter(e.target.value)} style={{ width: 170 }}>
           <option value="">All Outlets</option>
           {store.outlets.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
         </Select>
       </div>
 
       {/* Desktop Table */}
-      <div className="desktop-table-only table-responsive-sticky" style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-        <Table columns={columns} data={filteredOrders} />
+      <div className="desktop-table-only table-responsive-sticky card-base" style={{ padding: 0, overflow: 'hidden' }}>
+        <Table columns={columns} data={filteredOrders} emptyMessage="No orders match your filters." />
       </div>
 
       {/* Mobile Card List */}
@@ -112,17 +109,7 @@ export const OrderList = () => {
                 <span style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: 14 }}>
                   #{o.id.toUpperCase()}
                 </span>
-                <span
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: 12,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    backgroundColor: statusColors[o.status] || 'gray',
-                    color: '#fff',
-                    textTransform: 'capitalize',
-                  }}
-                >
+                <span className="vy-pill" style={{ ['--pill' as any]: statusColors[o.status] || 'var(--color-muted-text)' }}>
                   {o.status}
                 </span>
               </div>

@@ -6,6 +6,7 @@ import { Trash2, UserPlus, CreditCard, Banknote, Smartphone, Minus, Plus } from 
 import { Select } from '../../../components/ui/Select';
 import { AddCustomerModal } from '../../crm';
 import { formatINR } from '../../../utils/format';
+import { getGstRate, gstIncludedIn } from '../../../utils/gst';
 
 interface CartPanelProps {
   cart: CartItem[];
@@ -32,10 +33,14 @@ export const CartPanel: React.FC<CartPanelProps> = ({
     return sum + (d * item.quantity);
   }, 0);
   
-  // Simplified fixed GST 18% for demo, applied after discount
-  const taxableAmount = subtotal - totalDiscount;
-  const tax = taxableAmount * 0.18;
-  const grandTotal = taxableAmount + tax;
+  // Prices are GST-inclusive (same model as invoices): the customer pays the
+  // discounted shelf price, and the GST contained in it is shown for reference.
+  const grandTotal = subtotal - totalDiscount;
+  const tax = cart.reduce((sum, item) => {
+    const prod = store.products.find(p => p.id === item.productId);
+    const unitNet = item.unitPrice - (item.discountType === 'amount' ? item.discount : (item.unitPrice * (item.discount / 100)));
+    return sum + gstIncludedIn(unitNet * item.quantity, getGstRate(prod?.category));
+  }, 0);
 
   const handleQtyChange = (productId: string, currentQty: number, change: number) => {
     const newQty = currentQty + change;
@@ -56,11 +61,11 @@ export const CartPanel: React.FC<CartPanelProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       {/* Customer Selector */}
       <div style={{ padding: 'var(--spacing-16)', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <Select value={customerId || 'walk_in'} onChange={(e: any) => setCustomerId(e.target.value === 'walk_in' ? undefined : e.target.value)}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Select aria-label="Customer" value={customerId || 'walk_in'} onChange={(e: any) => setCustomerId(e.target.value === 'walk_in' ? undefined : e.target.value)}>
             <option value="walk_in">Walk-in Customer</option>
             {store.customers.map(c => (
               <option key={c.id} value={c.id}>{c.name} ({c.phone || c.email})</option>
@@ -69,7 +74,9 @@ export const CartPanel: React.FC<CartPanelProps> = ({
         </div>
         <Button
           onClick={() => setIsAddCustomerOpen(true)}
-          style={{ padding: '0 12px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', cursor: 'pointer' }}
+          variant="secondary"
+          aria-label="Add new customer"
+          title="Add new customer"
         >
           <UserPlus size={16} />
         </Button>
@@ -83,31 +90,35 @@ export const CartPanel: React.FC<CartPanelProps> = ({
       )}
 
       {/* Cart Items */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-16)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ flex: 1, minHeight: 120, overflowY: 'auto', padding: 'var(--spacing-16)', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {cart.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--color-muted-text)', marginTop: 40 }}>
+          <div style={{ textAlign: 'center', color: 'var(--color-muted-text)', margin: 'auto 0', padding: '32px 0' }}>
             <ShoppingCartIcon />
-            <p>Cart is empty</p>
+            <p style={{ fontWeight: 600, color: 'var(--color-text)' }}>Cart is empty</p>
+            <p style={{ fontSize: 13 }}>Tap a product to add it to the sale.</p>
           </div>
         ) : (
           cart.map(item => {
             const prod = store.products.find(p => p.id === item.productId);
             const lineSubtotal = (item.unitPrice - (item.discountType === 'amount' ? item.discount : (item.unitPrice * (item.discount / 100)))) * item.quantity;
             return (
-              <div key={item.productId} style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 16, borderBottom: '1px solid var(--color-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ fontWeight: 500 }}>{prod?.name}</div>
-                  <div style={{ fontWeight: 600 }}>₹{lineSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+              <div key={item.productId} style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 14, borderBottom: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, color: 'var(--color-dark)', overflowWrap: 'anywhere' }}>{prod?.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--color-muted-text)', fontVariantNumeric: 'tabular-nums' }}>₹{item.unitPrice.toLocaleString()} each</div>
+                  </div>
+                  <div style={{ fontWeight: 700, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>₹{lineSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--color-border)', borderRadius: 4, padding: 2 }}>
-                    <button onClick={() => handleQtyChange(item.productId, item.quantity, -1)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer' }}><Minus size={14}/></button>
-                    <span style={{ fontSize: 14, minWidth: 20, textAlign: 'center' }}>{item.quantity}</span>
-                    <button onClick={() => handleQtyChange(item.productId, item.quantity, 1)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer' }}><Plus size={14}/></button>
+                  <div className="vy-qty-stepper">
+                    <button type="button" aria-label={`Decrease quantity of ${prod?.name}`} onClick={() => handleQtyChange(item.productId, item.quantity, -1)}><Minus size={14}/></button>
+                    <span aria-live="polite">{item.quantity}</span>
+                    <button type="button" aria-label={`Increase quantity of ${prod?.name}`} onClick={() => handleQtyChange(item.productId, item.quantity, 1)}><Plus size={14}/></button>
                   </div>
-                  <button onClick={() => onRemoveFromCart(item.productId)} style={{ color: 'var(--color-danger)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <Button variant="danger-ghost" size="sm" onClick={() => onRemoveFromCart(item.productId)} aria-label={`Remove ${prod?.name} from cart`} title="Remove item">
                     <Trash2 size={16} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             );
@@ -116,28 +127,28 @@ export const CartPanel: React.FC<CartPanelProps> = ({
       </div>
 
       {/* Summary & Payment */}
-      <div style={{ padding: 'var(--spacing-16)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
-          <span style={{ color: 'var(--color-muted-text)' }}>Subtotal</span>
+      <div style={{ padding: 'var(--spacing-16)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface-sunken)' }}>
+        <div className="vy-summary-row">
+          <span>Subtotal</span>
           <span className="tabular-nums">{formatINR(subtotal, { showDecimals: true })}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
-          <span style={{ color: 'var(--color-muted-text)' }}>Discount</span>
+        <div className="vy-summary-row">
+          <span>Discount</span>
           <span style={{ color: 'var(--color-success)' }} className="tabular-nums">
             {formatINR(-totalDiscount, { showDecimals: true })}
           </span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, fontSize: 14 }}>
-          <span style={{ color: 'var(--color-muted-text)' }}>Tax (GST 18%)</span>
+        <div className="vy-summary-row">
+          <span>GST (included)</span>
           <span className="tabular-nums">{formatINR(tax, { showDecimals: true })}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, fontSize: 20, fontWeight: 'bold' }}>
+        <div className="vy-summary-total">
           <span>Total</span>
           <span className="tabular-nums">{formatINR(grandTotal, { showDecimals: true })}</span>
         </div>
 
         {/* Payment Methods */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 16, backgroundColor: 'var(--color-surface)', padding: 4, borderRadius: 6, border: '1px solid var(--color-border)' }}>
+        <div className="vy-pay-methods" role="radiogroup" aria-label="Payment method">
           {[
             { id: 'cash', icon: Banknote, label: 'Cash' },
             { id: 'upi', icon: Smartphone, label: 'UPI' },
@@ -146,35 +157,28 @@ export const CartPanel: React.FC<CartPanelProps> = ({
           ].map(method => (
             <button
               key={method.id}
+              type="button"
+              role="radio"
+              aria-checked={paymentMethod === method.id}
               onClick={() => setPaymentMethod(method.id as any)}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 4,
-                padding: '8px 0',
-                border: 'none',
-                borderRadius: 4,
-                backgroundColor: paymentMethod === method.id ? 'var(--color-primary)' : 'transparent',
-                color: paymentMethod === method.id ? '#fff' : 'var(--color-muted-text)',
-                cursor: 'pointer'
-              }}
+              className={`vy-pay-method${paymentMethod === method.id ? ' vy-pay-method--active' : ''}`}
             >
-              <method.icon size={16} />
-              <span style={{ fontSize: 11 }}>{method.label}</span>
+              <method.icon size={18} />
+              <span>{method.label}</span>
             </button>
           ))}
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button onClick={onClear} disabled={cart.length===0} style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}>
+          <Button onClick={onClear} disabled={cart.length===0} variant="secondary" style={{ minHeight: 46 }}>
             Clear
           </Button>
           <Button 
             onClick={onCheckout} 
             disabled={cart.length === 0 || isProcessing}
-            style={{ flex: 1, backgroundColor: 'var(--color-primary)', color: 'white' }}
+            variant="primary"
+            aria-busy={isProcessing}
+            style={{ flex: 1, minHeight: 46, fontSize: 15 }}
           >
             {isProcessing ? 'Processing...' : 'Complete Sale (Ctrl+Enter)'}
           </Button>

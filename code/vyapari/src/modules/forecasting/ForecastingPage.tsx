@@ -140,7 +140,7 @@ export const ForecastingPage: React.FC = () => {
       {/* "How This Works" Explanatory Modal */}
       {showHowItWorks && (
         <div className={styles.drawerOverlay} onClick={() => setShowHowItWorks(false)}>
-          <div className={styles.drawerContent} style={{ width: 620 }} onClick={e => e.stopPropagation()}>
+          <div className={styles.drawerContent} style={{ width: 620, maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
             <div className={styles.drawerHeader}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Sparkles size={20} style={{ color: 'var(--color-primary)' }} />

@@ -17,19 +17,19 @@ export const ActivityFeed = () => {
   };
 
   return (
-    <Card style={{ padding: 'var(--spacing-24)', gridRow: 'span 2' }}>
-      <h3 style={{ margin: '0 0 16px 0' }}>Recent Activity</h3>
+    <Card style={{ padding: 'var(--spacing-24)' }}>
+      <h3 className="vy-card-title" style={{ marginBottom: 12 }}>Recent Activity</h3>
       
       {recentEvents.length === 0 ? (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-muted-text)' }}>
+        <div style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--color-muted-text)' }}>
           No recent activity.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {recentEvents.map(event => (
-            <div key={event.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ marginTop: 2 }}>{getIcon(event.action)}</div>
-              <div style={{ flex: 1 }}>
+            <div key={event.id} className="vy-activity-item">
+              <div className="vy-activity-icon">{getIcon(event.action)}</div>
+              <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text)', marginBottom: 2 }}>
                   {event.details || event.action}
                 </div>

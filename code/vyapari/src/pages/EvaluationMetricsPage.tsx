@@ -130,7 +130,7 @@ export const EvaluationMetricsPage = () => {
   // Owner-only gate (placed after all hooks to satisfy Rules of Hooks)
   if (currentUser && currentUser.role !== 'owner') {
     return (
-      <div style={{ padding: 'var(--spacing-32)' }}>
+      <div style={{ padding: 'var(--page-padding)' }}>
         <div
           style={{
             padding: 32,
@@ -222,7 +222,7 @@ export const EvaluationMetricsPage = () => {
   return (
     <div
       style={{
-        padding: 'var(--spacing-32)',
+        padding: 'var(--page-padding)',
         display: 'flex',
         flexDirection: 'column',
         gap: 'var(--spacing-24)',

@@ -1,6 +1,5 @@
 import { useStore } from '../../../services/store';
-import { Card } from '../../../components/ui/Card';
-import { TrendingUp, TrendingDown, Package, CreditCard, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, CreditCard, IndianRupee, ShoppingBag, AlertTriangle, ChevronRight } from 'lucide-react';
 import { isToday, isYesterday } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { formatINR } from '../../../utils/format';
@@ -43,28 +42,45 @@ export const BusinessHealth = () => {
   const lowStockCount = getLowStockRecords(store.inventoryRecords).length;
   const outstandings = getOutstandingTotal(store.invoices);
 
-  const MetricCard = ({ title, value, delta, icon: Icon, onClick }: any) => (
-    <Card style={{ padding: 'var(--spacing-16)', flex: 1, cursor: onClick ? 'pointer' : 'default', borderLeft: onClick ? '3px solid var(--color-primary)' : 'none' }} onClick={onClick}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-muted-text)', marginBottom: 8, alignItems: 'center' }}>
-        <span style={{ fontSize: 14, fontWeight: 600 }}>{title}</span>
-        <Icon size={16} />
-      </div>
-      <div style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 8 }}>{value}</div>
-      {delta !== undefined && (
-        <div style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, color: delta >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-          {delta >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          <span>{Math.abs(delta).toFixed(1)}% vs yesterday</span>
+  const MetricCard = ({ title, value, delta, icon: Icon, onClick }: any) => {
+    const content = (
+      <>
+        <div className="vy-kpi__head">
+          <span className="vy-kpi__title" title={title}>{title}</span>
+          <span className="vy-kpi__icon" aria-hidden="true"><Icon size={17} /></span>
         </div>
-      )}
-    </Card>
-  );
+        <div className="vy-kpi__value" title={String(value)}>{value}</div>
+        <div className="vy-kpi__foot">
+          {delta !== undefined ? (
+            <>
+              <span className={`vy-kpi__delta ${delta >= 0 ? 'vy-kpi__delta--up' : 'vy-kpi__delta--down'}`}>
+                {delta >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {delta >= 0 ? '+' : '−'}{Math.abs(delta).toFixed(1)}%
+              </span>
+              <span>vs yesterday</span>
+            </>
+          ) : onClick ? (
+            <span className="vy-kpi__link-hint">View details <ChevronRight size={13} /></span>
+          ) : null}
+        </div>
+      </>
+    );
+
+    return onClick ? (
+      <button type="button" className="vy-kpi vy-kpi--link" onClick={onClick} aria-label={`${title}: ${value}. View details`}>
+        {content}
+      </button>
+    ) : (
+      <div className="vy-kpi">{content}</div>
+    );
+  };
 
   return (
-    <div style={{ display: 'flex', gap: 'var(--spacing-16)', flexWrap: 'wrap' }}>
-      <MetricCard title="Today's Revenue" value={formatINR(todayRev)} delta={revDelta} icon={DollarSign} />
-      <MetricCard title="Today's Orders" value={todayOrders} delta={orderDelta} icon={Package} />
+    <div className="vy-kpi-grid">
+      <MetricCard title="Today's Revenue" value={formatINR(todayRev)} delta={revDelta} icon={IndianRupee} />
+      <MetricCard title="Today's Orders" value={todayOrders} delta={orderDelta} icon={ShoppingBag} />
       <MetricCard title="Gross Profit" value={formatINR(todayGP)} delta={gpDelta} icon={TrendingUp} />
-      <MetricCard title="Low Stock Items" value={lowStockCount} icon={Package} onClick={() => navigate('/inventory')} />
+      <MetricCard title="Low Stock Items" value={lowStockCount} icon={AlertTriangle} onClick={() => navigate('/inventory')} />
       <MetricCard title="Outstanding Pay" value={formatINR(outstandings)} icon={CreditCard} onClick={() => navigate('/invoices')} />
     </div>
   );

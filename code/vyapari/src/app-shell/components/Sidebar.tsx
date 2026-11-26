@@ -23,45 +23,46 @@ export const Sidebar = ({
       aria-label="Primary Navigation"
       className={`app-sidebar ${mobileOpen ? 'open' : ''}`}
       style={{
-      width: collapsed ? 80 : 260,
+      width: collapsed ? 72 : 248,
+      flexShrink: 0,
       backgroundColor: 'var(--color-dark)',
       color: 'var(--color-surface)',
       transition: 'width 0.2s',
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
-      borderRight: '1px solid var(--color-border)',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      overflowX: 'hidden'
     }}>
-      <div style={{ padding: 'var(--spacing-16)', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between' }}>
+      <div style={{ minHeight: 64, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', borderBottom: '1px solid rgba(255, 253, 248, 0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src={logoMonogram} alt="Vyapari Logo" width={32} />
-          {!collapsed && <span style={{ fontWeight: 'bold', fontSize: 20 }}>Vyapari</span>}
+          <img src={logoMonogram} alt="Vyapari Logo" width={30} />
+          {!collapsed && <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20, letterSpacing: '-0.01em' }}>Vyapari</span>}
         </div>
         {!collapsed && (
-          <button onClick={() => setCollapsed(true)} aria-label="Collapse sidebar" style={{ background: 'none', border: 'none', color: 'var(--color-surface)', cursor: 'pointer' }}>
-            <Icons.ChevronLeft size={20} />
+          <button className="vy-sidebar__toggle" onClick={() => setCollapsed(true)} aria-label="Collapse sidebar" title="Collapse sidebar">
+            <Icons.ChevronLeft size={18} />
           </button>
         )}
       </div>
-      
+
       {collapsed && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <button onClick={() => setCollapsed(false)} aria-label="Expand sidebar" style={{ background: 'none', border: 'none', color: 'var(--color-surface)', cursor: 'pointer' }}>
-            <Icons.ChevronRight size={20} />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+          <button className="vy-sidebar__toggle" onClick={() => setCollapsed(false)} aria-label="Expand sidebar" title="Expand sidebar">
+            <Icons.ChevronRight size={18} />
           </button>
         </div>
       )}
 
-      <nav style={{ flex: 1, padding: 'var(--spacing-12)' }}>
+      <nav style={{ flex: 1, padding: '16px 12px' }}>
         {NAVIGATION_CONFIG.map(group => {
           const visibleItems = group.items.filter(item => hasPermission(role, item.path));
           if (visibleItems.length === 0) return null;
 
           return (
-            <div key={group.name} style={{ marginBottom: 'var(--spacing-24)' }}>
+            <div key={group.name} style={{ marginBottom: collapsed ? 12 : 20 }}>
               {!collapsed && (
-                <div style={{ fontSize: 11, color: 'var(--color-muted-text)', fontWeight: 600, letterSpacing: 1, marginBottom: 8, paddingLeft: 12 }}>
+                <div className="vy-sidebar__group-label">
                   {group.name}
                 </div>
               )}
@@ -71,24 +72,15 @@ export const Sidebar = ({
                   <NavLink
                     key={item.path}
                     to={item.path}
+                    end={item.path === '/'}
                     onClick={() => onCloseMobile?.()}
                     aria-label={item.label}
-                    style={({ isActive }) => ({
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: '10px 12px',
-                      borderRadius: 'var(--radius-sm)',
-                      textDecoration: 'none',
-                      color: isActive ? 'white' : 'var(--color-muted-text)',
-                      backgroundColor: isActive ? 'var(--color-primary)' : 'transparent',
-                      marginBottom: 4,
-                      justifyContent: collapsed ? 'center' : 'flex-start'
-                    })}
+                    className="vy-nav-link"
+                    style={{ justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? 0 : undefined }}
                     title={collapsed ? item.label : undefined}
                   >
-                    {Icon && <Icon size={20} />}
-                    {!collapsed && <span>{item.label}</span>}
+                    {Icon && <Icon size={18} />}
+                    {!collapsed && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
                   </NavLink>
                 );
               })}

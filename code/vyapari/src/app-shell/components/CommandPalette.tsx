@@ -78,8 +78,8 @@ export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean, onClose: 
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', paddingTop: '10vh' }} onClick={onClose}>
-      <div style={{ width: 600, backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(41,37,34,0.45)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '10vh 16px 16px' }} onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="Search" style={{ width: '100%', maxWidth: 600, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', overflow: 'hidden', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
         <div style={{ padding: 16, borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <Search size={20} color="var(--color-muted-text)" />
           <input
@@ -88,7 +88,7 @@ export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean, onClose: 
             value={query}
             onChange={e => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
-            style={{ border: 'none', outline: 'none', flex: 1, fontSize: 16, backgroundColor: 'transparent', color: 'var(--color-text)' }}
+            style={{ border: 'none', outline: 'none', boxShadow: 'none', flex: 1, minWidth: 0, fontSize: 16, backgroundColor: 'transparent', color: 'var(--color-text)' }}
           />
         </div>
         
@@ -105,7 +105,7 @@ export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean, onClose: 
                   return (
                     <div 
                       key={item.label + item.sub}
-                      style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', backgroundColor: selected ? 'var(--color-background)' : 'transparent', borderLeft: selected ? '3px solid var(--color-primary)' : '3px solid transparent' }}
+                      style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', transition: 'background-color 150ms ease', backgroundColor: selected ? 'var(--color-primary-soft)' : 'transparent', borderLeft: selected ? '3px solid var(--color-primary)' : '3px solid transparent' }}
                       onMouseEnter={() => setSelectedIndex(idx)}
                       onClick={() => { navigate(item.path); onClose(); }}
                     >

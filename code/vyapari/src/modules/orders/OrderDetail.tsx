@@ -15,7 +15,7 @@ export const OrderDetail = () => {
   const store = useStore();
   
   const order = store.orders.find(o => o.id === id);
-  if (!order) return <div style={{ padding: 24 }}>Order not found.</div>;
+  if (!order) return <div className="vy-page">Order not found.</div>;
 
   const items = store.orderItems.filter(i => i.orderId === order.id);
   const customer = store.customers.find(c => c.id === order.customerId);
@@ -31,15 +31,15 @@ export const OrderDetail = () => {
   const currentIndex = STAGES.indexOf(order.status);
   
   return (
-    <div style={{ padding: 'var(--spacing-24)', display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Button onClick={() => navigate('/orders')} style={{ padding: 8, background: 'none', border: 'none' }}><ArrowLeft /></Button>
-          <h1 style={{ margin: 0 }}>Order {order.id.toUpperCase()}</h1>
+    <div className="vy-page">
+      <div className="vy-page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          <Button onClick={() => navigate('/orders')} style={{ background: 'none', border: 'none' }} aria-label="Go back" title="Back"><ArrowLeft size={20} /></Button>
+          <h1 className="vy-page-title">Order {order.id.toUpperCase()}</h1>
         </div>
         
         {/* Actions based on current status */}
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="vy-actions">
           {order.status === 'pending' && <Button onClick={() => handleStatusUpdate('confirmed')} style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>Confirm Order</Button>}
           {order.status === 'confirmed' && <Button onClick={() => handleStatusUpdate('processing')} style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>Start Processing</Button>}
           {order.status === 'processing' && <Button onClick={() => handleStatusUpdate('ready')} style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>Mark Ready</Button>}
@@ -56,8 +56,9 @@ export const OrderDetail = () => {
       </div>
 
       <Card style={{ padding: 24 }}>
-        <h3 style={{ marginBottom: 24 }}>Order Timeline</h3>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+        <h3 className="vy-section-title" style={{ marginBottom: 24 }}>Order Timeline</h3>
+        <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', minWidth: 480 }}>
           {/* Connecting line */}
           <div style={{ position: 'absolute', top: 16, left: 24, right: 24, height: 2, backgroundColor: 'var(--color-border)', zIndex: 0 }} />
           
@@ -90,6 +91,7 @@ export const OrderDetail = () => {
             );
           })}
         </div>
+        </div>
         {['cancelled', 'returned'].includes(order.status) && (
           <div style={{ marginTop: 24, padding: 12, backgroundColor: 'var(--color-danger)', color: 'white', borderRadius: 8, textAlign: 'center' }}>
             This order was {order.status} on {order.history?.[order.history.length-1]?.timestamp ? new Date(order.history[order.history.length-1].timestamp).toLocaleString() : ''}.
@@ -98,8 +100,8 @@ export const OrderDetail = () => {
       </Card>
 
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-        <Card style={{ flex: 2, padding: 24, minWidth: 300 }}>
-          <h3 style={{ marginBottom: 16 }}>Line Items</h3>
+        <Card style={{ flex: 2, padding: 24, minWidth: 'min(300px, 100%)' }}>
+          <h3 className="vy-section-title">Line Items</h3>
           <Table 
             columns={[
               { header: 'Product', accessor: (r: any) => store.products.find(p => p.id === r.productId)?.name },
@@ -111,8 +113,8 @@ export const OrderDetail = () => {
           />
         </Card>
 
-        <Card style={{ flex: 1, padding: 24, minWidth: 250 }}>
-          <h3 style={{ marginBottom: 16 }}>Order Summary</h3>
+        <Card style={{ flex: 1, padding: 24, minWidth: 'min(250px, 100%)' }}>
+          <h3 className="vy-section-title">Order Summary</h3>
           <p><strong>Customer:</strong> {customer?.name || 'Guest'}</p>
           <p><strong>Outlet:</strong> {store.outlets.find(o => o.id === order.outletId)?.name}</p>
           <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>

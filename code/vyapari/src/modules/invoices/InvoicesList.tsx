@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../services/store';
 import { isInvoiceOverdue } from '../../services/mockApi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getGstRate, gstIncludedIn } from '../../utils/gst';
 import { formatINR } from '../../utils/format';
 import styles from './styles/invoices.module.css';
 
@@ -28,16 +29,8 @@ export const InvoicesList: React.FC = () => {
     items.forEach(item => {
       // Find product to get category
       const product = store.products.find(p => p.id === item.productId);
-      const category = product?.category?.toLowerCase() || '';
-      // Grocery: 5% inclusive, Electronics: 18% inclusive, general: 12% inclusive
-      const gstRate = category.includes('grocery') ? 5 : category.includes('electronics') ? 18 : 12;
-      
-      // Since product price in our system is inclusive, we back-calculate:
-      // TaxableValue = subtotal / (1 + gstRate/100)
-      // GST Amount = subtotal - TaxableValue
-      const taxableValue = item.subtotal / (1 + gstRate / 100);
-      const gstAmount = item.subtotal - taxableValue;
-      totalGST += gstAmount;
+      // Product prices are GST-inclusive; back-calculate using the shared category rate
+      totalGST += gstIncludedIn(item.subtotal, getGstRate(product?.category));
     });
 
     return totalGST;

@@ -1,7 +1,7 @@
 /* Analytics Module Styles - Dense, Analytical, Deep-Dive Aesthetic */
 
 .analyticsContainer {
-  padding: var(--spacing-24);
+  padding: var(--page-padding);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-24);
@@ -526,3 +526,20 @@
   color: var(--color-muted-text);
   max-width: 400px;
 }
+
+/* --- UI polish: consistent interaction states --- */
+.kpiCard {
+  transition: background-color var(--transition-base), border-color var(--transition-base),
+    box-shadow var(--transition-base), transform var(--transition-base);
+}
+.kpiCard:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.comparisonToggle:hover { color: var(--color-dark); }
+.legendItem { transition: opacity var(--transition-fast); }
+.legendItem:hover { opacity: 0.8; }
+.tabButton:focus-visible, .actionButton:focus-visible, .resetBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.headerActions { flex-wrap: wrap; }

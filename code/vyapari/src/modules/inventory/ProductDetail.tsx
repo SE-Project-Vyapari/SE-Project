@@ -24,20 +24,20 @@ export const ProductDetail = () => {
     }
   }, [id]);
 
-  if (!product) return <div>Product not found</div>;
+  if (!product) return <div className="vy-page">Product not found</div>;
 
   const totalStock = inventory.reduce((sum, r) => sum + r.quantity, 0);
 
   return (
-    <div style={{ padding: 'var(--spacing-24)', display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <Button onClick={() => navigate('/inventory')} style={{ padding: 8, background: 'none', border: 'none' }}><ArrowLeft /></Button>
-        <h1 style={{ margin: 0 }}>{product.name}</h1>
+    <div className="vy-page">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Button onClick={() => navigate('/inventory')} style={{ background: 'none', border: 'none' }} aria-label="Go back" title="Back"><ArrowLeft size={20} /></Button>
+        <h1 className="vy-page-title">{product.name}</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24 }}>
         <Card style={{ padding: 24 }}>
-          <h3>Details</h3>
+          <h3 className="vy-section-title">Details</h3>
           <p><strong>SKU:</strong> {product.sku}</p>
           <p><strong>Category:</strong> {product.category}</p>
           <p><strong>Cost:</strong> ₹{product.cost}</p>
@@ -64,7 +64,7 @@ export const ProductDetail = () => {
       </div>
 
       <Card style={{ padding: 24 }}>
-        <h3 style={{ marginBottom: 16 }}>Stock by Outlet</h3>
+        <h3 className="vy-section-title">Stock by Outlet</h3>
         <Table 
           columns={[
             { header: 'Outlet', accessor: (r: any) => store.outlets.find(o => o.id === r.outletId)?.name },
@@ -77,7 +77,7 @@ export const ProductDetail = () => {
       </Card>
 
       <Card style={{ padding: 24 }}>
-        <h3 style={{ marginBottom: 16 }}>Stock Movements History</h3>
+        <h3 className="vy-section-title">Stock Movements History</h3>
         <Table 
           columns={[
             { header: 'Date', accessor: (r: any) => new Date(r.createdAt).toLocaleString() },

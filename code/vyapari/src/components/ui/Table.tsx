@@ -19,6 +19,7 @@ export const Table: React.FC<TableProps> = ({
   emptyMessage = 'No records found.',
 }) => {
   return (
+    <div className="table-wrap">
     <table className="table-base">
       <thead>
         <tr>
@@ -53,5 +54,6 @@ export const Table: React.FC<TableProps> = ({
         )}
       </tbody>
     </table>
+    </div>
   );
 };

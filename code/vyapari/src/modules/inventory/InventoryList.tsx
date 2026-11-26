@@ -75,8 +75,8 @@ export const InventoryList = () => {
 
   const columns = [
     { header: 'Product', accessor: (r: any) => (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate(`/inventory/${r.p.id}`)}>
-        <div style={{ width: 40, height: 40, backgroundColor: 'var(--color-surface)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📦</div>
+      <div role="link" tabIndex={0} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', minWidth: 180 }} onClick={() => navigate(`/inventory/${r.p.id}`)} onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/inventory/${r.p.id}`); }}>
+        <div aria-hidden="true" style={{ width: 40, height: 40, flexShrink: 0, backgroundColor: 'var(--color-surface-sunken)', border: '1px solid var(--color-border)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📦</div>
         <div>
           <div style={{ fontWeight: 600 }}>{r.p.name}</div>
           <div style={{ fontSize: 12, color: 'var(--color-muted-text)' }}>{r.p.sku} {r.p.barcode ? `• ${r.p.barcode}` : '• No barcode'}</div>
@@ -86,7 +86,7 @@ export const InventoryList = () => {
     { header: 'Category', accessor: (r: any) => r.p.category },
     { header: 'Stock', accessor: (r: any) => <span style={{ fontWeight: 'bold' }}>{r.qty}</span> },
     { header: 'Status', accessor: (r: any) => (
-      <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, backgroundColor: r.statusColor, color: r.status === 'Out of Stock' || r.status === 'Critical' ? '#fff' : '#000' }}>
+      <span className="vy-pill" style={{ ['--pill' as any]: r.statusColor }}>
         {r.status}
       </span>
     ) },
@@ -102,10 +102,10 @@ export const InventoryList = () => {
   ].filter(Boolean) as any;
 
   return (
-    <div style={{ padding: 'var(--spacing-24)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ margin: 0 }}>Inventory</h1>
-        <div style={{ display: 'flex', gap: 12 }}>
+    <div className="vy-page">
+      <div className="vy-page-header">
+        <h1 className="vy-page-title">Inventory</h1>
+        <div className="vy-actions">
           <Button onClick={() => navigate('/inventory/transfers')} style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text)' }}>
             <ArrowRightLeft size={16} style={{ marginRight: 8 }} /> View Transfers
           </Button>
@@ -115,10 +115,10 @@ export const InventoryList = () => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-          <Input placeholder="Search SKU or Name..." value={search} onChange={(e: any) => setSearch(e.target.value)} style={{ paddingLeft: 36, width: '100%' }} />
-          <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--color-muted-text)' }} />
+      <div className="vy-toolbar">
+        <div className="vy-search">
+          <Input aria-label="Search inventory" placeholder="Search SKU or Name..." value={search} onChange={(e: any) => setSearch(e.target.value)} style={{ paddingLeft: 36, width: '100%' }} />
+          <Search size={16} />
         </div>
         <Button
           onClick={() => setIsScannerOpen(true)}
@@ -154,8 +154,8 @@ export const InventoryList = () => {
       </div>
 
       {/* Desktop Table with Sticky Product Column */}
-      <div className="desktop-table-only table-responsive-sticky" style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
-        <Table columns={columns} data={inventoryData} />
+      <div className="desktop-table-only table-responsive-sticky card-base" style={{ padding: 0, overflow: 'hidden' }}>
+        <Table columns={columns} data={inventoryData} emptyMessage="No products match your filters." />
       </div>
 
       {/* Mobile Card List */}
@@ -182,7 +182,7 @@ export const InventoryList = () => {
                   {r.p.sku} {r.p.barcode ? `• ${r.p.barcode}` : '• No barcode'}
                 </div>
               </div>
-              <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, backgroundColor: r.statusColor, color: r.status === 'Out of Stock' || r.status === 'Critical' ? '#fff' : '#000', flexShrink: 0 }}>
+              <span className="vy-pill" style={{ ['--pill' as any]: r.statusColor, flexShrink: 0 }}>
                 {r.status}
               </span>
             </div>
