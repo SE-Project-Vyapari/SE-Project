@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { useStore } from '../../services/store';
+import { useNavigate } from 'react-router-dom';
+import { useStore, store } from '../../services/store';
 import { mockApi } from '../../services/mockApi';
+import { scanMetrics } from '../../services/scanMetrics';
 import { useAuth } from '../../app-shell/auth/AuthContext';
 import { ProductGrid } from './components/ProductGrid';
 import { CartPanel } from './components/CartPanel';
 import { ScannerModal } from './components/ScannerModal';
 import { SuccessScreen } from './components/SuccessScreen';
+import type { ScanFeedback } from '../scanner';
+import { Clock } from 'lucide-react';
 
 export interface CartItem {
   productId: string;
@@ -17,6 +21,7 @@ export interface CartItem {
 }
 
 export const PosPage = () => {
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
   const businessId = currentUser?.businessId || '';
   const storeOutlets = useStore(state => state.outlets);
@@ -35,6 +40,9 @@ export const PosPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const cartStartAtRef = useRef<number | null>(null);
+  const scanCountRef = useRef<number>(0);
+  const manualCountRef = useRef<number>(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -53,7 +61,21 @@ export const PosPage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [cart, customerId, paymentMethod]); // Rebind to get latest state in handler
 
-  const handleAddToCart = (productId: string, price: number) => {
+  const handleAddToCart = (
+    productId: string,
+    price: number,
+    source: 'scan' | 'manual' = 'manual'
+  ) => {
+    if (cartStartAtRef.current === null) {
+      cartStartAtRef.current = Date.now();
+    }
+    if (source === 'scan') {
+      scanCountRef.current += 1;
+    } else {
+      manualCountRef.current += 1;
+    }
+    scanMetrics.recordCartAddition(source, productId);
+
     setCart(prev => {
       const existing = prev.find(item => item.productId === productId);
       if (existing) {
@@ -61,6 +83,37 @@ export const PosPage = () => {
       }
       return [...prev, { productId, quantity: 1, unitPrice: price, discount: 0, discountType: 'amount', note: '' }];
     });
+  };
+
+  const handleBarcodeScan = (barcode: string): ScanFeedback => {
+    const product = mockApi.findProductByBarcode(barcode);
+    if (!product) {
+      return {
+        ok: false,
+        message: `Barcode "${barcode}" not recognized. Try manual search.`,
+        allowManualFallback: true,
+      };
+    }
+
+    const inv = store
+      .getState()
+      .inventoryRecords.find(r => r.productId === product.id && r.outletId === outletId);
+    const available = inv?.quantity ?? 0;
+    const inCart = cart.find(c => c.productId === product.id)?.quantity ?? 0;
+
+    if (available <= 0 || inCart >= available) {
+      return {
+        ok: false,
+        message: `${product.name} has insufficient stock (${available} available).`,
+        allowManualFallback: false,
+      };
+    }
+
+    handleAddToCart(product.id, product.price, 'scan');
+    return {
+      ok: true,
+      message: `Added ${product.name} (₹${product.price}) to cart.`,
+    };
   };
 
   const handleUpdateCart = (productId: string, updates: Partial<CartItem>) => {
@@ -95,6 +148,14 @@ export const PosPage = () => {
       });
       
       const elapsedMs = performance.now() - startTime;
+      const timeToBillMs = cartStartAtRef.current ? Date.now() - cartStartAtRef.current : elapsedMs;
+      scanMetrics.recordBillCompleted({
+        itemCount: cart.reduce((sum, i) => sum + i.quantity, 0),
+        scanCount: scanCountRef.current,
+        manualCount: manualCountRef.current,
+        timeToBillMs,
+      });
+
       const totalAmount = cart.reduce((sum, item) => {
         const p = item.unitPrice - (item.discountType === 'amount' ? item.discount : (item.unitPrice * (item.discount / 100)));
         return sum + (p * item.quantity);
@@ -115,6 +176,9 @@ export const PosPage = () => {
     setSuccessData(null);
     setSearchQuery('');
     setCategoryFilter('');
+    cartStartAtRef.current = null;
+    scanCountRef.current = 0;
+    manualCountRef.current = 0;
   };
 
   if (successData) {
@@ -127,6 +191,25 @@ export const PosPage = () => {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 'var(--spacing-24)', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h1 style={{ margin: 0, fontSize: 24 }}>Point of Sale</h1>
+          <button
+            type="button"
+            onClick={() => navigate('/settings/evaluation')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-muted-text)',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <Clock size={14} /> Scan-to-Bill Metrics
+          </button>
         </div>
         
         <ProductGrid 
@@ -160,10 +243,16 @@ export const PosPage = () => {
       </div>
 
       {isScannerOpen && (
-        <ScannerModal onClose={() => setIsScannerOpen(false)} onScan={(barcode) => {
-          setSearchQuery(barcode);
-          setIsScannerOpen(false);
-        }} />
+        <ScannerModal
+          title="Scan Product Barcode"
+          onClose={() => setIsScannerOpen(false)}
+          onScan={handleBarcodeScan}
+          keepOpenOnSuccess={true}
+          onManualFallback={(code) => {
+            setSearchQuery(code);
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+          }}
+        />
       )}
     </div>
   );

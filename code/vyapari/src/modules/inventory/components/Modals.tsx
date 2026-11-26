@@ -5,11 +5,14 @@ import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
 import { useStore } from '../../../services/store';
 import { mockApi } from '../../../services/mockApi';
+import { BarcodeScannerModal } from '../../scanner';
+import { Camera } from 'lucide-react';
 
 export const AddProductModal = ({ isOpen, onClose, businessId, outletId }: { isOpen: boolean; onClose: () => void; businessId: string; outletId: string }) => {
   const [formData, setFormData] = useState({
     name: '', sku: '', barcode: '', category: '', price: 0, cost: 0, initialStock: 0, reorderLevel: 5
   });
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,9 +26,17 @@ export const AddProductModal = ({ isOpen, onClose, businessId, outletId }: { isO
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Product">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <Input placeholder="Product Name" required value={formData.name} onChange={(e: any) => setFormData({...formData, name: e.target.value})} />
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <Input placeholder="SKU" required value={formData.sku} onChange={(e: any) => setFormData({...formData, sku: e.target.value})} />
-          <Input placeholder="Barcode (Optional)" value={formData.barcode} onChange={(e: any) => setFormData({...formData, barcode: e.target.value})} />
+          <Input placeholder="Barcode (Optional)" value={formData.barcode} onChange={(e: any) => setFormData({...formData, barcode: e.target.value})} style={{ flex: 1 }} />
+          <Button
+            type="button"
+            onClick={() => setIsBarcodeScannerOpen(true)}
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: '8px 10px' }}
+            title="Scan to fill barcode field"
+          >
+            <Camera size={16} />
+          </Button>
         </div>
         <Input placeholder="Category" required value={formData.category} onChange={(e: any) => setFormData({...formData, category: e.target.value})} />
         <div style={{ display: 'flex', gap: 8 }}>
@@ -38,6 +49,16 @@ export const AddProductModal = ({ isOpen, onClose, businessId, outletId }: { isO
         </div>
         <Button type="submit" style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>Save Product</Button>
       </form>
+      {isBarcodeScannerOpen && (
+        <BarcodeScannerModal
+          title="Scan Product Barcode"
+          onClose={() => setIsBarcodeScannerOpen(false)}
+          onScan={(barcode) => {
+            setFormData(prev => ({ ...prev, barcode }));
+            return { ok: true, message: `Filled barcode: ${barcode}` };
+          }}
+        />
+      )}
     </Modal>
   );
 };

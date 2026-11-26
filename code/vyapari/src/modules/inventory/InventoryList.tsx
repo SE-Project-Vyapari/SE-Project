@@ -5,8 +5,10 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { Select } from '../../components/ui/Select';
-import { Search, Plus, ArrowRightLeft, FileDown, Upload } from 'lucide-react';
+import { Search, Plus, ArrowRightLeft, FileDown, Upload, Camera } from 'lucide-react';
 import { AddProductModal, AdjustStockModal, TransferStockModal } from './components/Modals';
+import { BarcodeScannerModal } from '../scanner';
+import { mockApi } from '../../services/mockApi';
 import { useNavigate } from 'react-router-dom';
 import { formatINR } from '../../utils/format';
 
@@ -23,6 +25,7 @@ export const InventoryList = () => {
   const [statusFilter, setStatusFilter] = useState('');
   
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [adjustProductId, setAdjustProductId] = useState<string | null>(null);
   const [transferProductId, setTransferProductId] = useState<string | null>(null);
 
@@ -110,6 +113,12 @@ export const InventoryList = () => {
           <Input placeholder="Search SKU or Name..." value={search} onChange={(e: any) => setSearch(e.target.value)} style={{ paddingLeft: 36, width: '100%' }} />
           <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--color-muted-text)' }} />
         </div>
+        <Button
+          onClick={() => setIsScannerOpen(true)}
+          style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+        >
+          <Camera size={16} style={{ marginRight: 6 }} /> Scan to find
+        </Button>
         <Select value={category} onChange={(e: any) => setCategory(e.target.value)} style={{ width: 160 }}>
           <option value="">All Categories</option>
           {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -131,6 +140,29 @@ export const InventoryList = () => {
       </div>
 
       <AddProductModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} businessId={currentUser?.businessId!} outletId={currentOutletId!} />
+      {isScannerOpen && (
+        <BarcodeScannerModal
+          title="Scan to Find Product"
+          onClose={() => setIsScannerOpen(false)}
+          onScan={(barcode) => {
+            const product = mockApi.findProductByBarcode(barcode);
+            if (!product) {
+              return {
+                ok: false,
+                message: `Barcode "${barcode}" not recognized in inventory.`,
+                allowManualFallback: true,
+              };
+            }
+            setSearch(product.sku);
+            setAdjustProductId(product.id);
+            return {
+              ok: true,
+              message: `Found ${product.name} — opening Adjust Stock.`,
+            };
+          }}
+          onManualFallback={(code) => setSearch(code)}
+        />
+      )}
       {adjustProductId && <AdjustStockModal isOpen={true} onClose={() => setAdjustProductId(null)} productId={adjustProductId} outletId={currentOutletId!} />}
       {transferProductId && <TransferStockModal isOpen={true} onClose={() => setTransferProductId(null)} productId={transferProductId} fromOutletId={currentOutletId!} />}
     </div>

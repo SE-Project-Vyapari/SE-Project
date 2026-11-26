@@ -776,6 +776,19 @@ export const mockApi = {
   },
 
   /**
+   * Look up a product by exact barcode (rejects blank or malformed codes).
+   */
+  findProductByBarcode(rawBarcode: string): Types.Product | undefined {
+    const code = rawBarcode.trim();
+    if (!code || !/^[A-Za-z0-9\-_]{4,32}$/.test(code)) {
+      return undefined;
+    }
+    return store.getState().products.find(
+      p => p.barcode && p.barcode.trim().toLowerCase() === code.toLowerCase()
+    );
+  },
+
+  /**
    * addProduct
    */
   async addProduct(payload: { businessId: string; name: string; sku: string; barcode?: string; category: string; price: number; cost: number; initialStock: number; reorderLevel: number; outletId: string }) {
