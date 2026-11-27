@@ -263,12 +263,11 @@ export const EmployeeList: React.FC = () => {
             <thead>
               <tr>
                 <th>Employee</th>
-                <th>Role / Department</th>
+                <th>Role / Dept</th>
                 <th>Outlet</th>
-                <th>Phone Number</th>
-                <th>Joining Date</th>
-                <th>Monthly Salary</th>
-                <th>Attendance (% This Month)</th>
+                <th>Contact / Joined</th>
+                <th>Salary</th>
+                <th>Attendance</th>
                 <th>Status</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
@@ -276,7 +275,7 @@ export const EmployeeList: React.FC = () => {
             <tbody>
               {filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-muted-text)' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-muted-text)' }}>
                     No employees found matching your search or filters.
                   </td>
                 </tr>
@@ -332,17 +331,17 @@ export const EmployeeList: React.FC = () => {
                         </span>
                       </td>
 
-                      {/* Phone */}
+                      {/* Contact / Joined */}
                       <td style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text)' }}>
-                          <Phone size={13} color="var(--color-muted-text)" />
-                          <span>{emp.phone}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--color-text)', whiteSpace: 'nowrap' }}>
+                            <Phone size={12} color="var(--color-muted-text)" />
+                            <span>{emp.phone}</span>
+                          </div>
+                          <span style={{ fontSize: 11, color: 'var(--color-muted-text)', whiteSpace: 'nowrap' }}>
+                            Joined {new Date(emp.joiningDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
                         </div>
-                      </td>
-
-                      {/* Joining Date */}
-                      <td style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
-                        {new Date(emp.joiningDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
 
                       {/* Salary (Role gated: Owner/Accountant only) */}
