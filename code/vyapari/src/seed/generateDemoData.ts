@@ -138,8 +138,24 @@ const EMPLOYEE_ROSTER: { name: string; role: string; department: string; salary:
   { name: 'Nandini Bose', role: 'Customer Support', department: 'Sales', salary: 22000 },
   { name: 'Yash Agarwal', role: 'Sales Associate', department: 'Sales', salary: 20000 }, // joins mid previous month
   { name: 'Pallavi Hegde', role: 'Cashier', department: 'Billing', salary: 19000 }, // joins mid month before that
+  { name: 'Rohit Chauhan', role: 'Floor Supervisor', department: 'Operations', salary: 31000 },
+  { name: 'Kavita Nair', role: 'Billing Lead', department: 'Billing', salary: 27500 },
+  { name: 'Manoj Tiwari', role: 'Inventory Associate', department: 'Inventory', salary: 18500 },
+  { name: 'Deepika Joshi', role: 'Sales Executive', department: 'Sales', salary: 25500 },
+  { name: 'Sandeep Kulkarni', role: 'Delivery Lead', department: 'Delivery', salary: 24500 },
+  { name: 'Meenakshi Iyer', role: 'Cashier', department: 'Billing', salary: 19500 }, // inactive
+  { name: 'Rajeshwari Devi', role: 'Housekeeping', department: 'Operations', salary: 14500 }, // inactive
   { name: 'Ashok Rane', role: 'Packer', department: 'Inventory', salary: 16000 }, // inactive
 ];
+
+const BANKS = [
+  { name: 'HDFC Bank', ifscPrefix: 'HDFC000' },
+  { name: 'ICICI Bank', ifscPrefix: 'ICIC000' },
+  { name: 'State Bank of India', ifscPrefix: 'SBIN000' },
+  { name: 'Axis Bank', ifscPrefix: 'UTIB000' },
+  { name: 'Kotak Mahindra Bank', ifscPrefix: 'KKBK000' },
+];
+const RELATIONS = ['Spouse', 'Parent', 'Sibling', 'Guardian'];
 
 // ---------------------------------------------------------------------------
 // Plan types
@@ -620,10 +636,12 @@ export async function generateDemoData(): Promise<DemoDataSummary> {
     const employeeIds: { id: string; joining: string; inactive: boolean; idx: number }[] = [];
     for (let i = 0; i < EMPLOYEE_ROSTER.length; i++) {
       const e = EMPLOYEE_ROSTER[i];
-      let joiningDate = fmtDate(atDay(randInt(240, 1500)));
+      let joiningDate = fmtDate(atDay(randInt(180, 1600)));
       if (i === 22) joiningDate = `${m1}-10`;
       if (i === 23) joiningDate = `${m2}-18`;
-      const inactive = i === EMPLOYEE_ROSTER.length - 1;
+      const inactive = i >= EMPLOYEE_ROSTER.length - 3;
+      const bank = BANKS[i % BANKS.length];
+      const lastName = e.name.split(' ').slice(-1)[0];
       const emp = await mockApi.createEmployee({
         businessId: 'b-1',
         outletId: OUTLETS[i % 3].id,
@@ -635,8 +653,25 @@ export async function generateDemoData(): Promise<DemoDataSummary> {
         joiningDate,
         salary: e.salary,
         status: inactive ? 'inactive' : 'active',
-        panNumber: `ABCDE${randInt(1000, 9999)}F`,
-        bankDetails: { accountNo: `${randInt(10000000, 99999999)}${randInt(1000, 9999)}`, ifsc: 'HDFC0001234', bankName: 'HDFC Bank' },
+        panNumber: `${String.fromCharCode(65 + (i % 20))}BCDE${randInt(1000, 9999)}F`,
+        bankDetails: {
+          accountNo: `${randInt(10000000, 99999999)}${randInt(1000, 9999)}`,
+          ifsc: `${bank.ifscPrefix}${randInt(1000, 9999)}`,
+          bankName: bank.name,
+        },
+        emergencyContact: {
+          name: `${CUSTOMER_FIRST[(i * 3) % CUSTOMER_FIRST.length]} ${lastName}`,
+          relation: RELATIONS[i % RELATIONS.length],
+          phone: `+91 9${randInt(1000, 9999)} ${randInt(10000, 99999)}`,
+        },
+      });
+      // Vary leave balances realistically
+      store.update('employees', emp.id, {
+        leaveBalance: {
+          paid: randInt(4, 15),
+          casual: randInt(2, 10),
+          sick: randInt(1, 8),
+        },
       });
       employeeIds.push({ id: emp.id, joining: joiningDate, inactive, idx: i });
     }
@@ -649,34 +684,172 @@ export async function generateDemoData(): Promise<DemoDataSummary> {
       const dateStr = fmtDate(dayMs);
       for (const emp of employeeIds) {
         if (emp.inactive || emp.joining > dateStr) continue;
-        // Employee #6 forgets to check out on the last 3 working days (incomplete attendance edge case)
-        if (emp.idx === 6 && d <= 4 && incompleteEmployeeMarked < 3) {
+        // Employees #6 and #14 forget to check out on recent working days (incomplete attendance edge case)
+        if ((emp.idx === 6 || emp.idx === 14) && d <= 4 && incompleteEmployeeMarked < 4) {
           incompleteEmployeeMarked += 1;
-          await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'present', checkIn: '09:05', notes: 'Missing check-out' });
-          continue;
-        }
-        const roll = rng();
-        if (roll < 0.04) {
-          await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'absent' });
-        } else if (roll < 0.1) {
-          await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'leave', notes: 'Approved leave' });
-        } else if (roll < 0.18) {
-          await mockApi.recordAttendance({
-            employeeId: emp.id,
-            date: dateStr,
-            status: 'late',
-            checkIn: `10:${pad(10 + empRng(30))}`,
-            checkOut: `18:${pad(empRng(30))}`,
-          });
-        } else {
           await mockApi.recordAttendance({
             employeeId: emp.id,
             date: dateStr,
             status: 'present',
-            checkIn: `08:${pad(50 + empRng(9))}`,
-            checkOut: `18:${pad(empRng(30))}`,
+            checkIn: '09:05',
+            notes: 'Missing check-out',
           });
+          continue;
         }
+
+        // Distinct attendance profiles so the employee dashboard displays varied rates
+        const profile = emp.idx % 5;
+        const roll = rng();
+        if (profile === 0) {
+          // Exemplary / Punctual (~98-100%)
+          if (roll < 0.03) {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'late',
+              checkIn: `09:${pad(20 + empRng(15))}`,
+              checkOut: `18:${pad(15 + empRng(30))}`,
+            });
+          } else {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'present',
+              checkIn: `08:${pad(45 + empRng(14))}`,
+              checkOut: `18:${pad(empRng(35))}`,
+            });
+          }
+        } else if (profile === 1) {
+          // Frequent Latecomer (~85-92%, high late ratio)
+          if (roll < 0.06) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'absent' });
+          } else if (roll < 0.42) {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'late',
+              checkIn: `10:${pad(5 + empRng(45))}`,
+              checkOut: `18:${pad(15 + empRng(35))}`,
+              notes: 'Delayed arrival',
+            });
+          } else {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'present',
+              checkIn: `09:${pad(empRng(15))}`,
+              checkOut: `18:${pad(empRng(30))}`,
+            });
+          }
+        } else if (profile === 2) {
+          // High Absenteeism (<75% attendance)
+          if (roll < 0.24) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'absent', notes: 'Unexcused absence' });
+          } else if (roll < 0.34) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'leave', notes: 'Sick / personal leave' });
+          } else if (roll < 0.48) {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'late',
+              checkIn: `10:${pad(15 + empRng(35))}`,
+              checkOut: `17:${pad(30 + empRng(29))}`,
+            });
+          } else {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'present',
+              checkIn: `09:${pad(empRng(12))}`,
+              checkOut: `18:${pad(empRng(20))}`,
+            });
+          }
+        } else if (profile === 3) {
+          // Leave-heavy (~80-86%)
+          if (roll < 0.08) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'absent' });
+          } else if (roll < 0.22) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'leave', notes: 'Approved leave' });
+          } else if (roll < 0.32) {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'late',
+              checkIn: `09:${pad(45 + empRng(14))}`,
+              checkOut: `18:${pad(empRng(30))}`,
+            });
+          } else {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'present',
+              checkIn: `08:${pad(52 + empRng(7))}`,
+              checkOut: `18:${pad(empRng(30))}`,
+            });
+          }
+        } else {
+          // Standard (~90-95%)
+          if (roll < 0.05) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'absent' });
+          } else if (roll < 0.1) {
+            await mockApi.recordAttendance({ employeeId: emp.id, date: dateStr, status: 'leave', notes: 'Approved leave' });
+          } else if (roll < 0.18) {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'late',
+              checkIn: `10:${pad(10 + empRng(30))}`,
+              checkOut: `18:${pad(empRng(30))}`,
+            });
+          } else {
+            await mockApi.recordAttendance({
+              employeeId: emp.id,
+              date: dateStr,
+              status: 'present',
+              checkIn: `08:${pad(50 + empRng(9))}`,
+              checkOut: `18:${pad(empRng(30))}`,
+            });
+          }
+        }
+      }
+    }
+
+    // Seed varied Leave Records (approved, pending, rejected across types)
+    const leaveTemplates: {
+      empIdx: number;
+      type: 'paid' | 'casual' | 'sick' | 'unpaid';
+      startAgo: number;
+      days: number;
+      status: 'approved' | 'pending' | 'rejected';
+      reason: string;
+    }[] = [
+      { empIdx: 1, type: 'paid', startAgo: 18, days: 2, status: 'approved', reason: 'Family function out of town' },
+      { empIdx: 2, type: 'sick', startAgo: 12, days: 1, status: 'approved', reason: 'Seasonal fever' },
+      { empIdx: 3, type: 'casual', startAgo: 5, days: 1, status: 'pending', reason: 'Personal bank work' },
+      { empIdx: 5, type: 'unpaid', startAgo: 22, days: 3, status: 'approved', reason: 'Extended travel' },
+      { empIdx: 7, type: 'casual', startAgo: 2, days: 2, status: 'pending', reason: 'Relocation assistance' },
+      { empIdx: 8, type: 'paid', startAgo: 28, days: 2, status: 'rejected', reason: 'Peak festival weekend staffing' },
+      { empIdx: 10, type: 'sick', startAgo: 9, days: 2, status: 'approved', reason: 'Dental procedure & recovery' },
+      { empIdx: 12, type: 'casual', startAgo: 1, days: 1, status: 'pending', reason: 'Doctor appointment' },
+      { empIdx: 15, type: 'unpaid', startAgo: 15, days: 2, status: 'approved', reason: 'Urgent family travel' },
+      { empIdx: 18, type: 'paid', startAgo: 25, days: 3, status: 'approved', reason: 'Annual vacation' },
+    ];
+    for (const lt of leaveTemplates) {
+      const targetEmp = employeeIds[lt.empIdx];
+      if (!targetEmp) continue;
+      setClock(atDay(lt.startAgo + 2, 11));
+      const leave = await mockApi.applyLeave({
+        employeeId: targetEmp.id,
+        type: lt.type,
+        startDate: fmtDate(atDay(lt.startAgo)),
+        endDate: fmtDate(atDay(Math.max(1, lt.startAgo - lt.days + 1))),
+        reason: lt.reason,
+      });
+      if (lt.status !== 'pending') {
+        store.update('leaveRecords', leave.id, {
+          status: lt.status,
+          approvedBy: 'u-1',
+        });
       }
     }
 
