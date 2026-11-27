@@ -185,16 +185,15 @@
   background-color: var(--color-background);
   color: var(--color-muted-text);
   font-weight: 600;
-  padding: 12px 16px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--color-border);
-  white-space: nowrap;
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .employeeTable td {
-  padding: 14px 16px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
 }
@@ -289,8 +288,8 @@
 .attendanceMetric {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 110px;
+  gap: 6px;
+  min-width: 78px;
 }
 
 .attendanceBarBg {

@@ -607,7 +607,7 @@ export const EmployeeDetail: React.FC = () => {
                       Attendance-to-Payroll Integration (Formula & Deduction Engine)
                     </h4>
                     <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-muted-text)' }}>
-                      This employee's monthly attendance directly feeds into the upcoming Payroll module (Prompt 14) for automated salary disbursement.
+                      This employee&apos;s monthly attendance directly feeds into the Payroll module for automated salary disbursement.
                     </p>
                   </div>
                 </div>
@@ -645,7 +645,7 @@ export const EmployeeDetail: React.FC = () => {
                 </div>
 
                 <div style={{ fontSize: 12, color: 'var(--color-muted-text)', marginTop: 4 }}>
-                  💡 Payroll history, salary slips generation, and one-click bank batch transfers will be processed in the upcoming <strong>Payroll Module (Prompt 14)</strong>.
+                  Payroll history, salary slips, and disbursements are managed in the <strong>Payroll</strong> module.
                 </div>
               </div>
             </>
