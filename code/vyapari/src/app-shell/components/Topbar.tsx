@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { useStore } from '../../services/store';
+import { useStore, store } from '../../services/store';
 import { useNotificationContext } from '../../context/NotificationContext';
 import {
   Search,
@@ -8,6 +8,7 @@ import {
   LogOut,
   ChevronDown,
   CheckCheck,
+  Check,
   AlertTriangle,
   XCircle,
   Info,
@@ -34,18 +35,30 @@ export const Topbar = ({
 
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
+  const [outletOpen, setOutletOpen] = useState(false);
+  const outletRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
         setBellOpen(false);
       }
+      if (outletRef.current && !outletRef.current.contains(e.target as Node)) {
+        setOutletOpen(false);
+      }
     };
-    if (bellOpen) {
+    if (bellOpen || outletOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [bellOpen]);
+  }, [bellOpen, outletOpen]);
+
+  const handleSelectOutlet = (outletId?: string) => {
+    if (currentUser) {
+      store.update('users', currentUser.id, { outletId });
+    }
+    setOutletOpen(false);
+  };
 
   const recentNotifications = [...notifications]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -94,25 +107,109 @@ export const Topbar = ({
         >
           <Menu size={20} color="var(--color-dark)" />
         </button>
-        <div
-          className="app-outlet-pill ui-hover-outline"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            cursor: 'pointer',
-            height: 36,
-            padding: '0 12px',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--color-border)',
-            fontWeight: 500,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {currentUser?.outletId
-            ? userOutlets.find(o => o.id === currentUser.outletId)?.name
-            : 'All Outlets'}
-          <ChevronDown size={16} color="var(--color-muted-text)" />
+        <div ref={outletRef} style={{ position: 'relative' }}>
+          <button
+            type="button"
+            className="app-outlet-pill ui-hover-outline"
+            onClick={() => setOutletOpen(prev => !prev)}
+            aria-expanded={outletOpen}
+            aria-haspopup="listbox"
+            aria-label="Select outlet"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              height: 36,
+              padding: '0 12px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-text)',
+              fontWeight: 500,
+              fontSize: 14,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {currentUser?.outletId
+              ? userOutlets.find(o => o.id === currentUser.outletId)?.name || 'All Outlets'
+              : 'All Outlets'}
+            <ChevronDown size={16} color="var(--color-muted-text)" />
+          </button>
+
+          {outletOpen && (
+            <div
+              role="listbox"
+              aria-label="Outlets"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 6px)',
+                left: 0,
+                minWidth: 210,
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 8,
+                boxShadow: 'var(--shadow-md)',
+                padding: 4,
+                zIndex: 100,
+              }}
+            >
+              <button
+                type="button"
+                role="option"
+                aria-selected={!currentUser?.outletId}
+                onClick={() => handleSelectOutlet(undefined)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 10px',
+                  border: 'none',
+                  borderRadius: 6,
+                  backgroundColor: !currentUser?.outletId ? 'rgba(181, 77, 43, 0.08)' : 'transparent',
+                  color: 'var(--color-text)',
+                  fontSize: 13,
+                  fontWeight: !currentUser?.outletId ? 600 : 400,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span>All Outlets</span>
+                {!currentUser?.outletId && <Check size={14} color="var(--color-primary)" />}
+              </button>
+              {userOutlets.map(o => {
+                const selected = currentUser?.outletId === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    onClick={() => handleSelectOutlet(o.id)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 10px',
+                      border: 'none',
+                      borderRadius: 6,
+                      backgroundColor: selected ? 'rgba(181, 77, 43, 0.08)' : 'transparent',
+                      color: 'var(--color-text)',
+                      fontSize: 13,
+                      fontWeight: selected ? 600 : 400,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span>{o.name}</span>
+                    {selected && <Check size={14} color="var(--color-primary)" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
