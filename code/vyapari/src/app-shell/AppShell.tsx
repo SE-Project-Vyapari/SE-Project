@@ -45,7 +45,7 @@ export const AppShell = () => {
   }, []);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div className="app-shell-root" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <div
         className={`app-sidebar-backdrop ${mobileMenuOpen ? 'open' : ''}`}
         onClick={() => setMobileMenuOpen(false)}

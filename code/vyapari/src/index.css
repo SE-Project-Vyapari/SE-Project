@@ -591,3 +591,25 @@ a:focus-visible,
     display: none !important;
   }
 }
+
+@media print {
+  html,
+  body,
+  #root,
+  .app-shell-root,
+  .app-shell-root > div,
+  main {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .app-sidebar,
+  .app-sidebar-backdrop,
+  header {
+    display: none !important;
+  }
+}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useStore } from '../../services/store';
 import { Button } from '../../components/ui/Button';
 import {
@@ -102,6 +102,7 @@ const REPORT_CATALOG: CatalogItem[] = [
 
 export const ReportsPage = () => {
   const state = useStore();
+  const reportRef = useRef<HTMLDivElement>(null);
   const [selectedReportId, setSelectedReportId] = useState<ReportId>('sales');
   const [config, setConfig] = useState<ReportConfig>({
     preset: '30d',
@@ -123,6 +124,47 @@ export const ReportsPage = () => {
     () => generateReport(selectedReportId, state, config),
     [selectedReportId, state, config]
   );
+
+  const handlePrint = () => {
+    const el = reportRef.current;
+    if (!el) return;
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) {
+      document.body.removeChild(iframe);
+      window.print();
+      return;
+    }
+
+    doc.open();
+    doc.write(`<!doctype html><html><head><title>${report.title}</title><style>
+      body { font-family: Inter, system-ui, sans-serif; color: #1f2937; margin: 24px; background: #fff; }
+      h2 { margin: 0 0 4px 0; font-size: 20px; }
+      [class*="summaryGrid"] { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 16px 0 20px 0; }
+      [class*="summaryCard"] { border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; }
+      table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+      th, td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+      th { background: #f9fafb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+      tr { page-break-inside: avoid; }
+    </style></head><body>${el.innerHTML}</body></html>`);
+    doc.close();
+
+    iframe.contentWindow?.focus();
+    setTimeout(() => {
+      iframe.contentWindow?.print();
+      setTimeout(() => {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+      }, 1000);
+    }, 100);
+  };
 
   return (
     <div className={styles.reportsContainer}>
@@ -362,7 +404,7 @@ export const ReportsPage = () => {
           </Button>
           <Button
             type="button"
-            onClick={() => window.print()}
+            onClick={handlePrint}
             style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}
           >
             <Printer size={15} style={{ marginRight: 6 }} /> Print
@@ -371,7 +413,7 @@ export const ReportsPage = () => {
       </div>
 
       {/* Generated Report Output (Print-Ready Paper) */}
-      <div className={styles.reportPaper}>
+      <div ref={reportRef} className={styles.reportPaper}>
         <div
           style={{
             display: 'flex',

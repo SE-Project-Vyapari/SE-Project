@@ -73,7 +73,7 @@
   header,
   nav,
   button,
-  .noPrint {
+  :global(.noPrint) {
     display: none !important;
   }
 

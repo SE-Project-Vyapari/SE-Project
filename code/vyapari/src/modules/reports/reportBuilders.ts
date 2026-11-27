@@ -586,7 +586,8 @@ export function exportReportToCsv(report: ReportResult) {
     ...report.rows.map(row => row.map(escapeCell).join(',')),
   ];
 
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  // Prepend UTF-8 BOM (\uFEFF) so Excel renders currency symbols (₹) properly
+  const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
